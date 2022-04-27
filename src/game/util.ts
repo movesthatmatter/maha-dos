@@ -5,6 +5,7 @@ import {
   Coord,
   GameState,
   PieceProps,
+  SerializedCoords,
   SerializedGameState
 } from './types';
 
@@ -53,3 +54,14 @@ export const deserializeGameState = (str: string): Result<GameState, void> => {
   // Here i reparse the json
   return new Ok(JSON.parse(str) as GameState);
 };
+
+export const serializeCoord = (coord: Coord): SerializedCoords => {
+  return JSON.stringify(coord) as SerializedCoords;
+};
+
+export function getPieceDamage(piece: PieceProps) {
+  return piece.hitPoints;
+}
+export function getPieceCurrentHealth(piece: PieceProps) {
+  return piece.health;
+}
