@@ -1,5 +1,9 @@
 import { BoardState } from '../Board/types';
-import { IdentifiablePieceState, PieceRegistry, PieceState } from '../Piece/types';
+import {
+  IdentifiablePieceState,
+  PieceRegistry,
+  PieceState
+} from '../Piece/types';
 import { TerrainProps } from '../Terrain/Terrain';
 import { Matrix } from '../util';
 import { Color, Coord } from '../util/types';
@@ -78,6 +82,17 @@ export type GameStateInProgress = {
           };
         }
       | {
+          submissionStatus: 'preparing';
+          white: {
+            canDraw: true;
+            moves: Move[];
+          };
+          black: {
+            canDraw: true;
+            moves: Move[];
+          };
+        }
+      | {
           submissionStatus: 'partial';
           white: {
             canDraw: true;
@@ -115,6 +130,17 @@ export type GameStateInProgress = {
           };
         }
       | {
+          submissionStatus: 'preparing';
+          white: {
+            canDraw: true;
+            attacks: Attack[];
+          };
+          black: {
+            canDraw: true;
+            attacks: Attack[];
+          };
+        }
+      | {
           submissionStatus: 'partial';
           white: {
             canDraw: true;
@@ -149,15 +175,54 @@ export type GameStateInMovePhaseWithNoSubmission = Extract<
   GameStateInMovePhase,
   { submissionStatus: 'none' }
 >;
+export type GameStateInMovePhaseWithPreparingSubmission = Extract<
+  GameStateInMovePhase,
+  { submissionStatus: 'preparing' }
+>;
 export type GameStateInMovePhaseWithPartialSubmission = Extract<
   GameStateInMovePhase,
   { submissionStatus: 'partial' }
 >;
 
+export const isGameStateInMovePhaseWithPreparingSubmission = (
+  g: GameState
+): g is GameStateInMovePhaseWithPreparingSubmission => {
+  return (
+    g.state === 'inProgress' &&
+    g.phase === 'move' &&
+    g.submissionStatus === 'preparing'
+  );
+};
+
+export const isGameStateInMovePhaseWithPartialSubmission = (
+  g: GameState
+): g is GameStateInMovePhaseWithPartialSubmission => {
+  return (
+    g.state === 'inProgress' &&
+    g.phase === 'move' &&
+    g.submissionStatus === 'partial'
+  );
+};
+
+export const isGameStateInMovePhaseWithPartialOrPreparingSubmission = (
+  g: GameState
+): g is
+  | GameStateInMovePhaseWithPreparingSubmission
+  | GameStateInMovePhaseWithPartialSubmission => {
+  return (
+    isGameStateInMovePhaseWithPreparingSubmission(g) ||
+    isGameStateInMovePhaseWithPartialSubmission(g)
+  );
+};
+
 export type GameStateInAttackPhase = Extract<GameState, { phase: 'attack' }>;
 export type GameStateInAtttackPhaseWithNoSubmission = Extract<
   GameStateInAttackPhase,
   { submissionStatus: 'none' }
+>;
+export type GameStateInAttackPhaseWithPreparingSubmission = Extract<
+  GameStateInAttackPhase,
+  { submissionStatus: 'preparing' }
 >;
 export type GameStateInAttackPhaseWithPartialSubmission = Extract<
   GameStateInAttackPhase,

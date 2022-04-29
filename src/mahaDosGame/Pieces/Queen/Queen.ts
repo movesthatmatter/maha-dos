@@ -1,24 +1,25 @@
-import { Game } from '../../../gameMechanics/Game/Game';
+import { Game } from 'src/gameMechanics/Game/Game';
 import { Color } from 'src/gameMechanics/util/types';
-import { Attack, Move } from '../../../gameMechanics/Game/types';
-import { Piece } from '../../../gameMechanics/Piece/Piece';
+import { Attack, Move } from 'src/gameMechanics/Game/types';
+import { Piece } from 'src/gameMechanics/Piece/Piece';
 import {
   IdentifiablePieceState,
   PieceDynamicProps
-} from '../../../gameMechanics/Piece/types';
-import { range, Coord } from '../../../gameMechanics/util';
+} from 'src/gameMechanics/Piece/types';
+import {range, Coord} from 'src/gameMechanics/util';
 
-const pieceLabel = 'Bishop';
+
+const pieceLabel = 'Queen';
 
 const DEFAULT_DYNAMIC_PROPS: PieceDynamicProps = {
-  hitPoints: 10,
-  moveRange: 5,
-  attackRange: 6,
-  attackDamage: 3,
+  hitPoints: 20,
+  moveRange: 7, 
+  attackRange: 7, 
+  attackDamage: 4,
   canAttack: true
 };
 
-export class Bishop extends Piece {
+export class Queen extends Piece {
   constructor(
     id: IdentifiablePieceState<typeof pieceLabel>['id'],
     color: Color,
@@ -29,26 +30,32 @@ export class Bishop extends Piece {
       ...dynamicProps,
       color,
       label: pieceLabel,
-      //Set them clockwise from top - right
       movesDirections: [
-        { row: -1, col: 1 },
-        { row: 1, col: 1 },
-        { row: 1, col: -1 },
-        { row: -1, col: -1 },
+        {row: -1, col: 0},
+        {row: -1, col: 1},
+        {row: 0, col: 1},
+        {row: 1, col: 1},
+        {row: 1, col: 0},
+        {row: 1, col: -1},
+        {row: 0, col: -1},
+        {row: -1, col: -1}
       ],
-      maxHitPoints: 10,
+      maxHitPoints: 20,
       canDie: true
     });
   }
 
+  // update(next: IdentifiablePieceState) {
+  //   this.props = next;
+  // }
 
   evalMove(game: Game): Move[] {
-    // the rules for the bishop algortighm
+    // the rules for the Queen algortighm
 
     // returns all the possible moves;
 
     const pieceCoord = game.board.pieceCoordsByPieceId[this.state.id];
-  
+
     const moves: Move[] = [];
 
     this.state.movesDirections.map((dir) => {

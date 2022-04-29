@@ -15,7 +15,7 @@ export const getInitialPieceColorAtCoord = (
   pieceLayout: Matrix<unknown>,
   coord: Coord
 ): Color =>
-  coord.row > getMatrixRowsLength(pieceLayout) / 2 ? 'black' : 'white';
+  coord.row > getMatrixRowsLength(pieceLayout) / 2 ? 'white' : 'black';
 
 export const boardMap = <T>(
   board: BoardState,

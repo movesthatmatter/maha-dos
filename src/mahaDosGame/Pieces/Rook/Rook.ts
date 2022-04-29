@@ -1,26 +1,26 @@
-import { Game } from '../../../gameMechanics/Game/Game';
 import { Color } from 'src/gameMechanics/util/types';
-import { Attack, Move } from '../../../gameMechanics/Game/types';
-import { Piece } from '../../../gameMechanics/Piece/Piece';
+import { Game } from 'src/gameMechanics/Game/Game';
+import { Attack, Move } from 'src/gameMechanics/Game/types';
+import { Piece } from 'src/gameMechanics/Piece/Piece';
 import {
   IdentifiablePieceState,
   PieceDynamicProps
-} from '../../../gameMechanics/Piece/types';
-import { range, Coord } from '../../../gameMechanics/util';
+} from 'src/gameMechanics/Piece/types';
+import {range, Coord} from 'src/gameMechanics/util';
 
-const pieceLabel = 'Bishop';
+type PieceLabel = 'Rook';
 
 const DEFAULT_DYNAMIC_PROPS: PieceDynamicProps = {
-  hitPoints: 10,
-  moveRange: 5,
+  hitPoints: 15,
+  moveRange: 4,
   attackRange: 6,
   attackDamage: 3,
-  canAttack: true
+  canAttack: true,
 };
 
-export class Bishop extends Piece {
+export class Rook extends Piece<PieceLabel> {
   constructor(
-    id: IdentifiablePieceState<typeof pieceLabel>['id'],
+    id: IdentifiablePieceState<PieceLabel>['id'],
     color: Color,
     dynamicProps?: Partial<PieceDynamicProps>
   ) {
@@ -28,27 +28,29 @@ export class Bishop extends Piece {
       ...DEFAULT_DYNAMIC_PROPS,
       ...dynamicProps,
       color,
-      label: pieceLabel,
-      //Set them clockwise from top - right
+      label: 'Rook',
       movesDirections: [
-        { row: -1, col: 1 },
-        { row: 1, col: 1 },
-        { row: 1, col: -1 },
-        { row: -1, col: -1 },
+        {row: -1, col: 0},
+        {row: 0, col: 1},
+        {row: 1, col: 0},
+        {row: 0, col: -1}
       ],
-      maxHitPoints: 10,
-      canDie: true
+      maxHitPoints: 15,
+      canDie: true,
     });
   }
 
+  // update(next: IdentifiablePieceState) {
+  //   this.props = next;
+  // }
 
   evalMove(game: Game): Move[] {
-    // the rules for the bishop algortighm
+    // the rules for the Rook algortighm
 
     // returns all the possible moves;
 
     const pieceCoord = game.board.pieceCoordsByPieceId[this.state.id];
-  
+
     const moves: Move[] = [];
 
     this.state.movesDirections.map((dir) => {
@@ -59,7 +61,7 @@ export class Bishop extends Piece {
         }
         const deltaRow = dir.row * range;
         const deltaCol = dir.col * range;
-        const potentialTargetSquare: Coord = {
+        const potentialTargetSquare: Coord= {
           row: pieceCoord.row + deltaRow,
           col: pieceCoord.col + deltaCol
         };
@@ -87,8 +89,7 @@ export class Bishop extends Piece {
       });
     });
 
-    // TODO: Add the coords
-    return moves
+    return moves;
   }
 
   evalAttack(game: Game): Attack[] {

@@ -14,20 +14,32 @@ import {
   PieceState
 } from 'src/gameMechanics/Piece/types';
 import { Coord, noop } from 'src/gameMechanics/util';
+import Arrow, { ArrowCoords } from './ArrowSVG';
+
+type ArrowChessCoords = {
+  from: Coord;
+  to: Coord;
+};
 
 type Props = {
   sizePx: number;
   board: BoardState;
+  arrows?: ArrowChessCoords[];
 
   onTouch?: (coord: Coord, piece?: IdentifiablePieceState<string>) => void;
   onMove?: (move: Move) => void;
 };
 
+// const coordToArrow = ()
+const coordToArrow = (squareSize: number, val: number) =>
+  val * squareSize + squareSize / 2;
+
 export const ChessTerrain: React.FC<Props> = ({
   onTouch = noop,
   onMove = noop,
   board,
-  sizePx
+  sizePx,
+  arrows = []
 }) => {
   const squareSize = useMemo(
     () => sizePx / board.terrainState.length,
@@ -92,6 +104,21 @@ export const ChessTerrain: React.FC<Props> = ({
       }}
       onClick={onSquareClick}
     >
+      <Arrow
+        fill="purple"
+        width={sizePx}
+        height={sizePx}
+        arrows={arrows.map(({ from, to }) => ({
+          from: {
+            x: coordToArrow(squareSize, from.col),
+            y: coordToArrow(squareSize, from.row)
+          },
+          to: {
+            x: coordToArrow(squareSize, to.col),
+            y: coordToArrow(squareSize, to.row)
+          }
+        }))}
+      />
       {boardMap(board, (coord, piece) => {
         // TODO: Optimize by only iterating over the pieces!
         if (!piece) {

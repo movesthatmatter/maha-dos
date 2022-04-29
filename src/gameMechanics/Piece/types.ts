@@ -1,9 +1,11 @@
 import { Color, MoveDirection } from '../util/types';
 import { Piece } from './Piece';
+import {Coord} from 'src/gameMechanics/util';
 
 export type PieceStaticProps<L extends string> = {
   label: L; // pawn, knight, bishop, queen, king, but also beserk king and whatever other new ones
   movesDirections: MoveDirection[];
+  attackDirection?: Coord[];
   color: Color;
   maxHitPoints: number; // static
   canDie: boolean; // If a canDie=false piece runs out of life, game ends!
