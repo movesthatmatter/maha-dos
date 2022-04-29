@@ -1,3 +1,5 @@
+import { identity } from './misc';
+
 export type Matrix<T> = T[][];
 
 export const matrixMap = <T, R>(
@@ -27,3 +29,35 @@ export const flipMatrixVertically = <T>(matrix: Matrix<T>) =>
 export const getMatrixRowsLength = (matrix: Matrix<unknown>) => matrix.length;
 export const getMatrixColsLength = (matrix: Matrix<unknown>) =>
   matrix[0]?.length || 0;
+
+export const duplicateMatrix = <T>(matrix: Matrix<T>) =>
+  matrixMap(matrix, identity);
+
+// This creates a new matrix each time. Immutability!
+export const matrixInsert = <T>(
+  matrix: Matrix<T>,
+  index: [number, number],
+  nextVal: T
+): Matrix<T> => matrixInsertMany(matrix, [{ index, nextVal }]);
+
+export const matrixInsertMany = <T>(
+  matrix: Matrix<T>,
+  vals: {
+    index: [number, number];
+    nextVal: T;
+  }[]
+) => {
+  const nextMatrixInPlace = duplicateMatrix(matrix);
+
+  vals.forEach(({ index, nextVal }) => {
+    const [i, j] = index;
+
+    if (i < matrix.length && i > -1) {
+      if (j < (matrix[0]?.length || 0) && j > -1) {
+        nextMatrixInPlace[i][j] = nextVal;
+      }
+    }
+  });
+
+  return nextMatrixInPlace;
+};

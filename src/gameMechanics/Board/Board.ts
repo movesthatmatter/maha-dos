@@ -25,30 +25,43 @@ export class Board<PR extends PieceRegistry> implements IBoard {
 
   private terrain: Terrain;
 
-  constructor(pieceRegistry: PR, props: Pick<GameConfigurator<PR>, 'pieceLayout' | 'terrain'>) {
+  constructor(
+    pieceRegistry: PR,
+    props: Pick<GameConfigurator<PR>, 'pieceLayout' | 'terrain'>
+  ) {
     // TODO: This should be created here from the given props!
-    this.terrain = new Terrain(props.terrain)
+    this.terrain = new Terrain(props.terrain);
+
+    this.pieceCoordsByPieceId = {};
 
     this.pieceLayout = matrixMap(props.pieceLayout, (label, [row, col]) => {
       if (label === 0) {
         return 0;
       }
 
-      const color = getInitialPieceColorAtCoord(props.pieceLayout, {x: row, y: col});
+      const coord = { row, col };
+      const color = getInitialPieceColorAtCoord(props.pieceLayout, coord);
 
-      return pieceRegistry[label](`${color}-${label}-${row}-${col}`, color);
+      const id = `${color}-${label}-${row}-${col}`;
+
+      // TODO: This shouldn't be here!
+      this.pieceCoordsByPieceId[id] = coord;
+
+      return pieceRegistry[label](id, color);
     });
 
     this.state = this.getDerivedState();
 
-    this.pieceCoordsByPieceId = {};
+    // this.pieceCoordsByPieceId = matrixMap(this.pieceLayout, () => {});
   }
 
   private getDerivedState(): BoardState {
     return {
       terrainState: this.terrain.state,
-      pieceLayoutState: matrixMap(this.pieceLayout, (x) => x === 0 ? x : x.state)
-    }
+      pieceLayoutState: matrixMap(this.pieceLayout, (x) =>
+        x === 0 ? x : x.state
+      )
+    };
   }
 
   // TODO: Ensure the state gets refreshed anytime there are updates!

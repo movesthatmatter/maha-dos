@@ -21,8 +21,8 @@ export type ShortColor = ShortWhiteColor | ShortBlackColor;
 export type MoveDirection = Coord;
 
 export type Coord = {
-  x: number;
-  y: number;
+  row: number;
+  col: number;
 };
 
 // export type Instantiable<T = any, Args extends unknown[] = unknown[]> = {

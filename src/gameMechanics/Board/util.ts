@@ -7,7 +7,7 @@ import {
   matrixMap
 } from '../util';
 import { BoardState } from './types';
-import {mahaPieceRegistry} from '../../mahaDosGame/config';
+import { mahaPieceRegistry } from '../../mahaDosGame/config';
 
 // Returns the default color at the coord for any chess based games
 // TODO: Might need to make it game specific in the future if this is not enough
@@ -15,19 +15,22 @@ export const getInitialPieceColorAtCoord = (
   pieceLayout: Matrix<unknown>,
   coord: Coord
 ): Color =>
-  coord.x > getMatrixRowsLength(pieceLayout) / 2 ? 'black' : 'white';
+  coord.row > getMatrixRowsLength(pieceLayout) / 2 ? 'black' : 'white';
 
 export const boardMap = <T>(
   board: BoardState,
   fn: (coord: Coord, piece: undefined | IdentifiablePieceState<string>) => T
 ) => {
-  const reversedTerrainState = flipMatrixHorizontally(board.terrainState);
-  const reversedPieceLayout = flipMatrixHorizontally(board.pieceLayoutState);
+  // const reversedTerrainState = flipMatrixHorizontally(board.terrainState);
+  // const reversedPieceLayout = flipMatrixHorizontally(board.pieceLayoutState);
 
-  return matrixMap(reversedTerrainState, (_, [row, col]) => {
-    const coord = { x: row, y: col };
+  // const reversedTerrainState = board.terrainState);
+  // const reversedPieceLayout = flipMatrixHorizontally(board.pieceLayoutState);
 
-    const piece = reversedPieceLayout[row][col];
+  return matrixMap(board.terrainState, (_, [row, col]) => {
+    const coord = { row, col };
+
+    const piece = board.pieceLayoutState[row][col];
 
     return fn(coord, piece || undefined);
   });
@@ -40,6 +43,10 @@ export const boardForEach = (
   boardMap(board, fn);
 };
 
-export const generatePieceLabel = (color: Color, label: keyof typeof mahaPieceRegistry ,coord: Coord): string => {
-  return `${color}-${label}-${coord.x}-${coord.y}`
-}
+export const generatePieceLabel = (
+  color: Color,
+  label: keyof typeof mahaPieceRegistry,
+  coord: Coord
+): string => {
+  return `${color}-${label}-${coord.row}-${coord.col}`;
+};

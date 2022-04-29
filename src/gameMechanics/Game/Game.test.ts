@@ -3,7 +3,15 @@ import { Game } from './Game';
 import { generate } from '../../mahaDosGame/helpers';
 import { mahaPieceRegistry } from '../../mahaDosGame/Pieces/registry';
 import { generatePieceLabel } from '../Board/util';
-import {GameTurn, FullGameTurn, PartialGameTurn, PartialGameTurnAttackPhase, PartialGameTurnMovePhase, Move, Attack} from './types';
+import {
+  GameTurn,
+  FullGameTurn,
+  PartialGameTurn,
+  PartialGameTurnAttackPhase,
+  PartialGameTurnMovePhase,
+  Move,
+  Attack
+} from './types';
 
 describe('Pending Games', () => {
   test('create a Game and evaluate it to pending status', () => {
@@ -17,18 +25,36 @@ describe('Pending Games', () => {
         ],
         pieceLayoutState: [
           [
-            generate.generateDefaultRook(generatePieceLabel('black', 'R', {x: 0, y: 0}), 'black'),
+            generate.generateDefaultRook(
+              generatePieceLabel('black', 'R', { row: 0, col: 0 }),
+              'black'
+            ),
             0,
-            generate.generateDefaultKing(generatePieceLabel('black', 'K', {x: 2, y: 0}), 'black'),
-            generate.generateDefaultRook(generatePieceLabel('black', 'R', {x: 3, y: 0}), 'black')
+            generate.generateDefaultKing(
+              generatePieceLabel('black', 'K', { row: 2, col: 0 }),
+              'black'
+            ),
+            generate.generateDefaultRook(
+              generatePieceLabel('black', 'R', { row: 3, col: 0 }),
+              'black'
+            )
           ],
           [0, 0, 0, 0],
           [0, 0, 0, 0],
           [
-            generate.generateDefaultRook(generatePieceLabel('white', 'R', {x: 0, y: 3}), 'white'),
+            generate.generateDefaultRook(
+              generatePieceLabel('white', 'R', { row: 0, col: 3 }),
+              'white'
+            ),
             0,
-            generate.generateDefaultKing(generatePieceLabel('white', 'K', {x: 2, y: 3}), 'white'),
-            generate.generateDefaultRook(generatePieceLabel('white', 'R', {x: 3, y: 3}), 'white')
+            generate.generateDefaultKing(
+              generatePieceLabel('white', 'K', { row: 2, col: 3 }),
+              'white'
+            ),
+            generate.generateDefaultRook(
+              generatePieceLabel('white', 'R', { row: 3, col: 3 }),
+              'white'
+            )
           ]
         ]
       },
@@ -70,7 +96,10 @@ describe('Complete Game', () => {
         ],
         pieceLayoutState: [
           [
-            generate.generateDefaultKing(generatePieceLabel('black', 'K', {x: 0, y: 0}), 'black'),
+            generate.generateDefaultKing(
+              generatePieceLabel('black', 'K', { row: 0, col: 0 }),
+              'black'
+            ),
             0,
             0
           ],
@@ -78,18 +107,22 @@ describe('Complete Game', () => {
           [
             0,
             0,
-            generate.generateDefaultKnight(generatePieceLabel('white', 'N', {x: 2, y: 2}), 'white'),
+            generate.generateDefaultKnight(
+              generatePieceLabel('white', 'N', { row: 2, col: 2 }),
+              'white'
+            )
           ]
         ]
       },
       state: 'completed',
       history: [
-        [{white: [] as Move[], black: [] as Move[]}, {white: [] as Attack[], black: [] as Attack[]}] 
+        [
+          { white: [] as Move[], black: [] as Move[] },
+          { white: [] as Attack[], black: [] as Attack[] }
+        ]
       ],
       winner: 'white'
     };
-
-
 
     expect(actual).toEqual(expected);
   });

@@ -1,5 +1,5 @@
 import { BoardState } from '../Board/types';
-import { PieceRegistry, PieceState } from '../Piece/types';
+import { IdentifiablePieceState, PieceRegistry, PieceState } from '../Piece/types';
 import { TerrainProps } from '../Terrain/Terrain';
 import { Matrix } from '../util';
 import { Color, Coord } from '../util/types';
@@ -7,7 +7,7 @@ import { Color, Coord } from '../util/types';
 export type Move = {
   from: Coord;
   to: Coord;
-  piece: PieceState<string>;
+  piece: IdentifiablePieceState<string>;
   promotion?: PieceState<string>['label'];
 };
 

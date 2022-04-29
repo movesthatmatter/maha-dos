@@ -26,6 +26,6 @@
     "importHelpers": true,
     "baseUrl": "./",
     "target": "es5",
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
   }
 }
