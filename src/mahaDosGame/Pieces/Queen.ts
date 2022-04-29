@@ -1,5 +1,5 @@
-import { Color } from 'src/gameMechanics/util/types';
 import { Game } from '../../gameMechanics/Game/Game';
+import { Color } from 'src/gameMechanics/util/types';
 import { Attack, Move } from '../../gameMechanics/Game/types';
 import { Piece } from '../../gameMechanics/Piece/Piece';
 import {
@@ -7,19 +7,19 @@ import {
   PieceDynamicProps
 } from '../../gameMechanics/Piece/types';
 
-type PieceLabel = 'Rook';
+const pieceLabel = 'Queen';
 
 const DEFAULT_DYNAMIC_PROPS: PieceDynamicProps = {
-  hitPoints: 15,
-  moveRange: 4,
-  attackRange: 6,
-  attackDamage: 3,
-  canAttack: true,
+  hitPoints: 20,
+  moveRange: 7, 
+  attackRange: 7, 
+  attackDamage: 4,
+  canAttack: true
 };
 
-export class Rook extends Piece<PieceLabel> {
+export class Queen extends Piece {
   constructor(
-    id: IdentifiablePieceState<PieceLabel>['id'],
+    id: IdentifiablePieceState<typeof pieceLabel>['id'],
     color: Color,
     dynamicProps?: Partial<PieceDynamicProps>
   ) {
@@ -27,10 +27,10 @@ export class Rook extends Piece<PieceLabel> {
       ...DEFAULT_DYNAMIC_PROPS,
       ...dynamicProps,
       color,
-      label: 'Rook',
+      label: pieceLabel,
       movesDirections: [], // TODO: Fix this
-      maxHitPoints: 15,
-      canDie: true,
+      maxHitPoints: 20,
+      canDie: true
     });
   }
 

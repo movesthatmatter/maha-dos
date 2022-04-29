@@ -1,8 +1,16 @@
 import { Result } from 'ts-results';
-import { Coord, GameConfigurator, PieceRegistry } from '../types';
-import { Attack, GameHistory, GameState, GameWinner, Move } from './types';
+import { Coord } from '../util/types';
+import {
+  Attack,
+  GameConfigurator,
+  GameHistory,
+  GameState,
+  GameWinner,
+  Move
+} from './types';
 import { AttackNotPossibleError, MoveNotPossibleError } from './errorTypes';
 import { Board } from '../Board/Board';
+import { PieceRegistry } from '../Piece/types';
 
 export interface IGame<PR extends PieceRegistry = PieceRegistry> {
   state: GameState;
@@ -79,7 +87,7 @@ export class Game<PR extends PieceRegistry = PieceRegistry> implements IGame {
       // TODO: This needs to be actually calculated correctly
       // Demo for now
       // ...(attackPhase
-      //   ? {
+      //   ?
       //       phase: 'attack',
       //       ...(attackPhase.white || attackPhase.black
       //         ? {

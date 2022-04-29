@@ -1,8 +1,9 @@
-import { Matrix } from "../types";
+import { Matrix } from '../util';
+import { ShortBlackColor, ShortWhiteColor } from '../util/types';
 
 export type TerrainSquareType =
   | 'x' // hole
-  | 'w' // white square
-  | 'b'; // black square;
+  | ShortWhiteColor // white square
+  | ShortBlackColor; // black square;
 
 export type TerrainState = Matrix<TerrainSquareType>;

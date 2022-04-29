@@ -1,6 +1,8 @@
 import { BoardState } from '../Board/types';
-import { PieceState } from '../Piece/types';
-import { Color, Coord } from '../types';
+import { PieceRegistry, PieceState } from '../Piece/types';
+import { TerrainProps } from '../Terrain/Terrain';
+import { Matrix } from '../util';
+import { Color, Coord } from '../util/types';
 
 export type Move = {
   from: Coord;
@@ -161,3 +163,8 @@ export type GameStateInAttackPhaseWithPartialSubmission = Extract<
   GameStateInAttackPhase,
   { submissionStatus: 'partial' }
 >;
+
+export type GameConfigurator<PR extends PieceRegistry> = {
+  terrain: TerrainProps;
+  pieceLayout: Matrix<keyof PR | 0>;
+};

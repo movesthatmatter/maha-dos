@@ -1,6 +1,8 @@
-import { Terrain, TerrainProps } from '../Terrain/Terrain';
-import { Coord, GameConfigurator, Matrix, PieceRegistry } from '../types';
-import { flipMatrixHorizontally, matrixForEach, matrixMap } from '../util';
+import { GameConfigurator } from '../Game/types';
+import { PieceRegistry } from '../Piece/types';
+import { Terrain } from '../Terrain/Terrain';
+import { matrixMap } from '../util';
+import { Coord } from '../util/types';
 import { BoardState, PieceLayout } from './types';
 import { getInitialPieceColorAtCoord } from './util';
 

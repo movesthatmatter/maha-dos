@@ -1,5 +1,5 @@
 import { Result } from 'ts-results';
-import { Color } from '../types';
+import { Color } from '../util/types';
 import { Game } from './Game';
 import {
   GameStateNotInMovePhaseError,
@@ -7,6 +7,7 @@ import {
 } from './errorTypes';
 import {
   Attack,
+  GameStateCompleted,
   GameStateInAttackPhaseWithPartialSubmission,
   GameStateInAtttackPhaseWithNoSubmission,
   GameStateInMovePhaseWithNoSubmission,
@@ -35,11 +36,12 @@ export interface GameReconciliator extends Game {
     GameStateNotInMovePhaseError
   >;
 
+  // TODO: The Reconciliator is tasked with also checking if the king has died, thus the game is over!
   reconcileAttacks(
     whiteAttacks: Attack[],
     blackAttack: Attack[]
   ): Result<
-    GameStateInMovePhaseWithNoSubmission,
+    GameStateInMovePhaseWithNoSubmission | GameStateCompleted,
     GameStateNotInAttackPhaseError
   >;
 }

@@ -1,7 +1,7 @@
 import { TerrainState } from '../Terrain/types';
 import { IdentifiablePieceState } from '../Piece/types';
-import { Matrix } from '../types';
 import { Piece } from '../Piece/Piece';
+import { Matrix } from '../util';
 
 export type PieceLayoutState = Matrix<0 | IdentifiablePieceState<string>>; // 0 means no Piece
 

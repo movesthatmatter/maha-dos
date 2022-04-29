@@ -1,5 +1,5 @@
 import { Game } from '../../gameMechanics/Game/Game';
-import { Color } from 'src/gameMechanics/types';
+import { Color } from 'src/gameMechanics/util/types';
 import { Attack, Move } from '../../gameMechanics/Game/types';
 import { Piece } from '../../gameMechanics/Piece/Piece';
 import {
@@ -29,7 +29,8 @@ export class Knight extends Piece {
       color,
       label: pieceLabel,
       movesDirections: [], // TODO: Fix this
-      maxHitPoints: 12
+      maxHitPoints: 12,
+      canDie: true
     });
   }
 

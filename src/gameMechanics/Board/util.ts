@@ -1,11 +1,13 @@
 import { IdentifiablePieceState } from '../Piece/types';
-import { Color, Coord, Matrix } from '../types';
+import { Color, Coord } from '../util/types';
 import {
   flipMatrixHorizontally,
   getMatrixRowsLength,
+  Matrix,
   matrixMap
 } from '../util';
 import { BoardState } from './types';
+import {mahaPieceRegistry} from '../../mahaDosGame/config';
 
 // Returns the default color at the coord for any chess based games
 // TODO: Might need to make it game specific in the future if this is not enough
@@ -37,3 +39,7 @@ export const boardForEach = (
 ) => {
   boardMap(board, fn);
 };
+
+export const generatePieceLabel = (color: Color, label: keyof typeof mahaPieceRegistry ,coord: Coord): string => {
+  return `${color}-${label}-${coord.x}-${coord.y}`
+}
