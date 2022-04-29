@@ -1,5 +1,6 @@
 import { Game } from '../Game/Game';
 import { Attack, Move } from '../Game/types';
+import { Color } from '../types';
 import { IdentifiablePieceState, PieceState } from './types';
 
 // TODO: Don'l default the L here - it must be given from outside
