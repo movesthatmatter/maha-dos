@@ -19,6 +19,8 @@ export type Attack = {
   from: Coord;
   to: Coord;
   type: 'range' | 'melee';
+  //TODO - better organize the type based on other bonus attack/defense mechanism
+  special?: 'heal';
 };
 
 // A Partial Game In Move Phase doesn't have the Attack Phase

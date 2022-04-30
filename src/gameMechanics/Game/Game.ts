@@ -65,7 +65,7 @@ export class Game<PR extends PieceRegistry = PieceRegistry> implements IGame {
       };
     }
 
-    // const [movePhase, attackPhase] = gameProps.history.slice(-1)[0];
+    //const [movePhase, attackPhase] = gameProps.history.slice(-1)[0];
 
     return {
       state: 'inProgress',
@@ -163,7 +163,9 @@ export class Game<PR extends PieceRegistry = PieceRegistry> implements IGame {
   };
 
   // Loads a new GameState and does all the needed calculations
-  load(state: GameState): void {}
+  load(updateState: GameState): void {
+    this.state = updateState;
+  }
 
   // // When a Move is Succesfully Drawn it gets appended to the nextMoves List of the "move" phase
   drawMove(from: Coord, to: Coord): Result<Move, MoveNotPossibleError> {

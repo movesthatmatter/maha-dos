@@ -6,8 +6,7 @@ import {
   IdentifiablePieceState,
   PieceDynamicProps
 } from 'src/gameMechanics/Piece/types';
-import {range, Coord} from 'src/gameMechanics/util';
-
+import { range, Coord } from 'src/gameMechanics/util';
 
 const pieceLabel = 'Pawn';
 
@@ -30,12 +29,8 @@ export class Pawn extends Piece {
       ...dynamicProps,
       color,
       label: pieceLabel,
-      movesDirections: [
-        {row: -1, col: 0}
-      ],
-      attackDirection: [
-        {row: -1, col: 1}
-      ],
+      movesDirections: [{ row: -1, col: 0 }],
+      attackDirection: [{ row: -1, col: 1 }],
       maxHitPoints: 6,
       canDie: true
     });
@@ -55,43 +50,35 @@ export class Pawn extends Piece {
     const moves: Move[] = [];
 
     this.state.movesDirections.map((dir) => {
-      let hitObstacle = false;
-      range(this.state.moveRange, 1).map((range) => {
-        if (hitObstacle) {
-          return
-        }
-        const deltaRow = dir.row * range;
-        const deltaCol = dir.col * range;
-        const potentialTargetSquare: Coord= {
-          row: pieceCoord.row + deltaRow,
-          col: pieceCoord.col + deltaCol
+      const deltaRow = dir.row;
+      const deltaCol = dir.col;
+      const potentialTargetSquare: Coord = {
+        row: pieceCoord.row + deltaRow,
+        col: pieceCoord.col + deltaCol
+      };
+      if (
+        potentialTargetSquare.row >= game.board.pieceLayout.length ||
+        potentialTargetSquare.col >= game.board.pieceLayout[0].length ||
+        potentialTargetSquare.row < 0 ||
+        potentialTargetSquare.col < 0
+      ) {
+        return;
+      }
+      if (
+        game.board.pieceLayout[potentialTargetSquare.row][
+          potentialTargetSquare.col
+        ] === 0
+      ) {
+        const move: Move = {
+          from: pieceCoord,
+          to: potentialTargetSquare,
+          piece: this.state
         };
-        if (
-          (potentialTargetSquare.row >= game.board.pieceLayout.length) || 
-          (potentialTargetSquare.col >= game.board.pieceLayout[0].length) || 
-          ((potentialTargetSquare.row < 0) || (potentialTargetSquare.col < 0))) {
-          return;
-        } 
-        if (
-          game.board.pieceLayout[potentialTargetSquare.row][
-            potentialTargetSquare.col
-          ] === 0
-        ) {
-          const move: Move = {
-            from: pieceCoord,
-            to: potentialTargetSquare,
-            piece: this.state
-          };
-          moves.push(move);
-        } else {
-          hitObstacle = true
-          return;
-        }
-      });
+        moves.push(move);
+      }
     });
 
     return moves;
-   
   }
 
   evalAttack(game: Game): Attack[] {

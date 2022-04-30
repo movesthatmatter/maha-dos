@@ -12,8 +12,8 @@ const pieceLabel = 'King';
 
 const DEFAULT_DYNAMIC_PROPS: PieceDynamicProps = {
   hitPoints: 3,
-  moveRange: 1, 
-  attackRange: 1, 
+  moveRange: 1,
+  attackRange: 1,
   attackDamage: 5,
   canAttack: true
 };
@@ -30,14 +30,14 @@ export class King extends Piece {
       color,
       label: pieceLabel,
       movesDirections: [
-        {row: -1, col: 0},
-        {row: -1, col: 1},
-        {row: 0, col: 1},
-        {row: 1, col: 1},
-        {row: 1, col: 0},
-        {row: 1, col: -1},
-        {row: 0, col: -1},
-        {row: -1, col: -1}
+        { row: -1, col: 0 },
+        { row: -1, col: 1 },
+        { row: 0, col: 1 },
+        { row: 1, col: 1 },
+        { row: 1, col: 0 },
+        { row: 1, col: -1 },
+        { row: 0, col: -1 },
+        { row: -1, col: -1 }
       ],
       maxHitPoints: 3,
       canDie: false
@@ -58,41 +58,33 @@ export class King extends Piece {
     const moves: Move[] = [];
 
     this.state.movesDirections.map((dir) => {
-      let hitObstacle = false;
-      range(this.state.moveRange, 1).map((range) => {
-        if (hitObstacle) {
-          return
-        }
-        const deltaRow = dir.row * range;
-        const deltaCol = dir.col * range;
-        const potentialTargetSquare: Coord= {
-          row: pieceCoord.row + deltaRow,
-          col: pieceCoord.col + deltaCol
+      const deltaRow = dir.row;
+      const deltaCol = dir.col;
+      const potentialTargetSquare: Coord = {
+        row: pieceCoord.row + deltaRow,
+        col: pieceCoord.col + deltaCol
+      };
+      if (
+        potentialTargetSquare.row >= game.board.pieceLayout.length ||
+        potentialTargetSquare.col >= game.board.pieceLayout[0].length ||
+        potentialTargetSquare.row < 0 ||
+        potentialTargetSquare.col < 0
+      ) {
+        return;
+      }
+      if (
+        game.board.pieceLayout[potentialTargetSquare.row][
+          potentialTargetSquare.col
+        ] === 0
+      ) {
+        const move: Move = {
+          from: pieceCoord,
+          to: potentialTargetSquare,
+          piece: this.state
         };
-        if (
-          (potentialTargetSquare.row >= game.board.pieceLayout.length) || 
-          (potentialTargetSquare.col >= game.board.pieceLayout[0].length) || 
-          ((potentialTargetSquare.row < 0) || (potentialTargetSquare.col < 0))) {
-          return;
-        } 
-        if (
-          game.board.pieceLayout[potentialTargetSquare.row][
-            potentialTargetSquare.col
-          ] === 0
-        ) {
-          const move: Move = {
-            from: pieceCoord,
-            to: potentialTargetSquare,
-            piece: this.state
-          };
-          moves.push(move);
-        } else {
-          hitObstacle = true
-          return;
-        }
-      });
+        moves.push(move);
+      }
     });
-
     return moves;
   }
 

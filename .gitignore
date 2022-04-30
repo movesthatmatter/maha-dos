@@ -27,5 +27,5 @@ yarn-debug.log*
 yarn-error.log*
 
 storybook-static
-.sublime-project
-.sublime-workspace
+maha-dos.sublime-project
+maha-dos.sublime-workspace

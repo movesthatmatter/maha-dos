@@ -7,6 +7,8 @@ import {
   PieceDynamicProps
 } from '../../../gameMechanics/Piece/types';
 import { range, Coord } from '../../../gameMechanics/util';
+import { toDictIndexedBy } from 'src/gameMechanics/utils';
+import { Rook } from '../Rook';
 
 const pieceLabel = 'Bishop';
 
@@ -34,13 +36,12 @@ export class Bishop extends Piece {
         { row: -1, col: 1 },
         { row: 1, col: 1 },
         { row: 1, col: -1 },
-        { row: -1, col: -1 },
+        { row: -1, col: -1 }
       ],
       maxHitPoints: 10,
       canDie: true
     });
   }
-
 
   evalMove(game: Game): Move[] {
     // the rules for the bishop algortighm
@@ -48,14 +49,14 @@ export class Bishop extends Piece {
     // returns all the possible moves;
 
     const pieceCoord = game.board.pieceCoordsByPieceId[this.state.id];
-  
+
     const moves: Move[] = [];
 
     this.state.movesDirections.map((dir) => {
       let hitObstacle = false;
       range(this.state.moveRange, 1).map((range) => {
         if (hitObstacle) {
-          return
+          return;
         }
         const deltaRow = dir.row * range;
         const deltaCol = dir.col * range;
@@ -64,11 +65,13 @@ export class Bishop extends Piece {
           col: pieceCoord.col + deltaCol
         };
         if (
-          (potentialTargetSquare.row >= game.board.pieceLayout.length) || 
-          (potentialTargetSquare.col >= game.board.pieceLayout[0].length) || 
-          ((potentialTargetSquare.row < 0) || (potentialTargetSquare.col < 0))) {
+          potentialTargetSquare.row >= game.board.pieceLayout.length ||
+          potentialTargetSquare.col >= game.board.pieceLayout[0].length ||
+          potentialTargetSquare.row < 0 ||
+          potentialTargetSquare.col < 0
+        ) {
           return;
-        } 
+        }
         if (
           game.board.pieceLayout[potentialTargetSquare.row][
             potentialTargetSquare.col
@@ -81,20 +84,85 @@ export class Bishop extends Piece {
           };
           moves.push(move);
         } else {
-          hitObstacle = true
+          hitObstacle = true;
           return;
         }
       });
     });
 
     // TODO: Add the coords
-    return moves
+    return moves;
   }
 
   evalAttack(game: Game): Attack[] {
     const pieceCoord = game.board.pieceCoordsByPieceId[this.state.id];
+    const attacks: Attack[] = [];
+    const length = game.state.history.length;
 
-    return [];
+    if (
+      length > 0 &&
+      typeof game.state.history[length - 1][0][this.state.color] !== 'undefined'
+    ) {
+      const movesByPieceId = toDictIndexedBy(
+        game.state.history[length - 1][0][this.state.color] as Move[],
+        (move) => move.piece.id
+      );
+
+      if (this.state.id in movesByPieceId) {
+        return attacks;
+      }
+    }
+    this.state.movesDirections.map((dir) => {
+      let hitObstacle = false;
+      range(this.state.attackRange, 1).map((r) => {
+        if (hitObstacle) {
+          return;
+        }
+        const target: Coord = {
+          row: pieceCoord.row + dir.row * r,
+          col: pieceCoord.col + dir.col * r
+        };
+        if (
+          target.row >= game.board.pieceLayout.length ||
+          target.col >= game.board.pieceLayout[0].length ||
+          target.row < 0 ||
+          target.col < 0
+        ) {
+          return;
+        }
+        const targetPiece = game.board.pieceLayout[target.row][target.col];
+        if (r === 1) {
+          if (targetPiece instanceof Rook) {
+            attacks.push({
+              from: pieceCoord,
+              to: target,
+              type: 'range',
+              ...(targetPiece.state.color === this.state.color && {
+                special: 'heal'
+              })
+            });
+            hitObstacle = true;
+            return;
+          }
+        } else {
+          if (targetPiece !== 0) {
+            attacks.push({
+              from: pieceCoord,
+              to: target,
+              type: 'range',
+              ...(r < 4 &&
+                targetPiece.state.color === this.state.color && {
+                  special: 'heal'
+                })
+            });
+            hitObstacle = true;
+            return;
+          }
+        }
+      });
+    });
+
+    return attacks;
   }
 
   // evalAttack(gameState: GameState) {
