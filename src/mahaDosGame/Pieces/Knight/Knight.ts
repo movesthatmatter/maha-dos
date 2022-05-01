@@ -7,6 +7,7 @@ import {
   PieceDynamicProps
 } from 'src/gameMechanics/Piece/types';
 import { range, Coord } from 'src/gameMechanics/util';
+import { evalEachDirectionForMove } from '../utils';
 
 const pieceLabel = 'Knight';
 
@@ -30,14 +31,14 @@ export class Knight extends Piece {
       color,
       label: pieceLabel,
       movesDirections: [
-        {row: -2, col: 1},
-        {row: -1, col: 2},
-        {row: 1, col: 2},
-        {row: 2, col: 1},
-        {row: 2, col: -1},
-        {row: 1, col: -2},
-        {row: -1, col: -2},
-        {row: -2, col: -1},
+        { row: -2, col: 1 },
+        { row: -1, col: 2 },
+        { row: 1, col: 2 },
+        { row: 2, col: 1 },
+        { row: 2, col: -1 },
+        { row: 1, col: -2 },
+        { row: -1, col: -2 },
+        { row: -2, col: -1 }
       ],
       maxHitPoints: 12,
       canDie: true
@@ -55,36 +56,7 @@ export class Knight extends Piece {
 
     const pieceCoord = game.board.pieceCoordsByPieceId[this.state.id];
 
-    const moves: Move[] = [];
-
-    this.state.movesDirections.map((dir) => {
-        const deltaRow = dir.row;
-        const deltaCol = dir.col;
-        const potentialTargetSquare: Coord= {
-          row: pieceCoord.row + deltaRow,
-          col: pieceCoord.col + deltaCol
-        };
-        if (
-          (potentialTargetSquare.row >= game.board.pieceLayout.length) || 
-          (potentialTargetSquare.col >= game.board.pieceLayout[0].length) || 
-          ((potentialTargetSquare.row < 0) || (potentialTargetSquare.col < 0))) {
-          return;
-        } 
-        if (
-          game.board.pieceLayout[potentialTargetSquare.row][
-            potentialTargetSquare.col
-          ] === 0
-        ) {
-          const move: Move = {
-            from: pieceCoord,
-            to: potentialTargetSquare,
-            piece: this.state
-          };
-          moves.push(move);
-        }
-    });
-
-    return moves;
+    return evalEachDirectionForMove(pieceCoord, this, game);
   }
 
   evalAttack(game: Game): Attack[] {

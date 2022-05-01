@@ -9,6 +9,7 @@ import {
 import { range, Coord } from '../../../gameMechanics/util';
 import { toDictIndexedBy } from 'src/gameMechanics/utils';
 import { Rook } from '../Rook';
+import { evalEachDirectionForMove } from '../utils';
 
 const pieceLabel = 'Bishop';
 
@@ -50,48 +51,7 @@ export class Bishop extends Piece {
 
     const pieceCoord = game.board.pieceCoordsByPieceId[this.state.id];
 
-    const moves: Move[] = [];
-
-    this.state.movesDirections.map((dir) => {
-      let hitObstacle = false;
-      range(this.state.moveRange, 1).map((range) => {
-        if (hitObstacle) {
-          return;
-        }
-        const deltaRow = dir.row * range;
-        const deltaCol = dir.col * range;
-        const potentialTargetSquare: Coord = {
-          row: pieceCoord.row + deltaRow,
-          col: pieceCoord.col + deltaCol
-        };
-        if (
-          potentialTargetSquare.row >= game.board.pieceLayout.length ||
-          potentialTargetSquare.col >= game.board.pieceLayout[0].length ||
-          potentialTargetSquare.row < 0 ||
-          potentialTargetSquare.col < 0
-        ) {
-          return;
-        }
-        if (
-          game.board.pieceLayout[potentialTargetSquare.row][
-            potentialTargetSquare.col
-          ] === 0
-        ) {
-          const move: Move = {
-            from: pieceCoord,
-            to: potentialTargetSquare,
-            piece: this.state
-          };
-          moves.push(move);
-        } else {
-          hitObstacle = true;
-          return;
-        }
-      });
-    });
-
-    // TODO: Add the coords
-    return moves;
+    return evalEachDirectionForMove(pieceCoord, this, game);
   }
 
   evalAttack(game: Game): Attack[] {

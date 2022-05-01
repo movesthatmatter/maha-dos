@@ -27,7 +27,7 @@ test('eval move', () => {
   const expectedMoves: Move[] = [
     {
       from: { row: 2, col: 2 },
-      to: { row: 1, col: 2},
+      to: { row: 1, col: 2 },
       piece: piece.state
     },
     {
@@ -42,7 +42,7 @@ test('eval move', () => {
     },
     {
       from: { row: 2, col: 2 },
-      to: { row:3, col: 3 },
+      to: { row: 3, col: 3 },
       piece: piece.state
     },
     {
@@ -74,7 +74,7 @@ test('eval move', () => {
       from: { row: 2, col: 2 },
       to: { row: 1, col: 1 },
       piece: piece.state
-    },
+    }
   ];
 
   expect(moves).toEqual(expectedMoves);
