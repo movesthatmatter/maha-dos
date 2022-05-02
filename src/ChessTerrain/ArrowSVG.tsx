@@ -50,28 +50,30 @@ const Arrow: React.FC<Props> = ({
         xmlns="http://www.w3.org/2000/svg"
         xmlnsXlink="http://www.w3.org/1999/xlink"
       >
-        {/* <defs>
-          <marker
-            id="arrowhead-g"
-            orient="auto"
-            markerWidth="4"
-            markerHeight="8"
-            refX="0"
-            refY="0"
-            // cgKey="g"
-          >
-            <path d="M0,0 V4 L3,2 Z" fill="red"></path>
-          </marker>
-        </defs> */}
         {arrows?.map(({ from, to }) => (
-          <line
-            strokeWidth={10}
-            x1={from.x}
-            y1={from.y}
-            x2={to.x}
-            y2={to.y}
-            stroke="black"
-          />
+          <>
+            <defs>
+              <marker
+                id="arrowhead-g"
+                orient="auto"
+                markerWidth="10"
+                markerHeight="10"
+                refX="0"
+                refY="0"
+                // cgKey="g"
+              >
+                <path d="M0,0 V4 L3,2 Z" fill="red"></path>
+              </marker>
+            </defs>
+            <line
+              strokeWidth={10}
+              x1={from.x}
+              y1={from.y}
+              x2={to.x}
+              y2={to.y}
+              stroke="black"
+            />
+          </>
         ))}
 
         {/* <line

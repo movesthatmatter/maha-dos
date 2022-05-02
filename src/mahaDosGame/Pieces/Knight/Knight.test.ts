@@ -23,7 +23,7 @@ test('eval move', () => {
   );
 
   const moves = piece.evalMove(game);
-  
+
   const expectedMoves: Move[] = [
     {
       from: { row: 4, col: 2 },

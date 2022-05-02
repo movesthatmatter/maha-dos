@@ -1,4 +1,5 @@
 import { GameConfigurator } from '../Game/types';
+import { Piece } from '../Piece/Piece';
 import { PieceRegistry } from '../Piece/types';
 import { Terrain } from '../Terrain/Terrain';
 import { matrixMap } from '../util';
@@ -12,6 +13,10 @@ export interface IBoard {
   pieceCoordsByPieceId: {
     [pieceId: string]: Coord;
   };
+
+  getPieceById(id: string): Piece | undefined;
+
+  getPieceByCoord(coord: Coord): Piece | undefined;
 }
 
 export class Board<PR extends PieceRegistry> implements IBoard {
@@ -62,6 +67,23 @@ export class Board<PR extends PieceRegistry> implements IBoard {
         x === 0 ? x : x.state
       )
     };
+  }
+
+  getPieceByCoord(coord: Coord) {
+    const squareOrPiece = this.pieceLayout[coord.row][coord.col];
+
+    if (squareOrPiece === 0) {
+      return undefined;
+    }
+
+    // Piece
+    return squareOrPiece;
+  }
+
+  getPieceById(pieceId: string) {
+    const coord = this.pieceCoordsByPieceId[pieceId];
+
+    return coord ? this.getPieceByCoord(coord) : undefined;
   }
 
   // TODO: Ensure the state gets refreshed anytime there are updates!

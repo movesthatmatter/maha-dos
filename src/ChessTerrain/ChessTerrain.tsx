@@ -1,4 +1,5 @@
 import React, {
+  CSSProperties,
   MouseEvent,
   SyntheticEvent,
   useCallback,
@@ -16,17 +17,25 @@ import {
 import { Coord, noop } from 'src/gameMechanics/util';
 import Arrow, { ArrowCoords } from './ArrowSVG';
 
+// type SquareCoord = Coord;
+
 type ArrowChessCoords = {
   from: Coord;
   to: Coord;
 };
 
-type Props = {
+export type ChessTerrainProps = {
   sizePx: number;
   board: BoardState;
-  arrows?: ArrowChessCoords[];
 
-  onTouch?: (coord: Coord, piece?: IdentifiablePieceState<string>) => void;
+  arrows?: ArrowChessCoords[];
+  styledCoords?: (Coord & { style?: CSSProperties })[];
+
+  // This is always on TouchPiece
+  onTouchedPiece?: (
+    piece: IdentifiablePieceState<string>,
+    coord: Coord
+  ) => void;
   onMove?: (move: Move) => void;
 };
 
@@ -34,12 +43,13 @@ type Props = {
 const coordToArrow = (squareSize: number, val: number) =>
   val * squareSize + squareSize / 2;
 
-export const ChessTerrain: React.FC<Props> = ({
-  onTouch = noop,
+export const ChessTerrain: React.FC<ChessTerrainProps> = ({
+  onTouchedPiece = noop,
   onMove = noop,
   board,
   sizePx,
-  arrows = []
+  arrows = [],
+  styledCoords = []
 }) => {
   const squareSize = useMemo(
     () => sizePx / board.terrainState.length,
@@ -53,12 +63,14 @@ export const ChessTerrain: React.FC<Props> = ({
 
   useEffect(() => {
     if (touchedPiece) {
-      onTouch(touchedPiece.coord, touchedPiece.piece);
+      onTouchedPiece(touchedPiece.piece, touchedPiece.coord);
     }
   }, [touchedPiece]);
 
-  const onSquareClick = useCallback(
+  const onBoardClick = useCallback(
     (e: MouseEvent) => {
+      e.stopPropagation();
+
       const rect = (e.target as any).getBoundingClientRect();
       const x = e.clientX - rect.left; //x position within the element.
       const y = e.clientY - rect.top; //y position within the element.
@@ -97,12 +109,10 @@ export const ChessTerrain: React.FC<Props> = ({
         backgroundRepeat: 'repeat',
 
         position: 'relative',
-        zIndex: 99,
-        cursor: 'pointer'
+        zIndex: 99
         // Adjust the position if needed to match the bottomLeft corner
         // backgroundPosition: `0 ${props.sizePx * 2}`,
       }}
-      onClick={onSquareClick}
     >
       <Arrow
         fill="purple"
@@ -119,6 +129,18 @@ export const ChessTerrain: React.FC<Props> = ({
           }
         }))}
       />
+      {styledCoords.map(({ style, ...coord }) => (
+        <div
+          style={{
+            ...style,
+            position: 'absolute',
+            width: squareSize,
+            height: squareSize,
+            left: coord.col * squareSize,
+            top: coord.row * squareSize
+          }}
+        />
+      ))}
       {boardMap(board, (coord, piece) => {
         // TODO: Optimize by only iterating over the pieces!
         if (!piece) {
@@ -129,7 +151,7 @@ export const ChessTerrain: React.FC<Props> = ({
           <div
             style={{
               position: 'absolute',
-              background: 'rgba(255, 0, 0, .2)',
+              // background: 'rgba(255, 0, 0, .2)',
               color: piece.color,
               width: squareSize,
               height: squareSize,
@@ -169,6 +191,18 @@ export const ChessTerrain: React.FC<Props> = ({
           </div>
         );
       })}
+      <div
+        style={{
+          background: 'rgba(255, 0, 0, .1)',
+          position: 'absolute',
+          left: 0,
+          top: 0,
+          right: 0,
+          bottom: 0,
+          cursor: 'pointer'
+        }}
+        onClick={onBoardClick}
+      />
     </div>
   );
 };
