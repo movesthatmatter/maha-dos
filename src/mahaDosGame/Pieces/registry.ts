@@ -1,4 +1,4 @@
-import { getPieceFactory } from 'src/gameMechanics/Piece/util';
+import { getPieceFactory } from '../../gameMechanics/Piece/util';
 import { Bishop } from './Bishop';
 import { King } from './King';
 import { Knight } from './Knight';

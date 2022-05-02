@@ -1,16 +1,15 @@
-import { Game } from 'src/gameMechanics/Game/Game';
-import { Color } from 'src/gameMechanics/util/types';
-import { Attack, Move } from 'src/gameMechanics/Game/types';
-import { Piece } from 'src/gameMechanics/Piece/Piece';
+import { Game } from '../../../gameMechanics/Game/Game';
+import { Color } from '../../../gameMechanics/util/types';
+import { Attack, Move } from '../../../gameMechanics/Game/types';
+import { Piece } from '../../../gameMechanics/Piece/Piece';
 import {
   IdentifiablePieceState,
   PieceDynamicProps
-} from 'src/gameMechanics/Piece/types';
-import { range, Coord } from 'src/gameMechanics/util';
+} from '../../../gameMechanics/Piece/types';
 import { evalEachDirectionForMove } from '../utils';
 import { Err, Ok, Result } from 'ts-results';
-import { PieceLayoutState } from 'src/gameMechanics/Board/types';
-import { AttackTargetPieceUndefined } from 'src/gameMechanics/engine';
+import { PieceLayoutState } from '../../../gameMechanics/Board/types';
+import { AttackTargetPieceUndefined } from '../../../gameMechanics/engine';
 
 const pieceLabel = 'King';
 

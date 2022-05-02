@@ -1,4 +1,4 @@
-import { MahaGame } from 'src/mahaDosGame/MahaGame';
+import { MahaGame } from '../../../mahaDosGame/MahaGame';
 import { Bishop } from './Bishop';
 import {
   Attack,
@@ -9,9 +9,8 @@ import {
   PartialGameTurn
 } from '../../../gameMechanics/Game/types';
 import { mahaPieceRegistry } from '../registry';
-import { generatePieceLabel } from 'src/gameMechanics/Board/util';
-import { generate } from 'src/mahaDosGame/helpers';
-import { Board } from 'src/gameMechanics/Board/Board';
+import { generatePieceLabel } from '../../../gameMechanics/Board/util';
+import { generate } from '../../..//mahaDosGame/helpers';
 
 test('eval moves', () => {
   const configuration: GameConfigurator<typeof mahaPieceRegistry> = {

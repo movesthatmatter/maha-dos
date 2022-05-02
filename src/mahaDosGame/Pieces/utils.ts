@@ -1,8 +1,7 @@
-import { Game } from 'src/gameMechanics/Game/Game';
-import { Move } from 'src/gameMechanics/Game/types';
-import { Piece } from 'src/gameMechanics/Piece/Piece';
-import { TerrainProps } from 'src/gameMechanics/Terrain/Terrain';
-import { Coord, MoveDirection, range } from 'src/gameMechanics/util';
+import { Game } from '../../gameMechanics/Game/Game';
+import { Move } from '../../gameMechanics/Game/types';
+import { Piece } from '../../gameMechanics/Piece/Piece';
+import { Coord, range } from '../../gameMechanics/util';
 
 export function evalEachDirectionForMove(
 	from: Coord,

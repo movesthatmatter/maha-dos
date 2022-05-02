@@ -1,5 +1,6 @@
+import { Err, Ok, Result } from 'ts-results';
 import { Game } from '../../../gameMechanics/Game/Game';
-import { Color } from 'src/gameMechanics/util/types';
+import { Color } from '../../../gameMechanics/util/types';
 import { Attack, Move } from '../../../gameMechanics/Game/types';
 import { Piece } from '../../../gameMechanics/Piece/Piece';
 import {
@@ -7,12 +8,11 @@ import {
   PieceDynamicProps
 } from '../../../gameMechanics/Piece/types';
 import { range, Coord } from '../../../gameMechanics/util';
-import { toDictIndexedBy } from 'src/gameMechanics/utils';
+import { toDictIndexedBy } from '../../../gameMechanics/utils';
 import { Rook } from '../Rook';
 import { evalEachDirectionForMove } from '../utils';
-import { PieceLayoutState } from 'src/gameMechanics/Board/types';
-import { Err, Ok, Result } from 'ts-results';
-import { AttackTargetPieceUndefined } from 'src/gameMechanics/engine';
+import { PieceLayoutState } from '../../../gameMechanics/Board/types';
+import { AttackTargetPieceUndefined } from '../../../gameMechanics/engine';
 
 const pieceLabel = 'Bishop';
 

@@ -7,15 +7,12 @@ import React, {
   useMemo,
   useState
 } from 'react';
-import { BoardState } from 'src/gameMechanics/Board/types';
-import { boardMap } from 'src/gameMechanics/Board/util';
-import { Move } from 'src/gameMechanics/Game/types';
-import {
-  IdentifiablePieceState,
-  PieceState
-} from 'src/gameMechanics/Piece/types';
-import { Coord, noop } from 'src/gameMechanics/util';
-import Arrow, { ArrowCoords } from './ArrowSVG';
+import { BoardState } from '../gameMechanics/Board/types';
+import { boardMap } from '../gameMechanics/Board/util';
+import { Move } from '../gameMechanics/Game/types';
+import { IdentifiablePieceState } from '../gameMechanics/Piece/types';
+import { Coord, noop } from '../gameMechanics/util';
+import Arrow from './ArrowSVG';
 
 // type SquareCoord = Coord;
 
@@ -56,10 +53,11 @@ export const ChessTerrain: React.FC<ChessTerrainProps> = ({
     [sizePx, board.terrainState.length]
   );
 
-  const [touchedPiece, setTouchedPiece] = useState<{
-    coord: Coord;
-    piece: IdentifiablePieceState<string>;
-  }>();
+  const [touchedPiece, setTouchedPiece] =
+    useState<{
+      coord: Coord;
+      piece: IdentifiablePieceState<string>;
+    }>();
 
   useEffect(() => {
     if (touchedPiece) {

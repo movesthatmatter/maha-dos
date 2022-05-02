@@ -1,10 +1,17 @@
-import { CSSProperties, useRef, useState } from 'react';
-import { ChessTerrain, ChessTerrainProps } from 'src/ChessTerrain';
+import { CSSProperties, useEffect, useRef, useState } from 'react';
+import { ChessTerrain, ChessTerrainProps } from '../../ChessTerrain';
 import {
+  GameState,
   GameStateInMovePhaseWithPreparingSubmission,
-  isGameStateInMovePhaseWithPreparingSubmission
-} from 'src/gameMechanics/Game/types';
-import { Coord, coordsAreEqual, matrixInsertMany, noop } from 'src/gameMechanics/util';
+  isGameStateInMovePhaseWithPreparingSubmission,
+  Move
+} from '../../gameMechanics/Game/types';
+import {
+  Coord,
+  coordsAreEqual,
+  matrixInsertMany,
+  noop
+} from '../../gameMechanics/util';
 import { DEFAULT_MAHA_CONFIGURATOR } from '../config';
 import { MahaGame } from '../MahaGame';
 
@@ -15,27 +22,37 @@ const destinationSquareStyle: CSSProperties = {
 
 export type MahaChessTerrainProps = {
   onPieceTouched?: ChessTerrainProps['onTouchedPiece'];
+  onMoveDrawn?: (move: Move) => void;
+  onUpdated?: (game: GameState) => void;
 };
 
 export const MahaChessTerrain: React.FC<MahaChessTerrainProps> = ({
-  onPieceTouched = noop
+  onPieceTouched = noop,
+  onMoveDrawn = noop,
+  onUpdated = noop
 }) => {
-  const gameRef = useRef(new MahaGame({
-    ...DEFAULT_MAHA_CONFIGURATOR,
-    pieceLayout: [
-      ['R', 'N', 'B', 'K', 'Q', 'B', 'N', 'R'],
-      ['P', 'P', 'P', 0, 0, 'P', 'P', 'P'],
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [0, 0, 0, 'P', 'P', 0, 0, 0],
-      [0, 0, 0, 'P', 'P', 0, 0, 0],
-      [0, 'P', 'N', 0, 0, 0, 'P', 0],
-      ['P', 'B', 'P', 0, 'Q', 'P', 0, 'P'],
-      ['R', 0, 0, 'K', 0, 'B', 'N', 'R']
-    ],
-  }));
+  const gameRef = useRef(
+    new MahaGame({
+      ...DEFAULT_MAHA_CONFIGURATOR,
+      pieceLayout: [
+        ['R', 'N', 'B', 'K', 'Q', 'B', 'N', 'R'],
+        ['P', 'P', 'P', 0, 0, 'P', 'P', 'P'],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 'P', 'P', 0, 0, 0],
+        [0, 0, 0, 'P', 'P', 0, 0, 0],
+        [0, 'P', 'N', 0, 0, 0, 'P', 0],
+        ['P', 'B', 'P', 0, 'Q', 'P', 0, 'P'],
+        ['R', 0, 0, 'K', 0, 'B', 'N', 'R']
+      ]
+    })
+  );
 
   const [gameState, setGameState] = useState(gameRef.current.state);
   const [destinationSquares, setDestinationSquares] = useState<Coord[]>();
+
+  useEffect(() => {
+    onUpdated(gameState);
+  }, [gameState]);
 
   return (
     <ChessTerrain
@@ -64,7 +81,7 @@ export const MahaChessTerrain: React.FC<MahaChessTerrainProps> = ({
       }}
       onMove={(move) => {
         // TODO: This is definitely not the end ode -neeeds to be refactored and tested!!
-        // TODO: this is actually part of the logic that needs to go in the engine draw move 
+        // TODO: this is actually part of the logic that needs to go in the engine draw move
         setGameState((prev) => {
           if (prev.state === 'completed') {
             return prev;
@@ -76,19 +93,20 @@ export const MahaChessTerrain: React.FC<MahaChessTerrainProps> = ({
             return prev;
           }
 
-
           const dests = piece.evalMove(gameRef.current);
 
           // Move is Valid
-          const moveIsPartOfDests = dests.find((d) => coordsAreEqual(d.to, move.to));
+          const moveIsPartOfDests = dests.find((d) =>
+            coordsAreEqual(d.to, move.to)
+          );
 
-          console.log('moveIsPartOfDests', moveIsPartOfDests)
+          console.log('moveIsPartOfDests', moveIsPartOfDests);
 
           if (!moveIsPartOfDests) {
             return prev;
           }
 
-          console.log('no mas', !!moveIsPartOfDests);
+          // console.log('no mas', !!moveIsPartOfDests);
 
           // const prevPiece = move.piece.
           const nextPieceLayoutState = matrixInsertMany(
@@ -146,6 +164,9 @@ export const MahaChessTerrain: React.FC<MahaChessTerrainProps> = ({
           //   ...prev
           // };
 
+          // TODO: This has nothing to do here!
+          onMoveDrawn(move);
+
           return {
             ...preparing,
             ...(isGameStateInMovePhaseWithPreparingSubmission(preparing) && {
@@ -156,7 +177,7 @@ export const MahaChessTerrain: React.FC<MahaChessTerrainProps> = ({
                 })
               },
               black: {
-                ...preparing.white,
+                ...preparing.black,
                 ...(move.piece.color === 'black' && {
                   moves: [...preparing.black.moves, move]
                 })

@@ -1,4 +1,4 @@
-import { Game } from 'src/gameMechanics/Game/Game';
+import { Game } from '../gameMechanics/Game/Game';
 import { mahaPieceRegistry } from './Pieces/registry';
 import {DEFAULT_MAHA_CONFIGURATOR} from './config';
 

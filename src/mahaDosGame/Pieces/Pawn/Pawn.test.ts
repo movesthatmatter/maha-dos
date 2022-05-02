@@ -1,8 +1,8 @@
-import { MahaGame } from 'src/mahaDosGame/MahaGame';
+import { MahaGame } from '../../../mahaDosGame/MahaGame';
 import { Pawn } from './Pawn';
 import { GameConfigurator, Move } from '../../../gameMechanics/Game/types';
 import { mahaPieceRegistry } from '../registry';
-import { generatePieceLabel } from 'src/gameMechanics/Board/util';
+import { generatePieceLabel } from '../../../gameMechanics/Board/util';
 
 describe('eval pawn moves', () => {
   test('eval move after first moved', () => {

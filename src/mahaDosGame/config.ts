@@ -1,4 +1,4 @@
-import { GameConfigurator } from 'src/gameMechanics/Game/types';
+import { GameConfigurator } from '../gameMechanics/Game/types';
 import { mahaPieceRegistry } from './Pieces/registry';
 
 export { mahaPieceRegistry };

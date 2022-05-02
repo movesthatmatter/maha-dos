@@ -9,3 +9,6 @@ export const identity = <T>(n: T) => n;
 
 export const coordsAreEqual = (a: Coord, b: Coord) =>
   a.col === b.col && a.row === b.row;
+
+export const objectKeys = <O extends object>(o: O) =>
+  Object.keys(o) as (keyof O)[];
