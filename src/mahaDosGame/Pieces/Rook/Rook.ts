@@ -84,7 +84,6 @@ export class Rook extends Piece<PieceLabel> {
         }
 
         const targetPiece = game.board.pieceLayout[target.row][target.col];
-
         //special attack, can move before this
         if (r === 1) {
           if (
@@ -116,10 +115,36 @@ export class Rook extends Piece<PieceLabel> {
             targetPiece !== 0 &&
             targetPiece.state.color !== this.state.color
           ) {
-            attacks.push({
+            const attack: Attack = {
               from: pieceCoord,
               to: target,
               type: 'range'
+            };
+            //Special attack - AOE damage
+            const aoe: Coord[] = [];
+            this.state.movesDirections.map((d) => {
+              const targetSq: Coord = {
+                row: target.row + d.row,
+                col: target.col + d.col
+              };
+              if (
+                targetSq.row < game.board.pieceLayout.length &&
+                targetSq.col < game.board.pieceLayout[0].length &&
+                targetSq.row >= 0 &&
+                targetSq.col >= 0
+              ) {
+                const tPiece =
+                  game.board.pieceLayout[targetSq.row][targetSq.col];
+                if (tPiece !== 0 && tPiece.state.color !== this.state.color) {
+                  aoe.push({ row: targetSq.row, col: targetSq.col });
+                }
+              }
+            });
+            attacks.push({
+              ...attack,
+              ...(aoe.length > 0 && {
+                aoe
+              })
             });
           }
         }
