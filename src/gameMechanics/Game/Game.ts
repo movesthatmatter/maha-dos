@@ -1,16 +1,24 @@
-import { Result } from 'ts-results';
+import { Err, Ok, Result } from 'ts-results';
 import { Coord } from '../util/types';
 import {
   Attack,
   GameConfigurator,
   GameHistory,
   GameState,
+  GameStateInMovePhaseWithPreparingSubmission,
   GameWinner,
+  isGameInMovePhase,
+  isGameStateInMovePhaseWithPreparingSubmission,
   Move
 } from './types';
-import { AttackNotPossibleError, MoveNotPossibleError } from './errorTypes';
+import {
+  AttackNotPossibleError,
+  getMoveNotPossibleError,
+  MoveNotPossibleError
+} from './errorTypes';
 import { Board } from '../Board/Board';
 import { PieceRegistry } from '../Piece/types';
+import { coordsAreEqual } from '../util';
 
 export interface IGame<PR extends PieceRegistry = PieceRegistry> {
   state: GameState;
@@ -21,7 +29,16 @@ export interface IGame<PR extends PieceRegistry = PieceRegistry> {
   load(state: GameState): void;
 
   // When a Move is Succesfully Drawn it gets appended to the nextMoves List of the "move" phase
-  drawMove(from: Coord, to: Coord): Result<Move, MoveNotPossibleError>;
+  drawMove(
+    from: Coord,
+    to: Coord
+  ): Result<
+    {
+      move: Move;
+      gameState: GameState;
+    },
+    MoveNotPossibleError
+  >;
 
   // When an Attack is Succesfully Drawn it gets appended to the nextAttacks List of the "attack" phase
   drawAttack(from: Coord, to: Coord): Result<Attack, AttackNotPossibleError>;
@@ -167,9 +184,120 @@ export class Game<PR extends PieceRegistry = PieceRegistry> implements IGame {
     this.state = updateState;
   }
 
-  // // When a Move is Succesfully Drawn it gets appended to the nextMoves List of the "move" phase
-  drawMove(from: Coord, to: Coord): Result<Move, MoveNotPossibleError> {
-    return {} as Result<Move, MoveNotPossibleError>;
+  // When a Move is Succesfully Drawn it gets appended to the nextMoves List of the "move" phase
+  // TODO: TEST!
+  drawMove(
+    from: Coord,
+    to: Coord
+  ): Result<
+    {
+      move: Move;
+      gameState: GameState;
+    },
+    MoveNotPossibleError
+  > {
+    console.log('about to move', this.state);
+
+    // Can't make a move when game is completed
+    if (this.state.state === 'completed') {
+      return new Err(getMoveNotPossibleError('GameIsCompleted'));
+    }
+
+    if (!(isGameInMovePhase(this.state) || this.state.state === 'pending')) {
+      return new Err(getMoveNotPossibleError('GameNotInMovePhase'));
+    }
+
+    const piece = this.board.getPieceByCoord(from);
+
+    if (!piece) {
+      return new Err(getMoveNotPossibleError('PieceNotExistent'));
+    }
+
+    const dests = piece.evalMove(this);
+    const moveIsPartOfDests = dests.find((d) => coordsAreEqual(d.to, to));
+
+    // Move is Valid
+    if (!moveIsPartOfDests) {
+      return new Err(getMoveNotPossibleError('DestinationNotValid'));
+    }
+
+    // TODO: Add usecase for when a piece has already moved, but add it as TDD later
+    //  PieceAlreadyMoved Error
+
+    // if (isGameStateInMovePhaseWithPreparingSubmission)
+
+    // console.log('no mas', !!moveIsPartOfDests);
+
+    // const prevPiece = move.piece.
+    // const nextPieceLayoutState = matrixInsertMany(
+    //   prev.boardState.pieceLayoutState,
+    //   [
+    //     // {
+    //     //   index: [move.from.row, move.from.col],
+    //     //   nextVal: 0
+    //     // },
+    //     // {
+    //     //   index: [move.to.row, move.to.col],
+    //     //   nextVal: move.piece
+    //     // }
+    //   ]
+    // );
+
+    const preparingState: GameStateInMovePhaseWithPreparingSubmission = {
+      ...this.state,
+      state: 'inProgress',
+      winner: undefined,
+      submissionStatus: 'preparing',
+      phase: 'move',
+
+      ...(isGameStateInMovePhaseWithPreparingSubmission(this.state)
+        ? {
+            white: this.state.white,
+            black: this.state.black
+          }
+        : {
+            white: {
+              canDraw: true,
+              moves: []
+            },
+            black: {
+              canDraw: true,
+              moves: []
+            }
+          })
+    };
+
+    const move: Move = {
+      from,
+      to,
+      piece: piece.state
+
+      // TODO: Add promotion
+    };
+
+    // TODO: Update the board and all the other state derivates
+    this.state = {
+      ...preparingState,
+      ...(isGameStateInMovePhaseWithPreparingSubmission(preparingState) && {
+        white: {
+          ...preparingState.white,
+          ...(move.piece.color === 'white' && {
+            moves: [...preparingState.white.moves, move]
+          })
+        },
+        black: {
+          ...preparingState.black,
+          ...(move.piece.color === 'black' && {
+            moves: [...preparingState.black.moves, move]
+          })
+        }
+      })
+    };
+
+    return new Ok({
+      move,
+      gameState: this.state
+    });
   }
 
   // // When an Attack is Succesfully Drawn it gets appended to the nextAttacks List of the "attack" phase

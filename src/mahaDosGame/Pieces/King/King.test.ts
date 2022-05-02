@@ -1,4 +1,4 @@
-import { MahaGame } from '../../../mahaDosGame/MahaGame';
+import { MahaGame } from '../../MahaGame';
 import { King } from './King';
 import { GameConfigurator, Move } from '../../../gameMechanics/Game/types';
 import { mahaPieceRegistry } from '../registry';

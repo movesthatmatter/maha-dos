@@ -218,6 +218,9 @@ export const isGameStateInMovePhaseWithPartialOrPreparingSubmission = (
   );
 };
 
+export const isGameInMovePhase = (g: GameState): g is GameStateInMovePhase =>
+  g.state === 'inProgress' && g.phase === 'move';
+
 export type GameStateInAttackPhase = Extract<GameState, { phase: 'attack' }>;
 export type GameStateInAtttackPhaseWithNoSubmission = Extract<
   GameStateInAttackPhase,

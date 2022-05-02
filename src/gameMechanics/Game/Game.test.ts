@@ -127,3 +127,18 @@ describe('Complete Game', () => {
     expect(actual).toEqual(expected);
   });
 });
+
+
+describe('InProgress Games', () => {
+
+  describe('draw move', () => {
+    // test move to correct destination
+
+    // test move to incorrect destination
+
+    // piece already moved
+
+    // game state not in movable phase
+
+  })
+});

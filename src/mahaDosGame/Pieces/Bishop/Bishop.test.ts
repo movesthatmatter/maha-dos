@@ -1,4 +1,4 @@
-import { MahaGame } from '../../../mahaDosGame/MahaGame';
+import { MahaGame } from '../../MahaGame';
 import { Bishop } from './Bishop';
 import {
   Attack,

@@ -1,7 +1,7 @@
 import './styles.css';
 import { PieceState } from './gameMechanics/Piece/types';
 import { useState } from 'react';
-import { MahaChessTerrain } from './mahaDosGame/MahaTerrain';
+import { MahaChessTerrain } from './mahaDosGame/components/MahaTerrain';
 
 export default function App() {
   const [pieceInfo, setPieceInfo] = useState<PieceState<string>>();
@@ -14,7 +14,7 @@ export default function App() {
           display: 'flex'
         }}
       >
-        <MahaChessTerrain onPieceTouched={(piece) => setPieceInfo(piece)} />
+        {/* <MahaChessTerrain onPieceTouched={(piece) => setPieceInfo(piece)} /> */}
         <div>
           <pre>{JSON.stringify(pieceInfo, null, 2)}</pre>
         </div>

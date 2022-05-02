@@ -1,13 +1,12 @@
-import React, { useRef, useState } from 'react';
-import { PieceInfo } from '../../mahaDosGame/components';
+import React, { useState } from 'react';
 import { PieceState } from '../../gameMechanics/Piece/types';
-import { MahaChessTerrain } from '../../mahaDosGame/MahaTerrain';
+import { PieceInfo } from '../../mahaDosGame/components/PieceInfo';
 import { Button } from '../Button';
 import {
-  GameState,
   isGameStateInMovePhaseWithPartialOrPreparingSubmission,
   Move
 } from '../../gameMechanics/Game/types';
+import { Maha } from '../../mahaDosGame/components/Maha';
 
 type Props = {};
 
@@ -37,14 +36,22 @@ export const MahaGame: React.FC<Props> = () => {
         <Button label="Submit Black" />
         <br />
         <br />
-        <MahaChessTerrain
+        <Maha
+          // gameState={}
+          onSubmit={() => {
+            console.log('on submit');
+          }}
           onPieceTouched={(piece) => setPieceInfo(piece)}
-          onUpdated={(next: GameState) => {
-            if (isGameStateInMovePhaseWithPartialOrPreparingSubmission(next)) {
-              setMovesbyColor(() => ({
-                white: next.white.moves,
-                black: next.black.moves
-              }));
+          onMoveDrawn={(next) => {
+            if (
+              isGameStateInMovePhaseWithPartialOrPreparingSubmission(
+                next.gameState
+              )
+            ) {
+              setMovesbyColor({
+                white: next.gameState.white.moves,
+                black: next.gameState.black.moves
+              });
             }
           }}
         />
@@ -57,7 +64,12 @@ export const MahaGame: React.FC<Props> = () => {
       </div>
       <div
         style={{
-          paddingLeft: '2em'
+          paddingLeft: '2em',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          alignContent: 'center',
+          justifyContent: 'center'
         }}
       >
         {pieceInfo && <PieceInfo piece={pieceInfo} />}

@@ -1,7 +1,6 @@
 import React, {
   CSSProperties,
   MouseEvent,
-  SyntheticEvent,
   useCallback,
   useEffect,
   useMemo,
@@ -29,11 +28,11 @@ export type ChessTerrainProps = {
   styledCoords?: (Coord & { style?: CSSProperties })[];
 
   // This is always on TouchPiece
-  onTouchedPiece?: (
+  onPieceTouched?: (
     piece: IdentifiablePieceState<string>,
     coord: Coord
   ) => void;
-  onMove?: (move: Move) => void;
+  onPieceDestinationSet?: (move: Move) => void;
 };
 
 // const coordToArrow = ()
@@ -41,8 +40,8 @@ const coordToArrow = (squareSize: number, val: number) =>
   val * squareSize + squareSize / 2;
 
 export const ChessTerrain: React.FC<ChessTerrainProps> = ({
-  onTouchedPiece = noop,
-  onMove = noop,
+  onPieceTouched = noop,
+  onPieceDestinationSet = noop,
   board,
   sizePx,
   arrows = [],
@@ -61,7 +60,7 @@ export const ChessTerrain: React.FC<ChessTerrainProps> = ({
 
   useEffect(() => {
     if (touchedPiece) {
-      onTouchedPiece(touchedPiece.piece, touchedPiece.coord);
+      onPieceTouched(touchedPiece.piece, touchedPiece.coord);
     }
   }, [touchedPiece]);
 
@@ -81,7 +80,7 @@ export const ChessTerrain: React.FC<ChessTerrainProps> = ({
       // console.log('actual', { x, y }, 'coord', coord);
 
       if (touchedPiece) {
-        onMove({
+        onPieceDestinationSet({
           from: touchedPiece.coord,
           to: coord,
           piece: touchedPiece.piece
