@@ -44,7 +44,6 @@ export type IdentifiablePieceState<L extends string> = {
 
 export type PieceFactory = (
   id: IdentifiablePieceState<'Knight'>['id'],
-  color: Color,
   dynamicProps?: PieceDynamicProps
 ) => Piece;
 

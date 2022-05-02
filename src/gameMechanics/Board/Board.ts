@@ -4,7 +4,6 @@ import { Terrain } from '../Terrain/Terrain';
 import { matrixMap } from '../util';
 import { Coord } from '../util/types';
 import { BoardState, PieceLayout } from './types';
-import { getInitialPieceColorAtCoord } from './util';
 
 export interface IBoard {
   state: BoardState;
@@ -40,14 +39,14 @@ export class Board<PR extends PieceRegistry> implements IBoard {
       }
 
       const coord = { row, col };
-      const color = getInitialPieceColorAtCoord(props.pieceLayout, coord);
+      const color = label.toString().charAt(0) === 'w' ? 'white' : 'black';
 
       const id = `${color}-${label}-${row}-${col}`;
 
       // TODO: This shouldn't be here!
       this.pieceCoordsByPieceId[id] = coord;
 
-      return pieceRegistry[label](id, color);
+      return pieceRegistry[label](id);
     });
 
     this.state = this.getDerivedState();

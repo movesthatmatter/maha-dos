@@ -11,11 +11,11 @@ import { mahaPieceRegistry } from '../../mahaDosGame/config';
 
 // Returns the default color at the coord for any chess based games
 // TODO: Might need to make it game specific in the future if this is not enough
-export const getInitialPieceColorAtCoord = (
-  pieceLayout: Matrix<unknown>,
-  coord: Coord
-): Color =>
-  coord.row > getMatrixRowsLength(pieceLayout) / 2 ? 'white' : 'black';
+// export const getInitialPieceColorAtCoord = (
+//   pieceLayout: Matrix<unknown>,
+//   coord: Coord
+// ): Color =>
+//   coord.row > getMatrixRowsLength(pieceLayout) / 2 ? 'white' : 'black';
 
 export const boardMap = <T>(
   board: BoardState,

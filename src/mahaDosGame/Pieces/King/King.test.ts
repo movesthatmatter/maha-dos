@@ -8,18 +8,18 @@ test('eval move', () => {
   const configuration: GameConfigurator<typeof mahaPieceRegistry> = {
     terrain: { width: 5 },
     pieceLayout: [
-      ['R', 0, 'R', 0, 0],
+      ['bR', 0, 'bR', 0, 0],
       [0, 0, 0, 0, 0],
-      [0, 0, 'K', 'B', 0],
-      [0, 'R', 0, 0, 0],
+      [0, 0, 'bK', 'bB', 0],
+      [0, 'wR', 0, 0, 0],
       [0, 0, 0, 0, 0]
     ]
   };
   const game = new MahaGame(configuration);
 
   const piece = new King(
-    generatePieceLabel('black', 'K', { row: 2, col: 2 }),
-    'black'
+    'black',
+    generatePieceLabel('black', 'bK', { row: 2, col: 2 })
   );
 
   const moves = piece.evalMove(game);
@@ -27,7 +27,7 @@ test('eval move', () => {
   const expectedMoves: Move[] = [
     {
       from: { row: 2, col: 2 },
-      to: { row: 1, col: 2},
+      to: { row: 1, col: 2 },
       piece: piece.state
     },
     {
@@ -37,7 +37,7 @@ test('eval move', () => {
     },
     {
       from: { row: 2, col: 2 },
-      to: { row:3, col: 3 },
+      to: { row: 3, col: 3 },
       piece: piece.state
     },
     {
@@ -54,7 +54,7 @@ test('eval move', () => {
       from: { row: 2, col: 2 },
       to: { row: 1, col: 1 },
       piece: piece.state
-    },
+    }
   ];
 
   expect(moves).toEqual(expectedMoves);

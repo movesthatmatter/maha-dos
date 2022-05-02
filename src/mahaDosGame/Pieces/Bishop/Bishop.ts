@@ -27,8 +27,8 @@ const DEFAULT_DYNAMIC_PROPS: PieceDynamicProps = {
 
 export class Bishop extends Piece {
   constructor(
-    id: IdentifiablePieceState<typeof pieceLabel>['id'],
     color: Color,
+    id: IdentifiablePieceState<typeof pieceLabel>['id'],
     dynamicProps?: Partial<PieceDynamicProps>
   ) {
     super(id, {
@@ -141,6 +141,7 @@ export class Bishop extends Piece {
         content: undefined
       });
     }
+
     return Ok({} as PieceLayoutState);
   }
 }

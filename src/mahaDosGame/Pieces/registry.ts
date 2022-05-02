@@ -7,13 +7,19 @@ import { Queen } from './Queen';
 import { Rook } from './Rook';
 
 export const mahaPieceRegistry = {
-  R: getPieceFactory((...args) => new Rook(...args)),
-  N: getPieceFactory((...args) => new Knight(...args)),
-  B: getPieceFactory((...args) => new Bishop(...args)),
-  Q: getPieceFactory((...args) => new Queen(...args)),
-  K: getPieceFactory((...args) => new King(...args)),
-  P: getPieceFactory((...args) => new Pawn(...args))
+  wR: getPieceFactory((...args) => new Rook('white', ...args)),
+  wN: getPieceFactory((...args) => new Knight('white', ...args)),
+  wB: getPieceFactory((...args) => new Bishop('white', ...args)),
+  wQ: getPieceFactory((...args) => new Queen('white', ...args)),
+  wK: getPieceFactory((...args) => new King('white', ...args)),
+  wP: getPieceFactory((...args) => new Pawn('white', ...args)),
 
+  bR: getPieceFactory((...args) => new Rook('black', ...args)),
+  bN: getPieceFactory((...args) => new Knight('black', ...args)),
+  bB: getPieceFactory((...args) => new Bishop('black', ...args)),
+  bQ: getPieceFactory((...args) => new Queen('black', ...args)),
+  bK: getPieceFactory((...args) => new King('black', ...args)),
+  bP: getPieceFactory((...args) => new Pawn('black', ...args))
   // Add others if needed
   // BsrKing: BeserkKing maybe
 };
