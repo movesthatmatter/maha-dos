@@ -1,6 +1,6 @@
 import { Color, MoveDirection } from '../util/types';
 import { Piece } from './Piece';
-import {Coord} from 'src/gameMechanics/util';
+import { Coord } from 'src/gameMechanics/util';
 
 export type PieceStaticProps<L extends string> = {
   label: L; // pawn, knight, bishop, queen, king, but also beserk king and whatever other new ones
@@ -24,6 +24,9 @@ export type PieceDynamicProps = {
 
   // This depends on wether the piece moved or not
   canAttack: boolean;
+
+  //Check against initial position
+  pieceHasMoved?: boolean;
 
   // TODO: The Attack Bonus or other Special Rules & Crits will come later!
   // bonus?: {

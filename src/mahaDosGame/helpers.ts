@@ -101,7 +101,7 @@ export const generateDefaultPawn = (
     attackDamage: 1,
     attackRange: 1,
     hitPoints: 6,
-    moveRange: 1,
+    moveRange: props?.pieceHasMoved ? 1 : 2,
     ...props
   };
 };

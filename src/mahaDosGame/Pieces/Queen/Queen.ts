@@ -8,6 +8,9 @@ import {
 } from 'src/gameMechanics/Piece/types';
 import { range, Coord } from 'src/gameMechanics/util';
 import { evalEachDirectionForMove } from '../utils';
+import { Err, Ok, Result } from 'ts-results';
+import { PieceLayoutState } from 'src/gameMechanics/Board/types';
+import { AttackTargetPieceUndefined } from 'src/gameMechanics/engine';
 
 const pieceLabel = 'Queen';
 
@@ -16,7 +19,8 @@ const DEFAULT_DYNAMIC_PROPS: PieceDynamicProps = {
   moveRange: 7,
   attackRange: 7,
   attackDamage: 4,
-  canAttack: true
+  canAttack: true,
+  pieceHasMoved: false
 };
 
 export class Queen extends Piece {
@@ -65,7 +69,18 @@ export class Queen extends Piece {
     return [];
   }
 
-  // evalAttack(gameState: GameState) {
-  //   //returns new pieces data
-  // }
+  executeAttack(
+    game: Game,
+    attack: Attack
+  ): Result<PieceLayoutState, AttackTargetPieceUndefined> {
+    const targetPiece = game.board.pieceLayout[attack.to.row][attack.to.col];
+    //TODO: Better typecheck. Deal with error handling
+    if (targetPiece === 0) {
+      return new Err({
+        type: 'TargetPieceIsUndefined',
+        content: undefined
+      });
+    }
+    return Ok({} as PieceLayoutState);
+  }
 }

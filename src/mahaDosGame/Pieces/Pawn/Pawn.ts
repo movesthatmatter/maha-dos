@@ -8,15 +8,19 @@ import {
 } from 'src/gameMechanics/Piece/types';
 import { range, Coord } from 'src/gameMechanics/util';
 import { evalEachDirectionForMove } from '../utils';
+import { Err, Ok, Result } from 'ts-results';
+import { PieceLayoutState } from 'src/gameMechanics/Board/types';
+import { AttackTargetPieceUndefined } from 'src/gameMechanics/engine';
 
 const pieceLabel = 'Pawn';
 
 const DEFAULT_DYNAMIC_PROPS: PieceDynamicProps = {
   hitPoints: 6,
-  moveRange: 1, // can be 2 for en-pasant!
-  attackRange: 1, // can be 2 for range
+  attackRange: 1,
   attackDamage: 1,
-  canAttack: true
+  canAttack: true,
+  moveRange: 1,
+  pieceHasMoved: false
 };
 
 export class Pawn extends Piece {
@@ -30,10 +34,21 @@ export class Pawn extends Piece {
       ...dynamicProps,
       color,
       label: pieceLabel,
-      movesDirections: [{ row: -1, col: 0 }],
-      attackDirection: [{ row: -1, col: 1 }],
+      movesDirections:
+        color === 'white' ? [{ row: -1, col: 0 }] : [{ row: 1, col: 0 }],
+      attackDirection:
+        color === 'white'
+          ? [
+              { row: -1, col: 1 },
+              { row: -1, col: -1 }
+            ]
+          : [
+              { row: 1, col: -1 },
+              { row: 1, col: 1 }
+            ],
       maxHitPoints: 6,
-      canDie: true
+      canDie: true,
+      moveRange: dynamicProps?.pieceHasMoved ? 1 : 2
     });
   }
 
@@ -57,7 +72,18 @@ export class Pawn extends Piece {
     return [];
   }
 
-  // evalAttack(gameState: GameState) {
-  //   //returns new pieces data
-  // }
+  executeAttack(
+    game: Game,
+    attack: Attack
+  ): Result<PieceLayoutState, AttackTargetPieceUndefined> {
+    const targetPiece = game.board.pieceLayout[attack.to.row][attack.to.col];
+    //TODO: Better typecheck. Deal with error handling
+    if (targetPiece === 0) {
+      return new Err({
+        type: 'TargetPieceIsUndefined',
+        content: undefined
+      });
+    }
+    return Ok({} as PieceLayoutState);
+  }
 }

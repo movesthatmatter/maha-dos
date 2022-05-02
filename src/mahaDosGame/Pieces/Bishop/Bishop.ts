@@ -10,6 +10,9 @@ import { range, Coord } from '../../../gameMechanics/util';
 import { toDictIndexedBy } from 'src/gameMechanics/utils';
 import { Rook } from '../Rook';
 import { evalEachDirectionForMove } from '../utils';
+import { PieceLayoutState } from 'src/gameMechanics/Board/types';
+import { Err, Ok, Result } from 'ts-results';
+import { AttackTargetPieceUndefined } from 'src/gameMechanics/engine';
 
 const pieceLabel = 'Bishop';
 
@@ -18,7 +21,8 @@ const DEFAULT_DYNAMIC_PROPS: PieceDynamicProps = {
   moveRange: 5,
   attackRange: 6,
   attackDamage: 3,
-  canAttack: true
+  canAttack: true,
+  pieceHasMoved: false
 };
 
 export class Bishop extends Piece {
@@ -125,7 +129,18 @@ export class Bishop extends Piece {
     return attacks;
   }
 
-  // evalAttack(gameState: GameState) {
-  //   //returns new pieces data
-  // }
+  executeAttack(
+    game: Game,
+    attack: Attack
+  ): Result<PieceLayoutState, AttackTargetPieceUndefined> {
+    const targetPiece = game.board.pieceLayout[attack.to.row][attack.to.col];
+    //TODO: Better typecheck. Deal with error handling
+    if (targetPiece === 0) {
+      return new Err({
+        type: 'TargetPieceIsUndefined',
+        content: undefined
+      });
+    }
+    return Ok({} as PieceLayoutState);
+  }
 }

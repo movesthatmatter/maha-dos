@@ -7,3 +7,8 @@ export type GameStateNotInAttackPhaseError = {
   type: 'GameStateNotInAttackPhase';
   content: undefined;
 };
+
+export type AttackTargetPieceUndefined = {
+  type: 'TargetPieceIsUndefined';
+  content: undefined;
+};
