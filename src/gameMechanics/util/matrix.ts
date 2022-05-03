@@ -1,10 +1,12 @@
-import { identity } from './misc';
+import { identity, range } from './misc';
 
 export type Matrix<T> = T[][];
 
+export type MatrixIndex = [row: number, col: number];
+
 export const matrixMap = <T, R>(
   matrix: Matrix<T>,
-  fn: (t: T, index: [row: number, col: number]) => R
+  fn: (t: T, index: MatrixIndex) => R
 ) =>
   matrix.map((row, rowIndex) =>
     row.map((val, colIndex) => fn(val, [rowIndex, colIndex]))
@@ -12,9 +14,24 @@ export const matrixMap = <T, R>(
 
 export const matrixForEach = <T>(
   matrix: Matrix<T>,
-  fn: (t: T, index: [row: number, col: number]) => void
+  fn: (t: T, index: MatrixIndex) => void
 ) => {
   matrixMap(matrix, fn);
+};
+
+export const matrixReduce = <T, Accum>(
+  matrix: Matrix<T>,
+  fn: (accum: Accum, next: T, index: MatrixIndex) => Accum,
+  accum: Accum
+) => {
+  // TODO: Might need to copy this!
+  let res = accum;
+
+  matrixForEach(matrix, (next, index) => {
+    res = fn(res, next, index);
+  });
+
+  return res;
 };
 
 // Flips the rows
@@ -30,20 +47,26 @@ export const getMatrixRowsLength = (matrix: Matrix<unknown>) => matrix.length;
 export const getMatrixColsLength = (matrix: Matrix<unknown>) =>
   matrix[0]?.length || 0;
 
+export const matrixCreate = <T = void>(
+  rows: number,
+  cols: number = rows,
+  val?: T
+): Matrix<T> => range(rows).map(() => range(cols).map(() => val as T));
+
 export const duplicateMatrix = <T>(matrix: Matrix<T>) =>
   matrixMap(matrix, identity);
 
 // This creates a new matrix each time. Immutability!
 export const matrixInsert = <T>(
   matrix: Matrix<T>,
-  index: [number, number],
+  index: MatrixIndex,
   nextVal: T
 ): Matrix<T> => matrixInsertMany(matrix, [{ index, nextVal }]);
 
 export const matrixInsertMany = <T>(
   matrix: Matrix<T>,
   vals: {
-    index: [number, number];
+    index: MatrixIndex;
     nextVal: T;
   }[]
 ) => {
@@ -60,4 +83,14 @@ export const matrixInsertMany = <T>(
   });
 
   return nextMatrixInPlace;
+};
+
+export const matrixGet = <T>(matrix: Matrix<T>, [row, col]: MatrixIndex) => {
+  const matrixRow = matrix[row];
+
+  if (!matrixRow) {
+    return undefined;
+  }
+
+  return matrixRow[col];
 };
