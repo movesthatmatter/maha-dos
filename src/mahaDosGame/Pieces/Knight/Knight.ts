@@ -25,8 +25,8 @@ const DEFAULT_DYNAMIC_PROPS: PieceDynamicProps = {
 
 export class Knight extends Piece {
   constructor(
-    id: IdentifiablePieceState<typeof pieceLabel>['id'],
     color: Color,
+    id: IdentifiablePieceState<typeof pieceLabel>['id'],
     dynamicProps?: Partial<PieceDynamicProps>
   ) {
     super(id, {

@@ -8,14 +8,14 @@ export const DEFAULT_MAHA_CONFIGURATOR: GameConfigurator<
 > = {
   terrain: { width: 8 },
   pieceLayout: [
-    ['R', 'N', 'B', 'K', 'Q', 'B', 'N', 'R'],
-    ['P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'],
+    ['bR', 'bN', 'bB', 'bK', 'bQ', 'bB', 'bN', 'bR'],
+    ['bP', 'bP', 'bP', 'bP', 'bP', 'bP', 'bP', 'bP'],
     [0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0],
-    ['P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'],
-    ['R', 'N', 'B', 'K', 'Q', 'B', 'N', 'R']
+    ['wP', 'wP', 'wP', 'wP', 'wP', 'wP', 'wP', 'wP'],
+    ['wR', 'wN', 'wB', 'wK', 'wQ', 'wB', 'wN', 'wR']
   ]
   // TODO: add this dynamic props going to be needed
   // pieceDynamicProps: []

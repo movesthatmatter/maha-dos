@@ -17,9 +17,9 @@ test('eval moves', () => {
   const configuration: GameConfigurator<typeof mahaPieceRegistry> = {
     terrain: { width: 5 },
     pieceLayout: [
-      [0, 0, 0, 0, 'R'],
-      [0, 'R', 0, 0, 0],
-      [0, 0, 'B', 0, 0],
+      [0, 0, 0, 0, 'bR'],
+      [0, 'bR', 0, 0, 0],
+      [0, 0, 'bB', 0, 0],
       [0, 0, 0, 0, 0],
       [0, 0, 0, 0, 0]
     ]
@@ -27,8 +27,8 @@ test('eval moves', () => {
   const game = new MahaGame(configuration);
 
   const piece = new Bishop(
-    generatePieceLabel('black', 'B', { row: 2, col: 2 }),
-    'black'
+    'black',
+    generatePieceLabel('black', 'bB', { row: 2, col: 2 })
   );
 
   const moves = piece.evalMove(game);
@@ -69,18 +69,18 @@ describe('Eval attacks for Bishop', () => {
     const configuration: GameConfigurator<typeof mahaPieceRegistry> = {
       terrain: { width: 5 },
       pieceLayout: [
-        [0, 0, 0, 0, 'N'],
+        [0, 0, 0, 0, 'bN'],
         [0, 0, 0, 0, 0],
-        [0, 0, 'B', 0, 0],
-        [0, 'R', 0, 0, 0],
-        [0, 0, 0, 0, 'Q']
+        [0, 0, 'bB', 0, 0],
+        [0, 'wR', 0, 0, 0],
+        [0, 0, 0, 0, 'wQ']
       ]
     };
     const game = new MahaGame(configuration);
 
     const piece = new Bishop(
-      generatePieceLabel('black', 'B', { row: 2, col: 2 }),
-      'black'
+      'black',
+      generatePieceLabel('black', 'bB', { row: 2, col: 2 })
     );
 
     const attacks = piece.evalAttack(game);
@@ -109,16 +109,16 @@ describe('Eval attacks for Bishop', () => {
     const configuration: GameConfigurator<typeof mahaPieceRegistry> = {
       terrain: { width: 5 },
       pieceLayout: [
-        [0, 0, 0, 0, 'R'],
-        [0, 'R', 0, 0, 0],
-        [0, 0, 'B', 0, 0],
-        ['P', 0, 0, 0, 0],
-        [0, 0, 0, 0, 'Q']
+        [0, 0, 0, 0, 'bR'],
+        [0, 'bR', 0, 0, 0],
+        [0, 0, 'bB', 0, 0],
+        ['wP', 0, 0, 0, 0],
+        [0, 0, 0, 0, 'wQ']
       ]
     };
     const piece = new Bishop(
-      generatePieceLabel('black', 'B', { row: 2, col: 2 }),
-      'black'
+      'black',
+      generatePieceLabel('black', 'bB', { row: 2, col: 2 })
     );
 
     const turn: PartialGameTurn = [
@@ -143,7 +143,7 @@ describe('Eval attacks for Bishop', () => {
         black: []
       }
     ];
-    const history: GameHistory = [{ ...turn }];
+    const history: GameHistory = [[...turn]];
     const game = new MahaGame(configuration);
     const state = game.state;
     game.load({
@@ -161,16 +161,16 @@ describe('Eval attacks for Bishop', () => {
     const configuration: GameConfigurator<typeof mahaPieceRegistry> = {
       terrain: { width: 5 },
       pieceLayout: [
-        ['N', 0, 'K', 0, 'B'],
-        [0, 'R', 0, 0, 0],
-        [0, 0, 'B', 0, 0],
-        ['P', 0, 0, 0, 0],
-        [0, 0, 'N', 0, 'Q']
+        ['bN', 0, 'bK', 0, 'bB'],
+        [0, 'bR', 0, 0, 0],
+        [0, 0, 'bB', 0, 0],
+        ['wP', 0, 0, 0, 0],
+        [0, 0, 'wN', 0, 'wQ']
       ]
     };
     const piece = new Bishop(
-      generatePieceLabel('black', 'B', { row: 2, col: 2 }),
-      'black'
+      'black',
+      generatePieceLabel('black', 'bB', { row: 2, col: 2 })
     );
 
     const turn: PartialGameTurn = [
@@ -200,7 +200,6 @@ describe('Eval attacks for Bishop', () => {
     const state = game.state;
     game.load({
       ...state,
-      state: 'inProgress',
       history
     } as GameStateInProgress);
 

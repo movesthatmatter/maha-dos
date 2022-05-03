@@ -8,18 +8,18 @@ test('eval move', () => {
   const configuration: GameConfigurator<typeof mahaPieceRegistry> = {
     terrain: { width: 5 },
     pieceLayout: [
-      ['R', 0, 'R', 0, 0],
+      ['bR', 0, 'bR', 0, 0],
       [0, 0, 0, 0, 0],
-      [0, 0, 'Q', 'B', 0],
-      [0, 'R', 0, 0, 0],
+      [0, 0, 'bQ', 'bB', 0],
+      [0, 'wR', 0, 0, 0],
       [0, 0, 0, 0, 0]
     ]
   };
   const game = new MahaGame(configuration);
 
   const piece = new Queen(
-    generatePieceLabel('black', 'Q', { row: 2, col: 2 }),
-    'black'
+    'black',
+    generatePieceLabel('black', 'bQ', { row: 2, col: 2 })
   );
 
   const moves = piece.evalMove(game);

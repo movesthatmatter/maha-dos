@@ -11,22 +11,22 @@ describe('eval pawn moves', () => {
       pieceLayout: [
         [0, 0, 0, 0, 0],
         [0, 0, 0, 0, 0],
-        [0, 0, 'P', 'B', 0],
-        [0, 0, 0, 'P', 0],
-        [0, 0, 'Q', 0, 0]
+        [0, 0, 'bP', 'bB', 0],
+        [0, 0, 0, 'wP', 0],
+        [0, 0, 'wQ', 0, 0]
       ]
     };
     const game = new MahaGame(configuration);
 
     const pieceBlack = new Pawn(
-      generatePieceLabel('black', 'P', { row: 2, col: 2 }),
       'black',
+      generatePieceLabel('black', 'bP', { row: 2, col: 2 }),
       { pieceHasMoved: true }
     );
 
     const pieceWhite = new Pawn(
-      generatePieceLabel('white', 'P', { row: 3, col: 3 }),
       'white',
+      generatePieceLabel('white', 'wP', { row: 3, col: 3 }),
       { pieceHasMoved: true }
     );
 
@@ -52,25 +52,25 @@ describe('eval pawn moves', () => {
       terrain: { width: 5 },
       pieceLayout: [
         [0, 0, 0, 0, 0],
-        [0, 0, 0, 'Q', 0],
-        [0, 0, 'P', 0, 0],
-        [0, 0, 0, 'P', 0],
+        [0, 0, 0, 'bQ', 0],
+        [0, 0, 'bP', 0, 0],
+        [0, 0, 0, 'wP', 0],
         [0, 0, 0, 0, 0]
       ]
     };
     const game = new MahaGame(configuration);
 
     const pieceBlack = new Pawn(
-      generatePieceLabel('black', 'P', { row: 2, col: 2 }),
       'black',
+      generatePieceLabel('black', 'bP', { row: 2, col: 2 }),
       {
         pieceHasMoved: false
       }
     );
 
     const pieceWhite = new Pawn(
-      generatePieceLabel('white', 'P', { row: 3, col: 3 }),
       'white',
+      generatePieceLabel('white', 'wP', { row: 3, col: 3 }),
       {
         pieceHasMoved: false
       }
