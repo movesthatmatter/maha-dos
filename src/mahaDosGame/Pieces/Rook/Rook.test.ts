@@ -1,5 +1,4 @@
 import { MahaGame } from '../../MahaGame';
-import { Rook } from './Rook';
 import {
   Attack,
   GameConfigurator,
@@ -9,8 +8,7 @@ import {
   PartialGameTurn
 } from '../../../gameMechanics/Game/types';
 import { mahaPieceRegistry } from '../registry';
-import { generate } from 'src/mahaDosGame/helpers';
-import { generatePieceLabel } from '../../../gameMechanics/Board/util';
+import { generate } from '../../../mahaDosGame/helpers';
 
 describe('eval moves for rooks', () => {
   test('eval move', () => {

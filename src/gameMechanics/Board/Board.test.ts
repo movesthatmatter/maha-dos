@@ -1,12 +1,12 @@
-import { King } from 'src/mahaDosGame/Pieces/King';
-import { Pawn } from 'src/mahaDosGame/Pieces/Pawn';
-import { Queen } from 'src/mahaDosGame/Pieces/Queen';
-import { Rook } from 'src/mahaDosGame/Pieces/Rook';
+import { King } from '../../mahaDosGame/Pieces/King';
+import { Pawn } from '../../mahaDosGame/Pieces/Pawn';
+import { Queen } from '../../mahaDosGame/Pieces/Queen';
+import { Rook } from '../../mahaDosGame/Pieces/Rook';
 import { GameConfigurator } from '../Game/types';
 import { Piece } from '../Piece/Piece';
 import { getPieceFactory } from '../Piece/util';
 import { Terrain } from '../Terrain/Terrain';
-import { matrixForEach, matrixMap, matrixReduce } from '../util';
+import { matrixReduce } from '../util';
 import { Board } from './Board';
 import { BoardState } from './types';
 

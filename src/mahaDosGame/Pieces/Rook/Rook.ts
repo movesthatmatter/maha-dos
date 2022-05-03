@@ -8,11 +8,10 @@ import {
 } from '../../../gameMechanics/Piece/types';
 import { evalEachDirectionForMove } from '../utils';
 import { PieceLayoutState } from '../../../gameMechanics/Board/types';
-// import { AttackTargetPieceUndefined } from '../../../gameMechanics/engine';
 import { Err, Ok, Result } from 'ts-results';
-import { toDictIndexedBy } from 'src/gameMechanics/utils';
-import { AttackTargetPieceUndefined } from 'src/gameMechanics/Game/errors';
-import { range } from 'src/gameMechanics/util';
+import { toDictIndexedBy } from '../../../gameMechanics/utils';
+import { AttackTargetPieceUndefined } from '../../..//gameMechanics/Game/errors';
+import { range } from '../../../gameMechanics/util';
 
 type PieceLabel = 'Rook';
 

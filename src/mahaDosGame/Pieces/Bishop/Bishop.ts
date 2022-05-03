@@ -12,7 +12,7 @@ import { toDictIndexedBy } from '../../../gameMechanics/utils';
 import { Rook } from '../Rook';
 import { evalEachDirectionForMove } from '../utils';
 import { PieceLayoutState } from '../../../gameMechanics/Board/types';
-import { AttackTargetPieceUndefined } from 'src/gameMechanics/Game/errors';
+import { AttackTargetPieceUndefined } from '../../../gameMechanics/Game/errors';
 
 const pieceLabel = 'Bishop';
 
