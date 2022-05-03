@@ -8,10 +8,13 @@ import { TerrainProps } from '../Terrain/Terrain';
 import { Matrix } from '../util';
 import { Color, Coord } from '../util/types';
 
-export type Move = {
+export type Move = ShortMove & {
+  piece: IdentifiablePieceState<string>;
+};
+
+export type ShortMove = {
   from: Coord;
   to: Coord;
-  piece: IdentifiablePieceState<string>;
   promotion?: PieceState<string>['label'];
 };
 
@@ -50,6 +53,7 @@ export type GameHistory = GameTurn[];
 
 export type GameStatePending = {
   boardState: BoardState;
+  // TODO: This needs to change to stateStatus
   state: 'pending';
   history: [];
   winner: undefined;
@@ -59,17 +63,14 @@ export type GameWinner = Color | '1/2';
 
 export type GameStateCompleted = {
   boardState: BoardState;
+
+  // TODO: This needs to change to stateStatus
   state: 'completed';
   history: GameHistory;
   winner: GameWinner;
 };
 
-export type GameStateInProgress = {
-  boardState: BoardState;
-  state: 'inProgress';
-  history: GameHistory;
-  winner: undefined;
-} & (
+export type InProgressGameStatePhaseSlice =
   | ({
       phase: 'move';
     } & (
@@ -99,7 +100,7 @@ export type GameStateInProgress = {
           submissionStatus: 'partial';
           white: {
             canDraw: true;
-            moves: Move[];
+            moves: undefined;
           };
           black: {
             canDraw: false; // When canDraw is false it means player Submitted
@@ -114,7 +115,7 @@ export type GameStateInProgress = {
           };
           black: {
             canDraw: true;
-            moves: Move[];
+            moves: undefined;
           };
         }
     ))
@@ -165,8 +166,15 @@ export type GameStateInProgress = {
             attacks: Attack[];
           };
         }
-    ))
-);
+    ));
+
+export type GameStateInProgress = {
+  boardState: BoardState;
+  // TODO: This needs to change to stateStatus
+  state: 'inProgress';
+  history: GameHistory;
+  winner: undefined;
+} & InProgressGameStatePhaseSlice;
 
 export type GameState =
   | GameStatePending
@@ -187,7 +195,17 @@ export type GameStateInMovePhaseWithPartialSubmission = Extract<
   { submissionStatus: 'partial' }
 >;
 
-export const isGameStateInMovePhaseWithPreparingSubmission = (
+export const isGameInMovePhaseWithNoSubmission = (
+  g: GameState
+): g is GameStateInMovePhaseWithPreparingSubmission => {
+  return (
+    g.state === 'inProgress' &&
+    g.phase === 'move' &&
+    g.submissionStatus === 'none'
+  );
+};
+
+export const isGameInMovePhaseWithPreparingSubmission = (
   g: GameState
 ): g is GameStateInMovePhaseWithPreparingSubmission => {
   return (
@@ -197,7 +215,7 @@ export const isGameStateInMovePhaseWithPreparingSubmission = (
   );
 };
 
-export const isGameStateInMovePhaseWithPartialSubmission = (
+export const isGameInMovePhaseWithPartialSubmission = (
   g: GameState
 ): g is GameStateInMovePhaseWithPartialSubmission => {
   return (
@@ -207,14 +225,14 @@ export const isGameStateInMovePhaseWithPartialSubmission = (
   );
 };
 
-export const isGameStateInMovePhaseWithPartialOrPreparingSubmission = (
+export const isGameInMovePhaseWithPartialOrPreparingSubmission = (
   g: GameState
 ): g is
   | GameStateInMovePhaseWithPreparingSubmission
   | GameStateInMovePhaseWithPartialSubmission => {
   return (
-    isGameStateInMovePhaseWithPreparingSubmission(g) ||
-    isGameStateInMovePhaseWithPartialSubmission(g)
+    isGameInMovePhaseWithPreparingSubmission(g) ||
+    isGameInMovePhaseWithPartialSubmission(g)
   );
 };
 
@@ -239,3 +257,4 @@ export type GameConfigurator<PR extends PieceRegistry> = {
   terrain: TerrainProps;
   pieceLayout: Matrix<keyof PR | 0>;
 };
+

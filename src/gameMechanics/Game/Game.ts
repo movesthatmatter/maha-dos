@@ -5,20 +5,21 @@ import {
   GameConfigurator,
   GameHistory,
   GameState,
+  GameStateCompleted,
   GameStateInMovePhaseWithPreparingSubmission,
+  GameStateInProgress,
+  GameStatePending,
   GameWinner,
+  InProgressGameStatePhaseSlice,
   isGameInMovePhase,
-  isGameStateInMovePhaseWithPreparingSubmission,
-  Move
+  isGameInMovePhaseWithPreparingSubmission,
+  Move,
 } from './types';
-import {
-  AttackNotPossibleError,
-  getMoveNotPossibleError,
-  MoveNotPossibleError
-} from './errorTypes';
+import { getMoveNotPossibleError } from './errors/helpers';
 import { Board } from '../Board/Board';
 import { PieceRegistry } from '../Piece/types';
 import { coordsAreEqual } from '../util';
+import { AttackNotPossibleError, MoveNotPossibleError } from './errors';
 
 export interface IGame<PR extends PieceRegistry = PieceRegistry> {
   state: GameState;
@@ -49,8 +50,32 @@ type GameProps = {
   winner?: GameWinner;
 };
 
+export type PartialGameStatePending = Omit<GameStatePending, 'boardState'>;
+export type PartialGameStateInProgress = Omit<
+  GameStateInProgress,
+  'boardState'
+> &
+  InProgressGameStatePhaseSlice;
+export type PartialGameStateCompleted = Omit<GameStateCompleted, 'boardState'>;
+
+export type PartialState =
+  | PartialGameStatePending
+  | PartialGameStateInProgress
+  | PartialGameStateCompleted;
+
 export class Game<PR extends PieceRegistry = PieceRegistry> implements IGame {
-  state: GameState;
+  // private partialState: Pick<GameState, 'history' | 'state' | 'winner'>;
+
+  // history: GameState['history'];
+
+  // stateStatus: GameState['state'];
+
+  // winner: GameState['winner'];
+
+  // This is the state the Game class works with.
+  //  The first level of the State, not the nested ones like board, etc..
+  // As the nested ones get merged back in the state getter method
+  protected partialState: PartialState;
 
   board: Board<PR>;
 
@@ -59,17 +84,19 @@ export class Game<PR extends PieceRegistry = PieceRegistry> implements IGame {
     configurator: Pick<GameConfigurator<PR>, 'pieceLayout' | 'terrain'>,
     gameProps?: GameProps
   ) {
+    // const
+
     this.board = new Board(pieceRegistry, configurator);
-    this.state = this.getState(gameProps);
+    this.partialState = this.calcPartialState(gameProps);
   }
 
-  private getState = (gameProps?: GameProps): GameState => {
+  private calcPartialState = (gameProps?: GameProps): PartialState => {
     if (!gameProps || gameProps.history.length === 0) {
       return {
         state: 'pending',
         winner: undefined,
-        history: [],
-        boardState: this.board.state
+        history: []
+        // boardState: this.board.state
       };
     }
 
@@ -77,8 +104,8 @@ export class Game<PR extends PieceRegistry = PieceRegistry> implements IGame {
       return {
         state: 'completed',
         winner: gameProps.winner,
-        history: gameProps.history,
-        boardState: this.board.state
+        history: gameProps.history
+        // boardState: this.board.state
       };
     }
 
@@ -88,7 +115,7 @@ export class Game<PR extends PieceRegistry = PieceRegistry> implements IGame {
       state: 'inProgress',
       winner: undefined,
       history: gameProps.history,
-      boardState: this.board.state,
+      // boardState: this.board.state,
 
       phase: 'move',
       submissionStatus: 'none',
@@ -180,8 +207,12 @@ export class Game<PR extends PieceRegistry = PieceRegistry> implements IGame {
   };
 
   // Loads a new GameState and does all the needed calculations
-  load(updateState: GameState): void {
-    this.state = updateState;
+  // TODO: Rename to setState
+  load({ boardState, ...partialState }: GameState): void {
+    this.partialState = partialState;
+
+    // TODO: Ensure the board state updates all of its derivates when set
+    // this.board.setState(boardState);
   }
 
   // When a Move is Succesfully Drawn it gets appended to the nextMoves List of the "move" phase
@@ -196,10 +227,10 @@ export class Game<PR extends PieceRegistry = PieceRegistry> implements IGame {
     },
     MoveNotPossibleError
   > {
-    console.log('about to move', this.state);
+    // console.log('about to move', this.state);
 
     // Can't make a move when game is completed
-    if (this.state.state === 'completed') {
+    if (this.partialState.state === 'completed') {
       return new Err(getMoveNotPossibleError('GameIsCompleted'));
     }
 
@@ -250,7 +281,7 @@ export class Game<PR extends PieceRegistry = PieceRegistry> implements IGame {
       submissionStatus: 'preparing',
       phase: 'move',
 
-      ...(isGameStateInMovePhaseWithPreparingSubmission(this.state)
+      ...(isGameInMovePhaseWithPreparingSubmission(this.state)
         ? {
             white: this.state.white,
             black: this.state.black
@@ -276,9 +307,9 @@ export class Game<PR extends PieceRegistry = PieceRegistry> implements IGame {
     };
 
     // TODO: Update the board and all the other state derivates
-    this.state = {
+    this.partialState = {
       ...preparingState,
-      ...(isGameStateInMovePhaseWithPreparingSubmission(preparingState) && {
+      ...(isGameInMovePhaseWithPreparingSubmission(preparingState) && {
         white: {
           ...preparingState.white,
           ...(move.piece.color === 'white' && {
@@ -305,10 +336,10 @@ export class Game<PR extends PieceRegistry = PieceRegistry> implements IGame {
     return {} as Result<Attack, AttackNotPossibleError>;
   }
 
-  // get state(): GameState {
-  //   return {
-  //     ...this._state,
-  //     boardState: this.board.state
-  //   };
-  // }
+  get state(): GameState {
+    return {
+      ...this.partialState,
+      boardState: this.board.state
+    };
+  }
 }

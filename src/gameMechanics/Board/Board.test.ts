@@ -1,12 +1,246 @@
-import { Terrain } from "../Terrain/Terrain";
-import { Board } from "./Board";
+import { King } from 'src/mahaDosGame/Pieces/King';
+import { Pawn } from 'src/mahaDosGame/Pieces/Pawn';
+import { Queen } from 'src/mahaDosGame/Pieces/Queen';
+import { Rook } from 'src/mahaDosGame/Pieces/Rook';
+import { GameConfigurator } from '../Game/types';
+import { Piece } from '../Piece/Piece';
+import { getPieceFactory } from '../Piece/util';
+import { Terrain } from '../Terrain/Terrain';
+import { matrixForEach, matrixMap, matrixReduce } from '../util';
+import { Board } from './Board';
+import { BoardState } from './types';
 
-test('works', () => {
-  const actual = [
-    [],
-  ];
-  const expected = 2;
+describe('Constructor', () => {
+  const deafultTestPieceBlack = new Pawn('black', 'default_test_piece_black');
+  const deafultTestPieceWhite = new Pawn('white', 'default_test_piece_white');
 
-  // TODO: Write the actual test
-  expect(expected).toBe(actual);
+  const pieceRegistry = {
+    bP: getPieceFactory((...args) => deafultTestPieceBlack),
+    wP: getPieceFactory((...args) => deafultTestPieceWhite)
+  };
+
+  const CONFIGURATOR: GameConfigurator<typeof pieceRegistry> = {
+    terrain: { width: 4 },
+    pieceLayout: [
+      ['bP', 'bP', 'bP', 'bP'],
+      [0, 0, 0, 0],
+      [0, 0, 0, 0],
+      ['wP', 'wP', 'wP', 'wP']
+    ]
+    // TODO: add this dynamic props going to be needed
+    // pieceDynamicProps: []
+  };
+
+  test('creates a new board with the correct piece layout', () => {
+    const actual = new Board(pieceRegistry, CONFIGURATOR).state;
+    const expected = {
+      terrainState: new Terrain(CONFIGURATOR.terrain).state,
+      pieceLayoutState: [
+        [
+          deafultTestPieceBlack.state,
+          deafultTestPieceBlack.state,
+          deafultTestPieceBlack.state,
+          deafultTestPieceBlack.state
+        ],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0],
+        [
+          deafultTestPieceWhite.state,
+          deafultTestPieceWhite.state,
+          deafultTestPieceWhite.state,
+          deafultTestPieceWhite.state
+        ]
+      ]
+    };
+
+    expect(actual).toEqual(expected);
+  });
+});
+
+describe('Get Piece By Coord', () => {
+  const localPieceRegistry = {
+    bP: getPieceFactory((...args) => new Pawn('black', ...args)),
+    bQ: getPieceFactory((...args) => new Queen('black', ...args)),
+    bR: getPieceFactory((...args) => new Rook('black', ...args)),
+
+    wP: getPieceFactory((...args) => new Pawn('white', ...args)),
+    wQ: getPieceFactory((...args) => new Queen('white', ...args)),
+    wR: getPieceFactory((...args) => new Rook('white', ...args))
+  };
+
+  const board = new Board(localPieceRegistry, {
+    terrain: { width: 4 },
+    pieceLayout: [
+      ['bP', 0, 'wQ', 'wR'],
+      [0, 0, 0, 0],
+      ['wP', 0, 0, 0],
+      [0, 'bQ', 'bR', 0]
+    ]
+  });
+
+  test('finds the prssent pieces upon constructing the Board', () => {
+    const actualBlackPawn = board.getPieceByCoord({ row: 0, col: 0 })?.state;
+    const expectedBlackPawn = new Pawn('black', actualBlackPawn?.id || 'ABSENT')
+      .state;
+    expect(actualBlackPawn).toEqual(expectedBlackPawn);
+
+    const actualWhiteQueen = board.getPieceByCoord({ row: 0, col: 2 })?.state;
+    const expectedWhiteQueen = new Queen(
+      'white',
+      actualWhiteQueen?.id || 'ABSENT'
+    ).state;
+    expect(actualWhiteQueen).toEqual(expectedWhiteQueen);
+
+    const actualWhitePawn = board.getPieceByCoord({ row: 2, col: 0 })?.state;
+    const expectedWhitePawn = new Pawn('white', actualWhitePawn?.id || 'ABSENT')
+      .state;
+    expect(actualWhitePawn).toEqual(expectedWhitePawn);
+  });
+
+  test('does not find the absent pieces within the board boundaries upon constructing the Board', () => {
+    const actualAbsentPiece1 = board.getPieceByCoord({ row: 3, col: 3 })?.state;
+    const actualAbsentPiece2 = board.getPieceByCoord({ row: 3, col: 0 })?.state;
+
+    expect(actualAbsentPiece1).toEqual(undefined);
+    expect(actualAbsentPiece2).toEqual(undefined);
+  });
+
+  test('does not find the absent pieces outside the board boundaries upon constructing the Board', () => {
+    const actualCoordWithRowOutsideBoaundaries = board.getPieceByCoord({
+      row: 7,
+      col: 2
+    })?.state;
+    const actualCoordWithColOutsideBoaundaries = board.getPieceByCoord({
+      row: 1,
+      col: 30
+    })?.state;
+    const actualCoordWithRowAndColOutsideBoaundaries = board.getPieceByCoord({
+      row: 124,
+      col: 30
+    })?.state;
+
+    expect(actualCoordWithRowOutsideBoaundaries).toEqual(undefined);
+    expect(actualCoordWithColOutsideBoaundaries).toEqual(undefined);
+    expect(actualCoordWithRowAndColOutsideBoaundaries).toEqual(undefined);
+  });
+});
+
+describe('Get Piece By Id', () => {
+  test('able to get any piece present upon constructing the Board', () => {
+    const localPieceRegistry = {
+      bP: getPieceFactory((...args) => new Pawn('black', ...args)),
+      bQ: getPieceFactory((...args) => new Queen('black', ...args)),
+      bR: getPieceFactory((...args) => new Rook('black', ...args)),
+
+      wP: getPieceFactory((...args) => new Pawn('white', ...args)),
+      wQ: getPieceFactory((...args) => new Queen('white', ...args)),
+      wR: getPieceFactory((...args) => new Rook('white', ...args))
+    };
+
+    const board = new Board(localPieceRegistry, {
+      terrain: { width: 4 },
+      pieceLayout: [
+        ['bP', 0, 'wQ', 'wR'],
+        [0, 0, 0, 0],
+        ['wP', 0, 0, 0],
+        [0, 'bQ', 'bR', 0]
+      ]
+    });
+
+    // console.log(board);
+    const allPieceIds = matrixReduce(
+      board.state.pieceLayoutState,
+      (accum, p) => {
+        if (p === 0) {
+          return accum;
+        }
+
+        return [...accum, p.id];
+      },
+      [] as string[]
+    );
+
+    const actual = board.getPieceById(allPieceIds[0])?.state;
+    const expected = new Pawn('black', actual.id || 'ABSENT').state;
+
+    expect(actual).toEqual(expected);
+  });
+});
+
+describe('Update', () => {
+  const piecesByLabelSpyMap: Record<string, Piece> = {};
+
+  const localPieceRegistry = {
+    bK: getPieceFactory((...args) => {
+      const piece = new King('black', ...args);
+
+      piecesByLabelSpyMap['bK'] = piece;
+
+      return piece;
+    })
+    // bQ: getPieceFactory((...args) => new Queen('black', ...args)),
+    // bR: getPieceFactory((...args) => new Rook('black', ...args)),
+
+    // wK: getPieceFactory((...args) => new King('white', ...args)),
+    // wQ: getPieceFactory((...args) => new Queen('white', ...args)),
+    // wR: getPieceFactory((...args) => new Rook('white', ...args))
+  };
+
+  test('can set a new state after construct', () => {
+    const board = new Board(localPieceRegistry, {
+      terrain: { width: 2 },
+      pieceLayout: [
+        [0, 0],
+        ['bK', 0]
+        // ['bR', 'bK', 'bQ', 'bR'],
+        // [0, 0, 0, 0],
+        // [0, 0, 0, 0],
+        // ['wR', 'wK', 'wQ', 'wR']
+      ]
+    });
+
+    const nextPieceLayoutState: BoardState['pieceLayoutState'] = [
+      [piecesByLabelSpyMap['bK'].state, 0],
+      [0, 0]
+    ];
+
+    const moveResult = board.move({
+      from: { row: 1, col: 0 },
+      to: { row: 0, col: 0 }
+    });
+
+    expect(moveResult.ok).toBe(true);
+
+    if (!moveResult.ok) {
+      return;
+    }
+
+    const actualMove = moveResult.val;
+
+    const expectedMove = {
+      from: { row: 1, col: 0 },
+      to: { row: 0, col: 0 },
+      piece: piecesByLabelSpyMap['bK'].state
+    };
+
+    const actualState = board.state;
+    const expectedState: BoardState = {
+      terrainState: board.state.terrainState, // hasn't changed
+      pieceLayoutState: nextPieceLayoutState
+    };
+
+    expect(actualState).toEqual(expectedState);
+    expect(actualMove).toEqual(expectedMove);
+
+    const actualPieceByPrevCoord = board.getPieceByCoord({ row: 1, col: 0 });
+    const expectedPieceByPrevCoord = undefined;
+    expect(actualPieceByPrevCoord).toEqual(expectedPieceByPrevCoord);
+
+    const actualPieceByNextCoord = board.getPieceByCoord({
+      row: 0,
+      col: 0
+    })?.state;
+    const expectedPieceByNextCoord = piecesByLabelSpyMap['bK'].state;
+    expect(actualPieceByNextCoord).toEqual(expectedPieceByNextCoord);
+  });
 });
