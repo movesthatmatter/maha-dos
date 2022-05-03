@@ -76,7 +76,10 @@ export class Queen extends Piece {
       pieceCoord,
       game.board.pieceLayout
     );
-    const crit = adjecentPieces.filter((p) => p instanceof King).length > 0;
+    const crit =
+      adjecentPieces.filter(
+        (p) => p instanceof King && p.state.color === this.state.color
+      ).length > 0;
 
     if (
       history &&
@@ -123,7 +126,7 @@ export class Queen extends Piece {
                 from: pieceCoord,
                 to: target,
                 type: 'melee',
-                ...(crit && { special: 'crit' })
+                ...(crit && { crit: true })
               });
             }
           }
@@ -170,7 +173,7 @@ export class Queen extends Piece {
               from: pieceCoord,
               to: target,
               type: r === 1 ? 'melee' : 'range',
-              ...(withCrit && { special: 'crit' })
+              ...(withCrit && { crit: true })
             });
           }
           hitObstacle = true;

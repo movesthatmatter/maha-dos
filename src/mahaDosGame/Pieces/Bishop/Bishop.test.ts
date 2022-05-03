@@ -105,7 +105,7 @@ describe('Eval attacks for Bishop', () => {
         from: { row: 2, col: 2 },
         to: { row: 0, col: 4 },
         type: 'range',
-        special: 'heal'
+        heal: true
       },
       {
         from: { row: 2, col: 2 },
@@ -232,7 +232,7 @@ describe('Eval attacks for Bishop', () => {
         from: { row: 2, col: 2 },
         to: { row: 0, col: 4 },
         type: 'range',
-        special: 'heal'
+        heal: true
       },
       {
         from: { row: 2, col: 2 },
@@ -243,7 +243,7 @@ describe('Eval attacks for Bishop', () => {
         from: { row: 2, col: 2 },
         to: { row: 1, col: 1 },
         type: 'range',
-        special: 'heal'
+        heal: true
       }
     ];
 
