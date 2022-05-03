@@ -1,82 +1,504 @@
-import { MahaGame } from '../../MahaGame';
-import { GameConfigurator, Move } from '../../../gameMechanics/Game/types';
+// import { MahaGame } from '../../MahaGame';
+// import { GameConfigurator, Move } from '../../../gameMechanics/Game/types';
+// import { mahaPieceRegistry } from '../registry';
+
+// test('eval move', () => {
+//   const configuration: GameConfigurator<typeof mahaPieceRegistry> = {
+//     terrain: { width: 5 },
+//     pieceLayout: [
+//       ['bR', 0, 'bR', 0, 0],
+//       [0, 0, 0, 0, 0],
+//       [0, 0, 'bQ', 'bB', 0],
+//       [0, 'wR', 0, 0, 0],
+//       [0, 0, 0, 0, 0]
+//     ]
+//   };
+//   const game = new MahaGame(configuration);
+
+//   const piece = game.board.getPieceByCoord({ row: 2, col: 2 });
+
+//     expect(piece).toBeDefined();
+
+//     if (!piece) {
+//       return;
+//     }
+
+//   const moves = piece.evalMove(game);
+
+//   const expectedMoves: Move[] = [
+//     {
+//       from: { row: 2, col: 2 },
+//       to: { row: 1, col: 2 },
+//       piece: piece.state
+//     },
+//     {
+//       from: { row: 2, col: 2 },
+//       to: { row: 1, col: 3 },
+//       piece: piece.state
+//     },
+//     {
+//       from: { row: 2, col: 2 },
+//       to: { row: 0, col: 4 },
+//       piece: piece.state
+//     },
+//     {
+//       from: { row: 2, col: 2 },
+//       to: { row: 3, col: 3 },
+//       piece: piece.state
+//     },
+//     {
+//       from: { row: 2, col: 2 },
+//       to: { row: 4, col: 4 },
+//       piece: piece.state
+//     },
+//     {
+//       from: { row: 2, col: 2 },
+//       to: { row: 3, col: 2 },
+//       piece: piece.state
+//     },
+//     {
+//       from: { row: 2, col: 2 },
+//       to: { row: 4, col: 2 },
+//       piece: piece.state
+//     },
+//     {
+//       from: { row: 2, col: 2 },
+//       to: { row: 2, col: 1 },
+//       piece: piece.state
+//     },
+//     {
+//       from: { row: 2, col: 2 },
+//       to: { row: 2, col: 0 },
+//       piece: piece.state
+//     },
+//     {
+//       from: { row: 2, col: 2 },
+//       to: { row: 1, col: 1 },
+//       piece: piece.state
+//     }
+//   ];
+
+//   expect(moves).toEqual(expectedMoves);
+
+
+import { MahaGame } from 'src/mahaDosGame/MahaGame';
+import { Queen } from './Queen';
+import {
+  Attack,
+  GameConfigurator,
+  GameHistory,
+  GameStateInProgress,
+  Move,
+  PartialGameTurn
+} from '../../../gameMechanics/Game/types';
 import { mahaPieceRegistry } from '../registry';
+import { generatePieceLabel } from 'src/gameMechanics/Board/util';
+import { Pawn } from '../Pawn';
 
-test('eval move', () => {
-  const configuration: GameConfigurator<typeof mahaPieceRegistry> = {
-    terrain: { width: 5 },
-    pieceLayout: [
-      ['bR', 0, 'bR', 0, 0],
-      [0, 0, 0, 0, 0],
-      [0, 0, 'bQ', 'bB', 0],
-      [0, 'wR', 0, 0, 0],
-      [0, 0, 0, 0, 0]
-    ]
-  };
-  const game = new MahaGame(configuration);
+describe('eval moves for Queen', () => {
+  test('eval move', () => {
+    const configuration: GameConfigurator<typeof mahaPieceRegistry> = {
+      terrain: { width: 5 },
+      pieceLayout: [
+        ['bR', 0, 'bR', 0, 0],
+        [0, 0, 0, 0, 0],
+        [0, 0, 'bQ', 'bB', 0],
+        [0, 'wR', 0, 0, 0],
+        [0, 0, 0, 0, 0]
+      ]
+    };
+    const game = new MahaGame(configuration);
 
-  const piece = game.board.getPieceByCoord({ row: 2, col: 2 });
+    const piece = new Queen(
+      'black',
+      generatePieceLabel('black', 'bQ', { row: 2, col: 2 })
+    );
 
-    expect(piece).toBeDefined();
+    const moves = piece.evalMove(game);
 
-    if (!piece) {
-      return;
-    }
+    const expectedMoves: Move[] = [
+      {
+        from: { row: 2, col: 2 },
+        to: { row: 1, col: 2 },
+        piece: piece.state
+      },
+      {
+        from: { row: 2, col: 2 },
+        to: { row: 1, col: 3 },
+        piece: piece.state
+      },
+      {
+        from: { row: 2, col: 2 },
+        to: { row: 0, col: 4 },
+        piece: piece.state
+      },
+      {
+        from: { row: 2, col: 2 },
+        to: { row: 3, col: 3 },
+        piece: piece.state
+      },
+      {
+        from: { row: 2, col: 2 },
+        to: { row: 4, col: 4 },
+        piece: piece.state
+      },
+      {
+        from: { row: 2, col: 2 },
+        to: { row: 3, col: 2 },
+        piece: piece.state
+      },
+      {
+        from: { row: 2, col: 2 },
+        to: { row: 4, col: 2 },
+        piece: piece.state
+      },
+      {
+        from: { row: 2, col: 2 },
+        to: { row: 2, col: 1 },
+        piece: piece.state
+      },
+      {
+        from: { row: 2, col: 2 },
+        to: { row: 2, col: 0 },
+        piece: piece.state
+      },
+      {
+        from: { row: 2, col: 2 },
+        to: { row: 1, col: 1 },
+        piece: piece.state
+      }
+    ];
 
-  const moves = piece.evalMove(game);
+    expect(moves).toEqual(expectedMoves);
+  });
+});
 
-  const expectedMoves: Move[] = [
-    {
-      from: { row: 2, col: 2 },
-      to: { row: 1, col: 2 },
-      piece: piece.state
-    },
-    {
-      from: { row: 2, col: 2 },
-      to: { row: 1, col: 3 },
-      piece: piece.state
-    },
-    {
-      from: { row: 2, col: 2 },
-      to: { row: 0, col: 4 },
-      piece: piece.state
-    },
-    {
-      from: { row: 2, col: 2 },
-      to: { row: 3, col: 3 },
-      piece: piece.state
-    },
-    {
-      from: { row: 2, col: 2 },
-      to: { row: 4, col: 4 },
-      piece: piece.state
-    },
-    {
-      from: { row: 2, col: 2 },
-      to: { row: 3, col: 2 },
-      piece: piece.state
-    },
-    {
-      from: { row: 2, col: 2 },
-      to: { row: 4, col: 2 },
-      piece: piece.state
-    },
-    {
-      from: { row: 2, col: 2 },
-      to: { row: 2, col: 1 },
-      piece: piece.state
-    },
-    {
-      from: { row: 2, col: 2 },
-      to: { row: 2, col: 0 },
-      piece: piece.state
-    },
-    {
-      from: { row: 2, col: 2 },
-      to: { row: 1, col: 1 },
-      piece: piece.state
-    }
-  ];
+describe('eval attacks for Queen', () => {
+  test('testing range attacks for queen with no prior movement', () => {
+    const configuration: GameConfigurator<typeof mahaPieceRegistry> = {
+      terrain: { width: 5 },
+      pieceLayout: [
+        [0, 0, 0, 0, 'bR'],
+        [0, 0, 0, 0, 0],
+        [0, 0, 'bN', 0, 0],
+        [0, 0, 0, 0, 0],
+        ['bP', 'bP', 0, 0, 'wQ']
+      ]
+    };
+    const piece = new Queen(
+      'white',
+      generatePieceLabel('white', 'wQ', { row: 4, col: 4 })
+    );
 
-  expect(moves).toEqual(expectedMoves);
+    const game = new MahaGame(configuration);
+    const attacks = piece.evalAttack(game);
+    const expected: Attack[] = [
+      { from: { row: 4, col: 4 }, to: { row: 0, col: 4 }, type: 'range' },
+      { from: { row: 4, col: 4 }, to: { row: 4, col: 1 }, type: 'range' },
+      { from: { row: 4, col: 4 }, to: { row: 2, col: 2 }, type: 'range' }
+    ];
+
+    expect(attacks).toEqual(expected);
+  });
+
+  test('testing range and melee attacks for queen with no prior movement', () => {
+    const configuration: GameConfigurator<typeof mahaPieceRegistry> = {
+      terrain: { width: 5 },
+      pieceLayout: [
+        [0, 0, 'bP', 0, 0, 0],
+        ['bP', 0, 'wK', 0, 'bP', 0],
+        [0, 0, 0, 'bP', 0, 0],
+        ['bP', 0, 'wQ', 0, 0, 'bN'],
+        [0, 0, 0, 'wP', 0, 0],
+        [0, 0, 'bQ', 0, 0, 0]
+      ]
+    };
+    const piece = new Queen(
+      'white',
+      generatePieceLabel('white', 'wQ', { row: 3, col: 2 })
+    );
+
+    const game = new MahaGame(configuration);
+    const attacks = piece.evalAttack(game);
+    const expected: Attack[] = [
+      { from: { row: 3, col: 2 }, to: { row: 2, col: 3 }, type: 'melee' },
+      { from: { row: 3, col: 2 }, to: { row: 3, col: 5 }, type: 'range' },
+      { from: { row: 3, col: 2 }, to: { row: 5, col: 2 }, type: 'range' },
+      { from: { row: 3, col: 2 }, to: { row: 3, col: 0 }, type: 'range' },
+      { from: { row: 3, col: 2 }, to: { row: 1, col: 0 }, type: 'range' }
+    ];
+
+    expect(attacks).toEqual(expected);
+  });
+
+  test('testing range and melee attacks for queen with prior movement', () => {
+    const configuration: GameConfigurator<typeof mahaPieceRegistry> = {
+      terrain: { width: 5 },
+      pieceLayout: [
+        [0, 0, 'bP', 0, 0, 0],
+        ['bP', 0, 'wK', 0, 'bP', 0],
+        [0, 0, 0, 'bP', 0, 0],
+        [0, 'bP', 'wQ', 0, 0, 'bN'],
+        [0, 0, 0, 'wP', 0, 0],
+        [0, 0, 'bQ', 0, 0, 0]
+      ]
+    };
+    const piece = new Queen(
+      'white',
+      generatePieceLabel('white', 'wQ', { row: 3, col: 2 })
+    );
+
+    const turn: PartialGameTurn = [
+      {
+        black: [
+          {
+            from: { row: 0, col: 0 },
+            to: { row: 1, col: 0 },
+            piece: new Pawn('black', 'bP').state
+          }
+        ],
+        white: [
+          {
+            from: { row: 5, col: 0 },
+            to: { row: 3, col: 2 },
+            piece: piece.state
+          }
+        ]
+      },
+      {
+        white: [],
+        black: []
+      }
+    ];
+    const history: GameHistory = [
+      [
+        {
+          white: [] as Move[],
+          black: [] as Move[]
+        },
+        {
+          white: [] as Attack[],
+          black: [] as Attack[]
+        }
+      ],
+      [...turn]
+    ];
+
+    const game = new MahaGame(configuration);
+    const state = game.state;
+    game.load({
+      ...state,
+      history
+    } as GameStateInProgress);
+
+    const attacks = piece.evalAttack(game);
+
+    const expected: Attack[] = [
+      { from: { row: 3, col: 2 }, to: { row: 2, col: 3 }, type: 'melee' }
+    ];
+    expect(attacks).toEqual(expected);
+  });
+
+  test('testing range and melee attacks for queen with king next to it', () => {
+    const configuration: GameConfigurator<typeof mahaPieceRegistry> = {
+      terrain: { width: 5 },
+      pieceLayout: [
+        [0, 0, 'bP', 0, 0, 0],
+        ['bP', 0, 0, 0, 'bP', 0],
+        [0, 0, 'wK', 'bP', 0, 0],
+        ['bP', 0, 'wQ', 0, 'bP', 'bN'],
+        [0, 0, 0, 'wP', 0, 0],
+        ['bK', 0, 'bQ', 0, 0, 0]
+      ]
+    };
+    const piece = new Queen(
+      'white',
+      generatePieceLabel('white', 'wQ', { row: 3, col: 2 })
+    );
+
+    const game = new MahaGame(configuration);
+    const attacks = piece.evalAttack(game);
+    const expected: Attack[] = [
+      {
+        from: { row: 3, col: 2 },
+        to: { row: 2, col: 3 },
+        type: 'melee',
+        special: 'crit'
+      },
+      {
+        from: { row: 3, col: 2 },
+        to: { row: 3, col: 4 },
+        type: 'range',
+        special: 'crit'
+      },
+      {
+        from: { row: 3, col: 2 },
+        to: { row: 5, col: 2 },
+        type: 'range',
+        special: 'crit'
+      },
+      {
+        from: { row: 3, col: 2 },
+        to: { row: 5, col: 0 },
+        type: 'range',
+        special: 'crit'
+      },
+      {
+        from: { row: 3, col: 2 },
+        to: { row: 3, col: 0 },
+        type: 'range',
+        special: 'crit'
+      },
+      {
+        from: { row: 3, col: 2 },
+        to: { row: 1, col: 0 },
+        type: 'range',
+        special: 'crit'
+      }
+    ];
+    expect(attacks).toEqual(expected);
+  });
+
+  test('testing attacks with movement from diagonal and crit damage', () => {
+    const configuration: GameConfigurator<typeof mahaPieceRegistry> = {
+      terrain: { width: 5 },
+      pieceLayout: [
+        [0, 0, 'bP', 0, 0, 0],
+        ['bP', 0, 0, 0, 'bP', 0],
+        [0, 'bP', 'wK', 'bP', 0, 0],
+        [0, 'bP', 'wQ', 0, 0, 'bN'],
+        [0, 0, 0, 0, 0, 0],
+        [0, 0, 'bQ', 0, 0, 0]
+      ]
+    };
+    const piece = new Queen(
+      'white',
+      generatePieceLabel('white', 'wQ', { row: 3, col: 2 })
+    );
+
+    const turn: PartialGameTurn = [
+      {
+        black: [
+          {
+            from: { row: 0, col: 0 },
+            to: { row: 1, col: 0 },
+            piece: new Pawn('black', 'bP').state
+          }
+        ],
+        white: [
+          {
+            from: { row: 5, col: 4 },
+            to: { row: 3, col: 2 },
+            piece: piece.state
+          }
+        ]
+      },
+      {
+        white: [],
+        black: []
+      }
+    ];
+    const history: GameHistory = [
+      [
+        {
+          white: [] as Move[],
+          black: [] as Move[]
+        },
+        {
+          white: [] as Attack[],
+          black: [] as Attack[]
+        }
+      ],
+      [...turn]
+    ];
+
+    const game = new MahaGame(configuration);
+    const state = game.state;
+    game.load({
+      ...state,
+      history
+    } as GameStateInProgress);
+
+    const attacks = piece.evalAttack(game);
+
+    const expected: Attack[] = [
+      {
+        from: { row: 3, col: 2 },
+        to: { row: 2, col: 1 },
+        type: 'melee',
+        special: 'crit'
+      }
+    ];
+    expect(attacks).toEqual(expected);
+  });
+
+  test('testing with history but no queen move', () => {
+    const configuration: GameConfigurator<typeof mahaPieceRegistry> = {
+      terrain: { width: 5 },
+      pieceLayout: [
+        [0, 0, 'bP', 0, 0, 0],
+        ['bP', 0, 'wK', 0, 'bP', 0],
+        [0, 0, 0, 'bP', 0, 0],
+        ['bP', 0, 'wQ', 0, 0, 'bN'],
+        [0, 0, 0, 'wP', 0, 0],
+        [0, 0, 'bQ', 0, 0, 0]
+      ]
+    };
+    const piece = new Queen(
+      'white',
+      generatePieceLabel('white', 'wQ', { row: 3, col: 2 })
+    );
+    const turn: PartialGameTurn = [
+      {
+        black: [
+          {
+            from: { row: 5, col: 0 },
+            to: { row: 5, col: 2 },
+            piece: new Queen('black', 'bQ').state
+          }
+        ],
+        white: [
+          {
+            from: { row: 5, col: 0 },
+            to: { row: 5, col: 2 },
+            piece: new Pawn('white', 'wP').state
+          }
+        ]
+      },
+      {
+        white: [],
+        black: []
+      }
+    ];
+    const history: GameHistory = [
+      [
+        {
+          white: [] as Move[],
+          black: [] as Move[]
+        },
+        {
+          white: [] as Attack[],
+          black: [] as Attack[]
+        }
+      ],
+      [...turn]
+    ];
+
+    const game = new MahaGame(configuration);
+    const state = game.state;
+    game.load({
+      ...state,
+      history
+    } as GameStateInProgress);
+    const attacks = piece.evalAttack(game);
+    const expected: Attack[] = [
+      { from: { row: 3, col: 2 }, to: { row: 2, col: 3 }, type: 'melee' },
+      { from: { row: 3, col: 2 }, to: { row: 3, col: 5 }, type: 'range' },
+      { from: { row: 3, col: 2 }, to: { row: 5, col: 2 }, type: 'range' },
+      { from: { row: 3, col: 2 }, to: { row: 3, col: 0 }, type: 'range' },
+      { from: { row: 3, col: 2 }, to: { row: 1, col: 0 }, type: 'range' }
+    ];
+
+    expect(attacks).toEqual(expected);
+  });
 });

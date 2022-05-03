@@ -23,7 +23,7 @@ export type Attack = {
   to: Coord;
   type: 'range' | 'melee';
   //TODO - better organize the type based on other bonus attack/defense mechanism
-  special?: 'heal';
+  special?: 'heal' | 'crit';
   aoe?: Coord[];
 };
 

@@ -42,3 +42,34 @@ export function evalEachDirectionForMove(
 	});
 	return moves;
 }
+
+export function getAllAdjecentPiecesToPosition(
+	pos: Coord,
+	pieceLayout: Game['board']['pieceLayout']
+): Piece[] {
+	return [
+		{ row: -1, col: 0 },
+		{ row: -1, col: 1 },
+		{ row: 0, col: 1 },
+		{ row: 1, col: 1 },
+		{ row: 1, col: 0 },
+		{ row: 1, col: -1 },
+		{ row: 0, col: -1 },
+		{ row: -1, col: -1 }
+	].reduce((accum, dir) => {
+		const target: Coord = { row: pos.row + dir.row, col: pos.col + dir.col };
+		if (
+			target.row >= pieceLayout.length ||
+			target.col >= pieceLayout[0].length ||
+			target.row < 0 ||
+			target.col < 0
+		) {
+			return accum;
+		}
+		const targetPiece = pieceLayout[target.row][target.col];
+		if (targetPiece === 0) {
+			return accum;
+		}
+		return [...accum, targetPiece];
+	}, [] as Piece[]);
+}
