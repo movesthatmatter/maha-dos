@@ -1,7 +1,7 @@
 import { ChessTerrain, ChessTerrainProps } from '../../../ChessTerrain';
 import {
   GameState,
-  isGameStateInMovePhaseWithPreparingSubmission
+  isGameInMovePhaseWithPreparingSubmission
 } from '../../../gameMechanics/Game/types';
 
 export type MahaChessTerrainProps = Omit<
@@ -22,7 +22,7 @@ export const MahaChessTerrain: React.FC<MahaChessTerrainProps> = ({
     <ChessTerrain
       board={gameState.boardState}
       arrows={
-        isGameStateInMovePhaseWithPreparingSubmission(gameState)
+        isGameInMovePhaseWithPreparingSubmission(gameState)
           ? [...gameState.white.moves, ...gameState.black.moves]
           : undefined
       }

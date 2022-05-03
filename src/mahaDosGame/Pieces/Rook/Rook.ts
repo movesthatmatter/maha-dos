@@ -1,4 +1,4 @@
-import { Color } from '../../../gameMechanics/util/types';
+import { Color, Coord } from '../../../gameMechanics/util/types';
 import { Game } from '../../../gameMechanics/Game/Game';
 import { Attack, Move } from '../../../gameMechanics/Game/types';
 import { Piece } from '../../../gameMechanics/Piece/Piece';
@@ -8,9 +8,11 @@ import {
 } from '../../../gameMechanics/Piece/types';
 import { evalEachDirectionForMove } from '../utils';
 import { PieceLayoutState } from '../../../gameMechanics/Board/types';
-import { AttackTargetPieceUndefined } from '../../../gameMechanics/engine';
+// import { AttackTargetPieceUndefined } from '../../../gameMechanics/engine';
 import { Err, Ok, Result } from 'ts-results';
 import { toDictIndexedBy } from 'src/gameMechanics/utils';
+import { AttackTargetPieceUndefined } from 'src/gameMechanics/Game/errors';
+import { range } from 'src/gameMechanics/util';
 
 type PieceLabel = 'Rook';
 
@@ -53,14 +55,13 @@ export class Rook extends Piece<PieceLabel> {
     // the rules for the Rook algortighm
 
     // returns all the possible moves;
-
-    const pieceCoord = game.board.pieceCoordsByPieceId[this.state.id];
+    const pieceCoord = game.board.getPieceCoordById(this.state.id);
 
     return evalEachDirectionForMove(pieceCoord, this, game);
   }
 
   evalAttack(game: Game): Attack[] {
-    const pieceCoord = game.board.pieceCoordsByPieceId[this.state.id];
+    const pieceCoord = game.board.getPieceCoordById(this.state.id);
     const attacks: Attack[] = [];
     const length = game.state.history.length;
     // check if past first turn of the game. Since we are in Attack phase, there should be the move phase already implemented hence why length = 2
@@ -74,21 +75,19 @@ export class Rook extends Piece<PieceLabel> {
           col: pieceCoord.col + dir.col * r
         };
         if (
-          target.row >= game.board.pieceLayout.length ||
-          target.col >= game.board.pieceLayout[0].length ||
+          target.row >= game.board.state.pieceLayoutState.length ||
+          target.col >= game.board.state.pieceLayoutState[0].length ||
           target.row < 0 ||
           target.col < 0
         ) {
           return;
         }
 
-        const targetPiece = game.board.pieceLayout[target.row][target.col];
+        const targetPiece = game.board.getPieceByCoord(target);
+
         //special attack, can move before this
         if (r === 1) {
-          if (
-            targetPiece !== 0 &&
-            targetPiece.state.color !== this.state.color
-          ) {
+          if (targetPiece && targetPiece.state.color !== this.state.color) {
             attacks.push({
               from: pieceCoord,
               to: target,
@@ -110,10 +109,7 @@ export class Rook extends Piece<PieceLabel> {
               return attacks;
             }
           }
-          if (
-            targetPiece !== 0 &&
-            targetPiece.state.color !== this.state.color
-          ) {
+          if (targetPiece && targetPiece.state.color !== this.state.color) {
             const attack: Attack = {
               from: pieceCoord,
               to: target,
@@ -127,14 +123,14 @@ export class Rook extends Piece<PieceLabel> {
                 col: target.col + d.col
               };
               if (
-                targetSq.row < game.board.pieceLayout.length &&
-                targetSq.col < game.board.pieceLayout[0].length &&
+                targetSq.row < game.board.state.pieceLayoutState.length &&
+                targetSq.col < game.board.state.pieceLayoutState[0].length &&
                 targetSq.row >= 0 &&
                 targetSq.col >= 0
               ) {
-                const tPiece =
-                  game.board.pieceLayout[targetSq.row][targetSq.col];
-                if (tPiece !== 0 && tPiece.state.color !== this.state.color) {
+                const tPiece = game.board.getPieceByCoord(targetSq);
+
+                if (tPiece && tPiece.state.color !== this.state.color) {
                   aoe.push({ row: targetSq.row, col: targetSq.col });
                 }
               }
@@ -157,9 +153,9 @@ export class Rook extends Piece<PieceLabel> {
     game: Game,
     attack: Attack
   ): Result<PieceLayoutState, AttackTargetPieceUndefined> {
-    const targetPiece = game.board.pieceLayout[attack.to.row][attack.to.col];
+    const targetPiece = game.board.getPieceByCoord(attack.to);
     //TODO: Better typecheck. Deal with error handling
-    if (targetPiece === 0) {
+    if (targetPiece) {
       return new Err({
         type: 'TargetPieceIsUndefined',
         content: undefined

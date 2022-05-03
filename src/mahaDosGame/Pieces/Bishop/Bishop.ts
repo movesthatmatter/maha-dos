@@ -12,7 +12,7 @@ import { toDictIndexedBy } from '../../../gameMechanics/utils';
 import { Rook } from '../Rook';
 import { evalEachDirectionForMove } from '../utils';
 import { PieceLayoutState } from '../../../gameMechanics/Board/types';
-import { AttackTargetPieceUndefined } from '../../../gameMechanics/engine';
+import { AttackTargetPieceUndefined } from 'src/gameMechanics/Game/errors';
 
 const pieceLabel = 'Bishop';
 
@@ -53,13 +53,13 @@ export class Bishop extends Piece {
 
     // returns all the possible moves;
 
-    const pieceCoord = game.board.pieceCoordsByPieceId[this.state.id];
+    const pieceCoord = game.board.getPieceCoordById(this.state.id);
 
     return evalEachDirectionForMove(pieceCoord, this, game);
   }
 
   evalAttack(game: Game): Attack[] {
-    const pieceCoord = game.board.pieceCoordsByPieceId[this.state.id];
+    const pieceCoord = game.board.getPieceCoordById(this.state.id);
     const attacks: Attack[] = [];
     const length = game.state.history.length;
 
@@ -87,14 +87,15 @@ export class Bishop extends Piece {
           col: pieceCoord.col + dir.col * r
         };
         if (
-          target.row >= game.board.pieceLayout.length ||
-          target.col >= game.board.pieceLayout[0].length ||
+          target.row >= game.board.state.pieceLayoutState.length ||
+          target.col >= game.board.state.pieceLayoutState[0].length ||
           target.row < 0 ||
           target.col < 0
         ) {
           return;
         }
-        const targetPiece = game.board.pieceLayout[target.row][target.col];
+        const targetPiece = game.board.getPieceByCoord(target); //.state.pieceLayoutState[target.row][target.col];
+
         if (r === 1) {
           if (targetPiece instanceof Rook) {
             attacks.push({
@@ -109,7 +110,7 @@ export class Bishop extends Piece {
             return;
           }
         } else {
-          if (targetPiece !== 0) {
+          if (targetPiece) {
             attacks.push({
               from: pieceCoord,
               to: target,
@@ -133,9 +134,10 @@ export class Bishop extends Piece {
     game: Game,
     attack: Attack
   ): Result<PieceLayoutState, AttackTargetPieceUndefined> {
-    const targetPiece = game.board.pieceLayout[attack.to.row][attack.to.col];
+    const targetPiece = game.board.getPieceByCoord(attack.to);
+
     //TODO: Better typecheck. Deal with error handling
-    if (targetPiece === 0) {
+    if (targetPiece) {
       return new Err({
         type: 'TargetPieceIsUndefined',
         content: undefined

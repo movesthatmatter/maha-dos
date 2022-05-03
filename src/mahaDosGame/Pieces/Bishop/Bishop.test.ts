@@ -25,10 +25,13 @@ test('eval moves', () => {
   };
   const game = new MahaGame(configuration);
 
-  const piece = new Bishop(
-    'black',
-    generatePieceLabel('black', 'bB', { row: 2, col: 2 })
-  );
+  const piece = game.board.getPieceByCoord({ row: 2, col: 2 });
+
+  expect(piece).toBeDefined();
+
+  if (!piece) {
+    return;
+  }
 
   const moves = piece.evalMove(game);
 
@@ -77,10 +80,18 @@ describe('Eval attacks for Bishop', () => {
     };
     const game = new MahaGame(configuration);
 
-    const piece = new Bishop(
-      'black',
-      generatePieceLabel('black', 'bB', { row: 2, col: 2 })
-    );
+    // const piece = new Bishop(
+    //   'black',
+    //   generatePieceLabel('black', 'bB', { row: 2, col: 2 })
+    // );
+
+    const piece = game.board.getPieceByCoord({ row: 2, col: 2 });
+
+    expect(piece).toBeDefined();
+
+    if (!piece) {
+      return;
+    }
 
     const attacks = piece.evalAttack(game);
 
@@ -102,6 +113,8 @@ describe('Eval attacks for Bishop', () => {
         type: 'range'
       }
     ];
+
+    expect(attacks).toBe(expected);
   });
 
   test('Attacks with previous move - cannot attack', () => {
@@ -167,10 +180,6 @@ describe('Eval attacks for Bishop', () => {
         [0, 0, 'wN', 0, 'wQ']
       ]
     };
-    const piece = new Bishop(
-      'black',
-      generatePieceLabel('black', 'bB', { row: 2, col: 2 })
-    );
 
     const turn: PartialGameTurn = [
       {
@@ -197,10 +206,24 @@ describe('Eval attacks for Bishop', () => {
     const history: GameHistory = [{ ...turn }];
     const game = new MahaGame(configuration);
     const state = game.state;
+
     game.load({
       ...state,
       history
     } as GameStateInProgress);
+
+    // const piece = new Bishop(
+    //   'black',
+    //   generatePieceLabel('black', 'bB', { row: 2, col: 2 })
+    // );
+
+    const piece = game.board.getPieceByCoord({ row: 2, col: 2 });
+
+    expect(piece).toBeDefined();
+
+    if (!piece) {
+      return;
+    }
 
     const attacks = piece.evalAttack(game);
 

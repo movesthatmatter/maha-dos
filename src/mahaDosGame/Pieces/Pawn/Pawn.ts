@@ -9,7 +9,7 @@ import {
 import { evalEachDirectionForMove } from '../utils';
 import { Err, Ok, Result } from 'ts-results';
 import { PieceLayoutState } from '../../../gameMechanics/Board/types';
-import { AttackTargetPieceUndefined } from '../../../gameMechanics/engine';
+import { AttackTargetPieceUndefined } from '../../../gameMechanics/Game/errors';
 
 const pieceLabel = 'Pawn';
 
@@ -60,13 +60,13 @@ export class Pawn extends Piece {
 
     // returns all the possible moves;
 
-    const pieceCoord = game.board.pieceCoordsByPieceId[this.state.id];
+    const pieceCoord = game.board.getPieceCoordById(this.state.id);
 
     return evalEachDirectionForMove(pieceCoord, this, game);
   }
 
   evalAttack(game: Game): Attack[] {
-    const pieceCoord = game.board.pieceCoordsByPieceId[this.state.id];
+    const pieceCoord = game.board.getPieceCoordById(this.state.id);
     //take into account the attack direction!!
     return [];
   }
@@ -75,9 +75,9 @@ export class Pawn extends Piece {
     game: Game,
     attack: Attack
   ): Result<PieceLayoutState, AttackTargetPieceUndefined> {
-    const targetPiece = game.board.pieceLayout[attack.to.row][attack.to.col];
+    const targetPiece = game.board.getPieceByCoord(attack.to);
     //TODO: Better typecheck. Deal with error handling
-    if (targetPiece === 0) {
+    if (targetPiece) {
       return new Err({
         type: 'TargetPieceIsUndefined',
         content: undefined

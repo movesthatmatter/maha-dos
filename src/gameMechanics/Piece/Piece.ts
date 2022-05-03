@@ -1,6 +1,6 @@
 import { Result } from 'ts-results';
-import { AttackTargetPieceUndefined } from '../engine';
 import { PieceLayoutState } from '../Board/types';
+import { AttackTargetPieceUndefined } from '../Game/errors';
 import { Game } from '../Game/Game';
 import { Attack, Move } from '../Game/types';
 import { IdentifiablePieceState, PieceState } from './types';

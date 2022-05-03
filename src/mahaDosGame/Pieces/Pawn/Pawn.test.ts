@@ -18,17 +18,15 @@ describe('eval pawn moves', () => {
     };
     const game = new MahaGame(configuration);
 
-    const pieceBlack = new Pawn(
-      'black',
-      generatePieceLabel('black', 'bP', { row: 2, col: 2 }),
-      { pieceHasMoved: true }
-    );
+    const pieceBlack = game.board.getPieceByCoord({ row: 2, col: 2 });
+    const pieceWhite = game.board.getPieceByCoord({ row: 3, col: 3 });
 
-    const pieceWhite = new Pawn(
-      'white',
-      generatePieceLabel('white', 'wP', { row: 3, col: 3 }),
-      { pieceHasMoved: true }
-    );
+    expect(pieceBlack).toBeDefined();
+    expect(pieceWhite).toBeDefined();
+
+    if (!(pieceWhite && pieceBlack)) {
+      return;
+    }
 
     const movesBlack = pieceBlack.evalMove(game);
     const movesWhite = pieceWhite.evalMove(game);
@@ -60,21 +58,15 @@ describe('eval pawn moves', () => {
     };
     const game = new MahaGame(configuration);
 
-    const pieceBlack = new Pawn(
-      'black',
-      generatePieceLabel('black', 'bP', { row: 2, col: 2 }),
-      {
-        pieceHasMoved: false
-      }
-    );
+    const pieceBlack = game.board.getPieceByCoord({ row: 2, col: 2 });
+    const pieceWhite = game.board.getPieceByCoord({ row: 3, col: 3 });
 
-    const pieceWhite = new Pawn(
-      'white',
-      generatePieceLabel('white', 'wP', { row: 3, col: 3 }),
-      {
-        pieceHasMoved: false
-      }
-    );
+    expect(pieceBlack).toBeDefined();
+    expect(pieceWhite).toBeDefined();
+
+    if (!(pieceWhite && pieceBlack)) {
+      return;
+    }
 
     const movesBlack = pieceBlack.evalMove(game);
     const movesWhite = pieceWhite.evalMove(game);

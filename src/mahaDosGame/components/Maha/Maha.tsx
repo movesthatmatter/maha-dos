@@ -1,12 +1,26 @@
 import React, { CSSProperties, useEffect, useRef, useState } from 'react';
-import { GameState, Move } from '../../../gameMechanics/Game/types';
-import { Coord, noop } from '../../../gameMechanics/util';
+import {
+  GameState,
+  GameStateInAttackPhaseWithPreparingSubmission,
+  GameStateInMovePhaseWithPreparingSubmission,
+  isGameInMovePhaseWithPreparingSubmission,
+  Move
+} from '../../../gameMechanics/Game/types';
+import { Color, Coord, noop } from '../../../gameMechanics/util';
 import { MahaGame } from '../../..//mahaDosGame/MahaGame';
 import { MahaChessTerrain, MahaChessTerrainProps } from '../MahaTerrain';
+import { Button } from '../Button';
 
-type Props = {
+export type MahaProps = {
+  onSubmitMoves: (
+    gameState: GameStateInMovePhaseWithPreparingSubmission
+  ) => void;
+  onSubmitAttacks: (
+    gameState: GameStateInAttackPhaseWithPreparingSubmission
+  ) => void;
+  canInteract?: boolean;
+  playingColor: Color;
   gameState?: GameState;
-  onSubmit: () => void;
   onPieceTouched?: MahaChessTerrainProps['onPieceTouched'];
   onMoveDrawn?: (p: { move: Move; gameState: GameState }) => void;
 };
@@ -26,9 +40,12 @@ const destinationSquareStyle: CSSProperties = {
   borderRadius: '8px'
 };
 
-export const Maha: React.FC<Props> = ({
+export const Maha: React.FC<MahaProps> = ({
   gameState,
-  onSubmit,
+  playingColor,
+  onSubmitMoves,
+  onSubmitAttacks,
+  canInteract = false,
   onPieceTouched = noop,
   onMoveDrawn = noop
 }) => {
@@ -43,49 +60,80 @@ export const Maha: React.FC<Props> = ({
   }, [gameState]);
 
   return (
-    <MahaChessTerrain
-      sizePx={500}
-      gameState={state}
-      styledCoords={destinationSquares?.map((dest) => ({
-        ...dest,
-        style: destinationSquareStyle
-      }))}
-      // onPieceTouched={onPieceTouched}
-      onPieceTouched={(pieceState, coord) => {
-        const piece = gameRef.current.board.getPieceById(pieceState.id);
+    <>
+      <MahaChessTerrain
+        sizePx={500}
+        gameState={state}
+        styledCoords={destinationSquares?.map((dest) => ({
+          ...dest,
+          style: destinationSquareStyle
+        }))}
+        // onPieceTouched={onPieceTouched}
 
-        const dests = piece?.evalMove(gameRef.current);
+        onPieceTouched={(pieceState, coord) => {
+          if (!canInteract) {
+            return;
+          }
 
-        if (dests) {
-          setDestinationSquares(dests.map((d) => d.to));
-        }
+          if (playingColor !== pieceState.color) {
+            return;
+          }
 
-        console.log('dests', piece, dests);
+          const piece = gameRef.current.board.getPieceById(pieceState.id);
 
-        onPieceTouched(pieceState, coord);
-      }}
-      onPieceDestinationSet={(move) => {
-        gameRef.current
-          .drawMove(move.from, move.to)
-          .mapErr((e) => {
-            console.log('error move', e);
-          })
-          .map((next) => {
-            onMoveDrawn(next);
-            setState(next.gameState);
+          const dests = piece?.evalMove(gameRef.current);
 
-            console.log('moved successfully', next);
-          });
-      }}
-      // onUpdated={(next: GameState) => {
-      //   if (isGameStateInMovePhaseWithPartialOrPreparingSubmission(next)) {
-      //     setMovesbyColor(() => ({
-      //       white: next.white.moves,
-      //       black: next.black.moves
-      //     }));
-      //     DEFA;
-      //   }
-      // }}
-    />
+          if (dests) {
+            setDestinationSquares(dests.map((d) => d.to));
+          }
+
+          // console.log('dests', piece, dests);
+
+          onPieceTouched(pieceState, coord);
+        }}
+        onPieceDestinationSet={(move) => {
+          if (!canInteract) {
+            return;
+          }
+
+          if (playingColor !== move.piece.color) {
+            return;
+          }
+
+          gameRef.current
+            .drawMove(move.from, move.to)
+            .mapErr((e) => {
+              console.log('error move', e);
+            })
+            .map((next) => {
+              onMoveDrawn(next);
+              setState(next.gameState);
+
+              console.log('moved successfully', next);
+            });
+        }}
+        // onUpdated={(next: GameState) => {
+        //   if (isGameStateInMovePhaseWithPartialOrPreparingSubmission(next)) {
+        //     setMovesbyColor(() => ({
+        //       white: next.white.moves,
+        //       black: next.black.moves
+        //     }));
+        //     DEFA;
+        //   }
+        // }}
+      />
+      {isGameInMovePhaseWithPreparingSubmission(state) && (
+        <>
+          <br />
+          <Button
+            primary
+            label={`Submit`}
+            onClick={() => {
+              onSubmitMoves(state);
+            }}
+          />
+        </>
+      )}
+    </>
   );
 };

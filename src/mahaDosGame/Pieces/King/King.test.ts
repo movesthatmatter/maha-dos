@@ -1,8 +1,6 @@
 import { MahaGame } from '../../MahaGame';
-import { King } from './King';
 import { GameConfigurator, Move } from '../../../gameMechanics/Game/types';
 import { mahaPieceRegistry } from '../registry';
-import { generatePieceLabel } from '../../../gameMechanics/Board/util';
 
 test('eval move', () => {
   const configuration: GameConfigurator<typeof mahaPieceRegistry> = {
@@ -17,10 +15,13 @@ test('eval move', () => {
   };
   const game = new MahaGame(configuration);
 
-  const piece = new King(
-    'black',
-    generatePieceLabel('black', 'bK', { row: 2, col: 2 })
-  );
+  const piece = game.board.getPieceByCoord({ row: 2, col: 2 });
+
+  expect(piece).toBeDefined();
+
+  if (!piece) {
+    return;
+  }
 
   const moves = piece.evalMove(game);
 

@@ -38,7 +38,7 @@ export type PieceDynamicProps = {
 export type PieceState<L extends string = string> = PieceStaticProps<L> &
   PieceDynamicProps;
 
-export type IdentifiablePieceState<L extends string> = {
+export type IdentifiablePieceState<L extends string = string> = {
   id: string; // color-pieceName-uniqueNumber
 } & PieceState<L>;
 

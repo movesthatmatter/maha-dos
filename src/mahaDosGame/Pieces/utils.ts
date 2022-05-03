@@ -20,14 +20,14 @@ export function evalEachDirectionForMove(
 				col: from.col + dir.col * r
 			};
 			if (
-				targetSq.row >= game.board.pieceLayout.length ||
-				targetSq.col >= game.board.pieceLayout[0].length ||
+				targetSq.row >= game.board.state.pieceLayoutState.length ||
+				targetSq.col >= game.board.state.pieceLayoutState[0].length ||
 				targetSq.row < 0 ||
 				targetSq.col < 0
 			) {
 				return;
 			}
-			if (game.board.pieceLayout[targetSq.row][targetSq.col] === 0) {
+			if (game.board.state.pieceLayoutState[targetSq.row][targetSq.col] === 0) {
 				const move: Move = {
 					from,
 					to: targetSq,
