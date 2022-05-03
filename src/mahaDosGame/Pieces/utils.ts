@@ -3,6 +3,7 @@ import { Move } from 'src/gameMechanics/Game/types';
 import { Piece } from 'src/gameMechanics/Piece/Piece';
 import { TerrainProps } from 'src/gameMechanics/Terrain/Terrain';
 import { Coord, MoveDirection, range } from 'src/gameMechanics/util';
+import { toDictIndexedBy } from 'src/gameMechanics/utils';
 
 export function evalEachDirectionForMove(
 	from: Coord,
@@ -73,4 +74,25 @@ export function getAllAdjecentPiecesToPosition(
 		}
 		return [...accum, targetPiece];
 	}, [] as Piece[]);
+}
+
+export function getPieceMoveThisTurn(
+	piece: Piece,
+	game: Game
+): Move | undefined {
+	const { history } = game.state;
+	if (
+		history &&
+		history.length > 0 &&
+		typeof history[history.length - 1][0][piece.state.color] !== 'undefined'
+	) {
+		const movesByPieceId = toDictIndexedBy(
+			history[history.length - 1][0][piece.state.color] as Move[],
+			(move) => move.piece.id
+		);
+		if (piece.state.id in movesByPieceId) {
+			return movesByPieceId[piece.state.id];
+		}
+	}
+	return undefined;
 }

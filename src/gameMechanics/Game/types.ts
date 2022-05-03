@@ -20,7 +20,12 @@ export type Attack = {
   to: Coord;
   type: 'range' | 'melee';
   //TODO - better organize the type based on other bonus attack/defense mechanism
-  special?: 'heal' | 'crit';
+  heal?: boolean;
+  crit?: boolean;
+  attackBonus?: boolean;
+  defenseBonus?: boolean;
+  defensePenalty?: boolean;
+  movementAttackBonus?: boolean;
   aoe?: Coord[];
 };
 

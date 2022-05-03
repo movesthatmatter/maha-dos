@@ -102,7 +102,7 @@ export class Bishop extends Piece {
               to: target,
               type: 'range',
               ...(targetPiece.state.color === this.state.color && {
-                special: 'heal'
+                heal: true
               })
             });
             hitObstacle = true;
@@ -116,7 +116,7 @@ export class Bishop extends Piece {
               type: 'range',
               ...(r < 4 &&
                 targetPiece.state.color === this.state.color && {
-                  special: 'heal'
+                  heal: true
                 })
             });
             hitObstacle = true;
