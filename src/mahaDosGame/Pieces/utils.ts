@@ -1,9 +1,9 @@
-import { Game } from 'src/gameMechanics/Game/Game';
-import { Move } from 'src/gameMechanics/Game/types';
-import { Piece } from 'src/gameMechanics/Piece/Piece';
-import { IdentifiablePieceState } from 'src/gameMechanics/Piece/types';
-import { Coord, range } from 'src/gameMechanics/util';
-import { toDictIndexedBy } from 'src/gameMechanics/utils';
+import { Game } from '../../gameMechanics/Game/Game';
+import { Move } from '../../gameMechanics/Game/types';
+import { Piece } from '../../gameMechanics/Piece/Piece';
+import { IdentifiablePieceState } from '../../gameMechanics/Piece/types';
+import { Coord, range } from '../../gameMechanics/util';
+import { toDictIndexedBy } from '../../gameMechanics/utils';
 
 export function evalEachDirectionForMove(
   from: Coord,

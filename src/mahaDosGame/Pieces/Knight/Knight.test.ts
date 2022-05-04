@@ -1,14 +1,12 @@
-import { MahaGame } from 'src/mahaDosGame/MahaGame';
-import { Knight } from './Knight';
+import { MahaGame } from '../../../mahaDosGame/MahaGame';
 import {
   Attack,
   GameConfigurator,
   GameHistory,
   GameStateInProgress,
   Move
-} from 'src/gameMechanics/Game/types';
+} from '../../../gameMechanics/Game/types';
 import { mahaPieceRegistry } from '../registry';
-import { generatePieceLabel } from 'src/gameMechanics/Board/util';
 import { Pawn } from '../Pawn';
 
 describe('eval moves for Knight', () => {

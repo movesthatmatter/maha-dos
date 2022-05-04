@@ -6,21 +6,16 @@ import {
   IdentifiablePieceState,
   PieceDynamicProps
 } from '../../../gameMechanics/Piece/types';
-// import { evalEachDirectionForMove } from '../utils';
-// import { PieceLayoutState } from '../../../gameMechanics/Board/types';
-// import { AttackTargetPieceUndefined } from '../../../gameMechanics/Game/errors';
-// } from 'src/gameMechanics/Piece/types';
-import { range, Coord } from 'src/gameMechanics/util';
+import { Coord } from '../../../gameMechanics/util';
 import {
   evalEachDirectionForMove,
   getAllAdjecentPiecesToPosition,
   getPieceMoveThisTurn
 } from '../utils';
-import { PieceLayoutState } from 'src/gameMechanics/Board/types';
-// import { AttackTargetPieceUndefined } from 'src/gameMechanics/engine';
+import { PieceLayoutState } from '../../../gameMechanics/Board/types';
 import { Err, Ok, Result } from 'ts-results';
 import { Queen } from '../Queen';
-import { AttackTargetPieceUndefined } from 'src/gameMechanics/Game/errors';
+import { AttackTargetPieceUndefined } from '../../../gameMechanics/Game/errors';
 
 const pieceLabel = 'Knight';
 

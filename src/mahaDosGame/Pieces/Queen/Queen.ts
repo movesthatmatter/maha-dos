@@ -5,17 +5,17 @@ import { Piece } from '../../../gameMechanics/Piece/Piece';
 import {
   IdentifiablePieceState,
   PieceDynamicProps
-} from 'src/gameMechanics/Piece/types';
-import { range, Coord } from 'src/gameMechanics/util';
+} from '../../../gameMechanics/Piece/types';
+import { range, Coord } from '../../../gameMechanics/util';
 import {
   evalEachDirectionForMove,
   getAllAdjecentPiecesToPosition
 } from '../utils';
 import { Err, Ok, Result } from 'ts-results';
-import { PieceLayoutState } from 'src/gameMechanics/Board/types';
-import { toDictIndexedBy } from 'src/gameMechanics/utils';
+import { PieceLayoutState } from '../../../gameMechanics/Board/types';
+import { toDictIndexedBy } from '../../../gameMechanics/utils';
 import { King } from '../King';
-import { AttackTargetPieceUndefined } from 'src/gameMechanics/Game/errors';
+import { AttackTargetPieceUndefined } from '../../../gameMechanics/Game/errors';
 
 const pieceLabel = 'Queen';
 
