@@ -80,8 +80,8 @@ export class Board<PR extends PieceRegistry> implements IBoard {
       },
       {
         layoutMatrix: matrixCreate(
+          props.terrain.height || props.terrain.width,
           props.terrain.width,
-          props.terrain.height,
           0
         ),
         pieceById: {}

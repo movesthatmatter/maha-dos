@@ -124,7 +124,7 @@ describe('eval attacks for Queen', () => {
 
   test('testing range and melee attacks for queen with no prior movement', () => {
     const configuration: GameConfigurator<typeof mahaPieceRegistry> = {
-      terrain: { width: 5 },
+      terrain: { width: 6 },
       pieceLayout: [
         [0, 0, 'bP', 0, 0, 0],
         ['bP', 0, 'wK', 0, 'bP', 0],
@@ -152,13 +152,12 @@ describe('eval attacks for Queen', () => {
       { from: { row: 3, col: 2 }, to: { row: 3, col: 0 }, type: 'range' },
       { from: { row: 3, col: 2 }, to: { row: 1, col: 0 }, type: 'range' }
     ];
-
     expect(attacks).toEqual(expected);
   });
 
   test('testing range and melee attacks for queen with prior movement', () => {
     const configuration: GameConfigurator<typeof mahaPieceRegistry> = {
-      terrain: { width: 5 },
+      terrain: { width: 6 },
       pieceLayout: [
         [0, 0, 'bP', 0, 0, 0],
         ['bP', 0, 'wK', 0, 'bP', 0],
@@ -168,10 +167,14 @@ describe('eval attacks for Queen', () => {
         [0, 0, 'bQ', 0, 0, 0]
       ]
     };
-    const piece = new Queen(
-      'white',
-      generatePieceLabel('white', 'wQ', { row: 3, col: 2 })
-    );
+    const game = new MahaGame(configuration);
+
+    const piece = game.board.getPieceByCoord({ row: 3, col: 2 });
+
+    expect(piece).toBeDefined();
+    if (!piece) {
+      return;
+    }
 
     const turn: PartialGameTurn = [
       {
@@ -209,7 +212,6 @@ describe('eval attacks for Queen', () => {
       [...turn]
     ];
 
-    const game = new MahaGame(configuration);
     const state = game.state;
     game.load({
       ...state,
@@ -226,7 +228,7 @@ describe('eval attacks for Queen', () => {
 
   test('testing range and melee attacks for queen with king next to it', () => {
     const configuration: GameConfigurator<typeof mahaPieceRegistry> = {
-      terrain: { width: 5 },
+      terrain: { width: 6 },
       pieceLayout: [
         [0, 0, 'bP', 0, 0, 0],
         ['bP', 0, 0, 0, 'bP', 0],
@@ -289,7 +291,7 @@ describe('eval attacks for Queen', () => {
 
   test('testing attacks with movement from diagonal and crit damage', () => {
     const configuration: GameConfigurator<typeof mahaPieceRegistry> = {
-      terrain: { width: 5 },
+      terrain: { width: 6 },
       pieceLayout: [
         [0, 0, 'bP', 0, 0, 0],
         ['bP', 0, 0, 0, 'bP', 0],
@@ -365,7 +367,7 @@ describe('eval attacks for Queen', () => {
 
   test('testing with different color king, no crit', () => {
     const configuration: GameConfigurator<typeof mahaPieceRegistry> = {
-      terrain: { width: 5 },
+      terrain: { width: 6 },
       pieceLayout: [
         [0, 0, 'bP', 0, 0, 0],
         ['bP', 0, 0, 0, 'bP', 0],
@@ -439,7 +441,7 @@ describe('eval attacks for Queen', () => {
 
   test('testing with history but no queen move', () => {
     const configuration: GameConfigurator<typeof mahaPieceRegistry> = {
-      terrain: { width: 5 },
+      terrain: { width: 6 },
       pieceLayout: [
         [0, 0, 'bP', 0, 0, 0],
         ['bP', 0, 'wK', 0, 'bP', 0],

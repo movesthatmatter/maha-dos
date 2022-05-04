@@ -256,7 +256,7 @@ describe('eval attacks for knight', () => {
 
   test('test attacks for knight with opposing queen next to it', () => {
     const configuration: GameConfigurator<typeof mahaPieceRegistry> = {
-      terrain: { width: 7, height: 6 },
+      terrain: { height: 7, width: 6 },
       pieceLayout: [
         [0, 0, 0, 0, 0, 0, 0],
         [0, 0, 'wQ', 'bN', 0, 0, 0],

@@ -109,7 +109,7 @@ export class Bishop extends Piece {
         const targetPiece = game.board.getPieceByCoord(target); //.state.pieceLayoutState[target.row][target.col];
 
         if (r === 1) {
-          if (targetPiece instanceof Rook) {
+          if (targetPiece?.state.label === 'Rook') {
             attacks.push({
               from: pieceCoord,
               to: target,

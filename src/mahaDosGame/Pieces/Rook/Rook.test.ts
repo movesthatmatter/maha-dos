@@ -165,10 +165,6 @@ describe('eval attacks for Rooks', () => {
       ]
     };
 
-    // const piece = new Rook(
-    //   'black',
-    //   generatePieceLabel('black', 'bR', { row: 2, col: 2 })
-    // );
     const turn: PartialGameTurn = [
       {
         black: [
@@ -260,10 +256,6 @@ describe('eval attacks for Rooks', () => {
       ]
     };
 
-    // const piece = new Rook(
-    //   'black',
-    //   generatePieceLabel('black', 'bR', { row: 1, col: 0 })
-    // );
     const turn: PartialGameTurn = [
       {
         black: [
@@ -375,23 +367,6 @@ describe('eval attacks for Rooks', () => {
         [0, 0, 0, 'wQ', 0, 0]
       ]
     };
-
-    // const rook1 = new Rook(
-    //   'black',
-    //   generatePieceLabel('black', 'bR', { row: 4, col: 1 })
-    // );
-    // const rook2 = new Rook(
-    //   'black',
-    //   generatePieceLabel('black', 'bR', { row: 4, col: 3 })
-    // );
-    // const rook3 = new Rook(
-    //   'black',
-    //   generatePieceLabel('black', 'bR', { row: 5, col: 4 })
-    // );
-    // const rook4 = new Rook(
-    //   'white',
-    //   generatePieceLabel('white', 'wR', { row: 1, col: 3 })
-    // );
 
     const turn: PartialGameTurn = [
       {
