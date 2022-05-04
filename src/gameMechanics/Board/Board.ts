@@ -161,7 +161,7 @@ export class Board<PR extends PieceRegistry> implements IBoard {
     return this.piecesState.pieceById[pieceId]?.piece;
   }
 
-  getPieceCoordById(pieceId: string) {
+  getPieceCoordById(pieceId: string): Coord | undefined {
     return this.piecesState.pieceById[pieceId]?.coord;
   }
 

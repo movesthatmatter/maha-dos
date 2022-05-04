@@ -59,6 +59,10 @@ export class King extends Piece {
 
     const pieceCoord = game.board.getPieceCoordById(this.state.id);
 
+    if (!pieceCoord) {
+      return [];
+    }
+
     return evalEachDirectionForMove(pieceCoord, this, game);
   }
 

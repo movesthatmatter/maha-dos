@@ -80,11 +80,6 @@ describe('Eval attacks for Bishop', () => {
     };
     const game = new MahaGame(configuration);
 
-    // const piece = new Bishop(
-    //   'black',
-    //   generatePieceLabel('black', 'bB', { row: 2, col: 2 })
-    // );
-
     const piece = game.board.getPieceByCoord({ row: 2, col: 2 });
 
     expect(piece).toBeDefined();

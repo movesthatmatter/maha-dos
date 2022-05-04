@@ -56,17 +56,28 @@ export class Rook extends Piece<PieceLabel> {
     // returns all the possible moves;
     const pieceCoord = game.board.getPieceCoordById(this.state.id);
 
+    if (!pieceCoord) {
+      return [];
+    }
+
     return evalEachDirectionForMove(pieceCoord, this, game);
   }
 
   evalAttack(game: Game): Attack[] {
     const pieceCoord = game.board.getPieceCoordById(this.state.id);
+
+    if (!pieceCoord) {
+      return [];
+    }
+
     const attacks: Attack[] = [];
     const length = game.state.history.length;
+
     // check if past first turn of the game. Since we are in Attack phase, there should be the move phase already implemented hence why length = 2
     if (length < 2) {
       return attacks;
     }
+
     this.state.movesDirections.map((dir) => {
       range(this.state.attackRange, 1).map((r) => {
         const target: Coord = {

@@ -7,7 +7,7 @@ import {
   IdentifiablePieceState,
   PieceDynamicProps
 } from '../../../gameMechanics/Piece/types';
-import { range, Coord } from '../../../gameMechanics/util';
+import { range, Coord, matrixGet } from '../../../gameMechanics/util';
 import { toDictIndexedBy } from '../../../gameMechanics/utils';
 import { Rook } from '../Rook';
 import { evalEachDirectionForMove } from '../utils';
@@ -55,11 +55,20 @@ export class Bishop extends Piece {
 
     const pieceCoord = game.board.getPieceCoordById(this.state.id);
 
+    if (!pieceCoord) {
+      return [];
+    }
+
     return evalEachDirectionForMove(pieceCoord, this, game);
   }
 
   evalAttack(game: Game): Attack[] {
     const pieceCoord = game.board.getPieceCoordById(this.state.id);
+
+    if (!pieceCoord) {
+      return [];
+    }
+
     const attacks: Attack[] = [];
     const length = game.state.history.length;
 
@@ -76,6 +85,7 @@ export class Bishop extends Piece {
         return attacks;
       }
     }
+
     this.state.movesDirections.map((dir) => {
       let hitObstacle = false;
       range(this.state.attackRange, 1).map((r) => {
@@ -86,6 +96,7 @@ export class Bishop extends Piece {
           row: pieceCoord.row + dir.row * r,
           col: pieceCoord.col + dir.col * r
         };
+
         if (
           target.row >= game.board.state.pieceLayoutState.length ||
           target.col >= game.board.state.pieceLayoutState[0].length ||
@@ -94,6 +105,7 @@ export class Bishop extends Piece {
         ) {
           return;
         }
+
         const targetPiece = game.board.getPieceByCoord(target); //.state.pieceLayoutState[target.row][target.col];
 
         if (r === 1) {

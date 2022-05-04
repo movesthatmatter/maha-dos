@@ -25,10 +25,12 @@ describe('eval moves for Knight', () => {
     };
     const game = new MahaGame(configuration);
 
-    const piece = new Knight(
-      'white',
-      generatePieceLabel('white', 'wN', { row: 4, col: 2 })
-    );
+    const piece = game.board.getPieceByCoord({ row: 4, col: 2 });
+    expect(piece).toBeDefined();
+
+    if (!piece) {
+      return;
+    }
 
     const moves = piece.evalMove(game);
 
@@ -68,8 +70,11 @@ describe('eval attacks for knight', () => {
       ]
     };
     const game = new MahaGame(configuration);
-    const piece = game.board.pieceLayout[3][2];
-    if (piece === 0) {
+
+    const piece = game.board.getPieceByCoord({ row: 3, col: 2 });
+    expect(piece).toBeDefined();
+
+    if (!piece) {
       return;
     }
 
@@ -98,8 +103,11 @@ describe('eval attacks for knight', () => {
       ]
     };
     const game = new MahaGame(configuration);
-    const piece = game.board.pieceLayout[3][2];
-    if (piece === 0) {
+
+    const piece = game.board.getPieceByCoord({ row: 3, col: 2 });
+    expect(piece).toBeDefined();
+
+    if (!piece) {
       return;
     }
 
@@ -176,8 +184,11 @@ describe('eval attacks for knight', () => {
       ]
     };
     const game = new MahaGame(configuration);
-    const piece = game.board.pieceLayout[3][2];
-    if (piece === 0) {
+
+    const piece = game.board.getPieceByCoord({ row: 3, col: 2 });
+    expect(piece).toBeDefined();
+
+    if (!piece) {
       return;
     }
 
@@ -258,8 +269,11 @@ describe('eval attacks for knight', () => {
       ]
     };
     const game = new MahaGame(configuration);
-    const piece = game.board.pieceLayout[3][2];
-    if (piece === 0) {
+
+    const piece = game.board.getPieceByCoord({ row: 3, col: 2 });
+    expect(piece).toBeDefined();
+
+    if (!piece) {
       return;
     }
 

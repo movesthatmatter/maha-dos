@@ -94,3 +94,13 @@ export const matrixGet = <T>(matrix: Matrix<T>, [row, col]: MatrixIndex) => {
 
   return matrixRow[col];
 };
+
+// export const matrix = <T>(matrix: Matrix<T>, [row, col]: MatrixIndex) => {
+//   const matrixRow = matrix[row];
+
+//   if (!matrixRow) {
+//     return false;
+//   }
+
+//   return matrixRow[col];
+// };

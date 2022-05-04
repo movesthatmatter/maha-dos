@@ -15,7 +15,7 @@ import { getAllAdjecentPiecesToPosition, getPieceMoveThisTurn } from './utils';
 
 describe('test getAllAdjecentPiecesToPosition function', () => {
 	test('with no pieces', () => {
-		const pieceLayout: Game['board']['pieceLayout'] = [
+		const pieceLayout: Game['board']['state']['pieceLayoutState'] = [
 			[0, 0, 0, 0, 0],
 			[0, 0, 0, 0, 0],
 			[0, 0, 0, 0, 0],
@@ -31,10 +31,10 @@ describe('test getAllAdjecentPiecesToPosition function', () => {
 	});
 
 	test('with position in the middle and few pieces around', () => {
-		const pieceLayout: Game['board']['pieceLayout'] = [
-			[0, 0, new Queen('white', 'wQ'), 0, 0],
-			[0, new Knight('black', 'wB'), 0, 0, 0],
-			[0, 0, new Pawn('white', 'wP'), 0, 0],
+		const pieceLayout: Game['board']['state']['pieceLayoutState'] = [
+			[0, 0, new Queen('white', 'wQ').state, 0, 0],
+			[0, new Knight('black', 'wB').state, 0, 0, 0],
+			[0, 0, new Pawn('white', 'wP').state, 0, 0],
 			[0, 0, 0, 0, 0]
 		];
 
@@ -117,11 +117,11 @@ describe('test getAllAdjecentPiecesToPosition function', () => {
 	});
 
 	test('with position in the corner and few pieces around', () => {
-		const pieceLayout: Game['board']['pieceLayout'] = [
+		const pieceLayout: Game['board']['state']['pieceLayoutState'] = [
 			[0, 0, 0, 0, 0],
 			[0, 0, 0, 0, 0],
-			[new Knight('black', 'wB'), new Pawn('white', 'wP'), 0, 0, 0],
-			[0, new Queen('white', 'wQ'), 0, 0, 0]
+			[new Knight('black', 'wB').state, new Pawn('white', 'wP').state, 0, 0, 0],
+			[0, new Queen('white', 'wQ').state, 0, 0, 0]
 		];
 
 		const pieces = getAllAdjecentPiecesToPosition(

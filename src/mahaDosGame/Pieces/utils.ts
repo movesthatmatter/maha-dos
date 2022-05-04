@@ -1,8 +1,8 @@
 import { Game } from 'src/gameMechanics/Game/Game';
 import { Move } from 'src/gameMechanics/Game/types';
 import { Piece } from 'src/gameMechanics/Piece/Piece';
-import { TerrainProps } from 'src/gameMechanics/Terrain/Terrain';
-import { Coord, MoveDirection, range } from 'src/gameMechanics/util';
+import { IdentifiablePieceState } from 'src/gameMechanics/Piece/types';
+import { Coord, range } from 'src/gameMechanics/util';
 import { toDictIndexedBy } from 'src/gameMechanics/utils';
 
 export function evalEachDirectionForMove(
@@ -45,10 +45,11 @@ export function evalEachDirectionForMove(
   return moves;
 }
 
+// TODO: Ensure this is good!
 export function getAllAdjecentPiecesToPosition(
   pos: Coord,
-  pieceLayout: Game['board']['pieceLayout']
-): Piece[] {
+  pieceLayoutState: Game['board']['state']['pieceLayoutState']
+): IdentifiablePieceState[] {
   return [
     { row: -1, col: 0 },
     { row: -1, col: 1 },
@@ -60,20 +61,24 @@ export function getAllAdjecentPiecesToPosition(
     { row: -1, col: -1 }
   ].reduce((accum, dir) => {
     const target: Coord = { row: pos.row + dir.row, col: pos.col + dir.col };
+
     if (
-      target.row >= pieceLayout.length ||
-      target.col >= pieceLayout[0].length ||
+      target.row >= pieceLayoutState.length ||
+      target.col >= pieceLayoutState[0].length ||
       target.row < 0 ||
       target.col < 0
     ) {
       return accum;
     }
-    const targetPiece = pieceLayout[target.row][target.col];
+
+    const targetPiece = pieceLayoutState[target.row][target.col];
+
     if (targetPiece === 0) {
       return accum;
     }
+
     return [...accum, targetPiece];
-  }, [] as Piece[]);
+  }, [] as IdentifiablePieceState[]);
 }
 
 export function getPieceMoveThisTurn(
@@ -81,6 +86,7 @@ export function getPieceMoveThisTurn(
   game: Game
 ): Move | undefined {
   const { history } = game.state;
+
   if (
     history &&
     history.length > 0 &&
@@ -90,9 +96,11 @@ export function getPieceMoveThisTurn(
       history[history.length - 1][0][piece.state.color] as Move[],
       (move) => move.piece.id
     );
+
     if (piece.state.id in movesByPieceId) {
       return movesByPieceId[piece.state.id];
     }
   }
+
   return undefined;
 }

@@ -4,6 +4,8 @@ import { generate } from '../../mahaDosGame/helpers';
 import { mahaPieceRegistry } from '../../mahaDosGame/Pieces/registry';
 import { generatePieceLabel } from '../Board/util';
 import { Move, Attack } from './types';
+import { Rook } from 'src/mahaDosGame/Pieces/Rook';
+import { King } from 'src/mahaDosGame/Pieces/King';
 
 describe('Pending Games', () => {
   test('create a Game and evaluate it to pending status', () => {
@@ -17,36 +19,18 @@ describe('Pending Games', () => {
         ],
         pieceLayoutState: [
           [
-            generate.generateDefaultRook(
-              generatePieceLabel('black', 'bR', { row: 0, col: 0 }),
-              'black'
-            ),
+            new Rook('black', 'br1').state,
             0,
-            generate.generateDefaultKing(
-              generatePieceLabel('black', 'bK', { row: 2, col: 0 }),
-              'black'
-            ),
-            generate.generateDefaultRook(
-              generatePieceLabel('black', 'bR', { row: 3, col: 0 }),
-              'black'
-            )
+            new King('black', 'bk1').state,
+            new Rook('black', 'br2').state
           ],
           [0, 0, 0, 0],
           [0, 0, 0, 0],
           [
-            generate.generateDefaultRook(
-              generatePieceLabel('white', 'wR', { row: 0, col: 3 }),
-              'white'
-            ),
+            new Rook('white', 'wr1').state,
             0,
-            generate.generateDefaultKing(
-              generatePieceLabel('white', 'wK', { row: 2, col: 3 }),
-              'white'
-            ),
-            generate.generateDefaultRook(
-              generatePieceLabel('white', 'wR', { row: 3, col: 3 }),
-              'white'
-            )
+            new King('white', 'wk1').state,
+            new Rook('white', 'wr2').state
           ]
         ]
       },
@@ -55,7 +39,7 @@ describe('Pending Games', () => {
       state: 'pending'
     };
 
-    const mahaGame: Game = new Game(
+    const actual = new Game(
       mahaPieceRegistry,
       {
         pieceLayout: [
@@ -70,9 +54,11 @@ describe('Pending Games', () => {
         history: currentGameState.history,
         winner: undefined
       }
-    );
+    ).state;
 
-    expect(mahaGame.state).toEqual(currentGameState);
+    const expected = currentGameState;
+
+    expect(actual).toEqual(expected);
   });
 });
 

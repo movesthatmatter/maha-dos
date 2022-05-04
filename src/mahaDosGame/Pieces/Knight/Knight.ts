@@ -70,17 +70,28 @@ export class Knight extends Piece {
 
     const pieceCoord = game.board.getPieceCoordById(this.state.id);
 
+    if (!pieceCoord) {
+      return [];
+    }
+
     return evalEachDirectionForMove(pieceCoord, this, game);
   }
 
   evalAttack(game: Game): Attack[] {
-    const pieceCoord = game.board.pieceCoordsByPieceId[this.state.id];
+    const pieceCoord = game.board.getPieceCoordById(this.state.id);
+
+    if (!pieceCoord) {
+      return [];
+    }
+
     const attacks: Attack[] = [];
     const moved = getPieceMoveThisTurn(this, game);
     const attackBonus =
-      getAllAdjecentPiecesToPosition(pieceCoord, game.board.pieceLayout).filter(
-        (p) => p instanceof Queen && p.state.color === this.state.color
-      ).length > 0;
+      getAllAdjecentPiecesToPosition(
+        pieceCoord,
+        game.board.state.pieceLayoutState
+      ).filter((p) => p instanceof Queen && p.state.color === this.state.color)
+        .length > 0;
     this.state.movesDirections.map((dir) => {
       const target: Coord = {
         row: pieceCoord.row + dir.row,
@@ -90,15 +101,16 @@ export class Knight extends Piece {
         return;
       }
       if (
-        target.row >= game.board.pieceLayout.length ||
-        target.col >= game.board.pieceLayout[0].length ||
+        target.row >= game.board.state.pieceLayoutState.length ||
+        target.col >= game.board.state.pieceLayoutState[0].length ||
         target.row < 0 ||
         target.col < 0
       ) {
         return;
       }
-      const targetPiece = game.board.pieceLayout[target.row][target.col];
-      if (targetPiece !== 0 && targetPiece.state.color !== this.state.color) {
+      const targetPiece = game.board.getPieceByCoord(target);
+
+      if (targetPiece && targetPiece.state.color !== this.state.color) {
         attacks.push({
           from: pieceCoord,
           to: target,
