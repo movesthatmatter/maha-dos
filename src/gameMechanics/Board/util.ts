@@ -50,3 +50,14 @@ export const generatePieceLabel = (
 ): string => {
   return `${color}-${label}-${coord.row}-${coord.col}`;
 };
+
+export const toPrintableBoard = (board: BoardState) => {
+  return matrixMap(board.pieceLayoutState, (sqOrPiece) => {
+    if (sqOrPiece === 0) {
+      return 0;
+    }
+
+    return `${sqOrPiece.color[0]}${sqOrPiece.label[0]}`;
+  });
+};
+

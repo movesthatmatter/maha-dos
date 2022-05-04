@@ -177,32 +177,24 @@ describe('Update', () => {
       piecesByLabelSpyMap['bK'] = piece;
 
       return piece;
-    })
-    // bQ: getPieceFactory((...args) => new Queen('black', ...args)),
-    // bR: getPieceFactory((...args) => new Rook('black', ...args)),
+    }),
+    wK: getPieceFactory((...args) => {
+      const piece = new King('white', ...args);
 
-    // wK: getPieceFactory((...args) => new King('white', ...args)),
-    // wQ: getPieceFactory((...args) => new Queen('white', ...args)),
-    // wR: getPieceFactory((...args) => new Rook('white', ...args))
+      piecesByLabelSpyMap['wK'] = piece;
+
+      return piece;
+    })
   };
 
-  test('can set a new state after construct', () => {
+  test('one move from initial phase', () => {
     const board = new Board(localPieceRegistry, {
       terrain: { width: 2 },
       pieceLayout: [
-        [0, 0],
+        [0, 'wK'],
         ['bK', 0]
-        // ['bR', 'bK', 'bQ', 'bR'],
-        // [0, 0, 0, 0],
-        // [0, 0, 0, 0],
-        // ['wR', 'wK', 'wQ', 'wR']
       ]
     });
-
-    const nextPieceLayoutState: BoardState['pieceLayoutState'] = [
-      [piecesByLabelSpyMap['bK'].state, 0],
-      [0, 0]
-    ];
 
     const moveResult = board.move({
       from: { row: 1, col: 0 },
@@ -224,13 +216,87 @@ describe('Update', () => {
     };
 
     const actualState = board.state;
+
+    const expectedPieceLayoutState: BoardState['pieceLayoutState'] = [
+      [piecesByLabelSpyMap['bK'].state, piecesByLabelSpyMap['wK'].state],
+      [0, 0]
+    ];
+
     const expectedState: BoardState = {
       terrainState: board.state.terrainState, // hasn't changed
-      pieceLayoutState: nextPieceLayoutState
+      pieceLayoutState: expectedPieceLayoutState
     };
 
     expect(actualState).toEqual(expectedState);
     expect(actualMove).toEqual(expectedMove);
+
+    const actualPieceByPrevCoord = board.getPieceByCoord({ row: 1, col: 0 });
+    const expectedPieceByPrevCoord = undefined;
+    expect(actualPieceByPrevCoord).toEqual(expectedPieceByPrevCoord);
+
+    const actualPieceByNextCoord = board.getPieceByCoord({
+      row: 0,
+      col: 0
+    })?.state;
+    const expectedPieceByNextCoord = piecesByLabelSpyMap['bK'].state;
+    expect(actualPieceByNextCoord).toEqual(expectedPieceByNextCoord);
+  });
+
+  test('multiple move from initial phase', () => {
+    const board = new Board(localPieceRegistry, {
+      terrain: { width: 2 },
+      pieceLayout: [
+        [0, 'wK'],
+        ['bK', 0]
+      ]
+    });
+
+    const moveResult = board.moveMultiple([
+      {
+        from: { row: 1, col: 0 },
+        to: { row: 0, col: 0 }
+      },
+      {
+        from: { row: 0, col: 1 },
+        to: { row: 1, col: 1 }
+      }
+    ]);
+
+    expect(moveResult.ok).toBe(true);
+
+    if (!moveResult.ok) {
+      return;
+    }
+
+    const actualMoves = moveResult.val;
+
+    const expectedMoves = [
+      {
+        from: { row: 1, col: 0 },
+        to: { row: 0, col: 0 },
+        piece: piecesByLabelSpyMap['bK'].state
+      },
+      {
+        from: { row: 0, col: 1 },
+        to: { row: 1, col: 1 },
+        piece: piecesByLabelSpyMap['wK'].state
+      }
+    ];
+
+    const actualState = board.state;
+
+    const expectedPieceLayoutState: BoardState['pieceLayoutState'] = [
+      [piecesByLabelSpyMap['bK'].state, 0],
+      [0, piecesByLabelSpyMap['wK'].state]
+    ];
+
+    const expectedState: BoardState = {
+      terrainState: board.state.terrainState, // hasn't changed
+      pieceLayoutState: expectedPieceLayoutState
+    };
+
+    expect(actualState).toEqual(expectedState);
+    expect(actualMoves).toEqual(expectedMoves);
 
     const actualPieceByPrevCoord = board.getPieceByCoord({ row: 1, col: 0 });
     const expectedPieceByPrevCoord = undefined;

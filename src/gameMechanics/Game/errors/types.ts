@@ -36,7 +36,7 @@ export type AttackNotPossibleError = {
 // Also, the content could be union tagged by reason!
 export type SubmitMovesNotPossibleError = {
   type: 'SubmitMovesNotPossible';
-  reason: GameNotInMovePhaseReason;
+  reason: GameNotInMovePhaseReason | 'InvalidMoves';
   content: undefined;
 };
 

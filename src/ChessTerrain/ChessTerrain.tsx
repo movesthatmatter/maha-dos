@@ -33,6 +33,9 @@ export type ChessTerrainProps = {
     coord: Coord
   ) => void;
   onPieceDestinationSet?: (move: Move) => void;
+  
+  // TODO: Implement
+  onSquareTouched?: (coord: Coord) => void;
 };
 
 // const coordToArrow = ()
@@ -94,6 +97,10 @@ export const ChessTerrain: React.FC<ChessTerrainProps> = ({
   // const onPieceClick = useCallback((e: MouseEvent) => {
 
   // }, [squareSize])
+
+  useEffect(() => {
+    console.log('ChessTerrain: Board Changed', board);
+  }, [board]);
 
   return (
     <div
