@@ -1,12 +1,12 @@
 import { Game } from '../../../gameMechanics/Game/Game';
-import { Color } from '../../../gameMechanics/util/types';
+import { Color, Coord } from '../../../gameMechanics/util/types';
 import { Attack, Move } from '../../../gameMechanics/Game/types';
 import { Piece } from '../../../gameMechanics/Piece/Piece';
 import {
   IdentifiablePieceState,
   PieceDynamicProps
 } from '../../../gameMechanics/Piece/types';
-import { evalEachDirectionForMove } from '../utils';
+import { evalEachDirectionForMove, getPieceMoveThisTurn } from '../utils';
 import { Err, Ok, Result } from 'ts-results';
 import { PieceLayoutState } from '../../../gameMechanics/Board/types';
 import { AttackTargetPieceUndefined } from '../../../gameMechanics/Game/errors';
@@ -71,8 +71,40 @@ export class Pawn extends Piece {
 
   evalAttack(game: Game): Attack[] {
     const pieceCoord = game.board.getPieceCoordById(this.state.id);
-    //take into account the attack direction!!
-    return [];
+    if (!pieceCoord) {
+      return [];
+    }
+    if (!this.state.attackDirection) {
+      return [];
+    }
+
+    const moved = getPieceMoveThisTurn(this, game);
+
+    return this.state.attackDirection.reduce((attacks, dir) => {
+      const target: Coord = {
+        row: pieceCoord.row + dir.row,
+        col: pieceCoord.col + dir.col
+      };
+      if (
+        target.row >= game.board.state.pieceLayoutState.length ||
+        target.col >= game.board.state.pieceLayoutState[0].length ||
+        target.row < 0 ||
+        target.col < 0
+      ) {
+        return attacks;
+      }
+      const targetPiece = game.board.getPieceByCoord(target);
+      if (targetPiece && targetPiece.state.color !== this.state.color) {
+        const attack: Attack = {
+          from: pieceCoord,
+          to: target,
+          type: 'melee',
+          ...(moved && { movementAttackBonus: true })
+        };
+        return [...attacks, attack];
+      }
+      return attacks;
+    }, [] as Attack[]);
   }
 
   executeAttack(
