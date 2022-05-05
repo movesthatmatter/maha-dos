@@ -6,20 +6,28 @@ import {
   GameHistory,
   GameState,
   GameStateCompleted,
+  GameStateInAttackPhaseWithPreparingSubmission,
   GameStateInMovePhaseWithPreparingSubmission,
   GameStateInProgress,
   GameStatePending,
   GameWinner,
   InProgressGameStatePhaseSlice,
-  isGameInMovePhase,
-  isGameInMovePhaseWithPreparingSubmission,
-  Move,
+  Move
 } from './types';
-import { getMoveNotPossibleError } from './errors/helpers';
+import {
+  getMoveNotPossibleError,
+  getAttackNotPossibleError
+} from './errors/helpers';
 import { Board } from '../Board/Board';
 import { PieceRegistry } from '../Piece/types';
 import { coordsAreEqual } from '../util';
 import { AttackNotPossibleError, MoveNotPossibleError } from './errors';
+import {
+  isGameInAttackPhase,
+  isGameInAttackPhaseWithPreparingSubmission,
+  isGameInMovePhase,
+  isGameInMovePhaseWithPreparingSubmission
+} from './helpers';
 
 export interface IGame<PR extends PieceRegistry = PieceRegistry> {
   state: GameState;
@@ -42,7 +50,16 @@ export interface IGame<PR extends PieceRegistry = PieceRegistry> {
   >;
 
   // When an Attack is Succesfully Drawn it gets appended to the nextAttacks List of the "attack" phase
-  drawAttack(from: Coord, to: Coord): Result<Attack, AttackNotPossibleError>;
+  drawAttack(
+    from: Coord,
+    to: Coord
+  ): Result<
+    {
+      attack: Attack;
+      gameState: GameState;
+    },
+    AttackNotPossibleError
+  >;
 }
 
 type GameProps = {
@@ -206,6 +223,31 @@ export class Game<PR extends PieceRegistry = PieceRegistry> implements IGame {
     };
   };
 
+  start(): void {
+    if (this.state.state !== 'pending') {
+      return;
+    }
+
+    const inProgressState: PartialGameStateInProgress = {
+      ...this.partialState,
+      state: 'inProgress',
+      history: [],
+      phase: 'move',
+      submissionStatus: 'none',
+      white: {
+        canDraw: true,
+        moves: undefined
+      },
+      black: {
+        canDraw: true,
+        moves: undefined
+      },
+      winner: undefined
+    };
+
+    this.partialState = inProgressState;
+  }
+
   // Loads a new GameState and does all the needed calculations
   // TODO: Rename to setState
   load({ boardState, ...partialState }: GameState): void {
@@ -334,8 +376,93 @@ export class Game<PR extends PieceRegistry = PieceRegistry> implements IGame {
   }
 
   // // When an Attack is Succesfully Drawn it gets appended to the nextAttacks List of the "attack" phase
-  drawAttack(from: Coord, to: Coord): Result<Attack, AttackNotPossibleError> {
-    return {} as Result<Attack, AttackNotPossibleError>;
+  // TODO: Test
+  drawAttack(
+    from: Coord,
+    to: Coord
+  ): Result<
+    {
+      attack: Attack;
+      gameState: GameState;
+    },
+    AttackNotPossibleError
+  > {
+    // Can't make a move when game is completed
+    if (this.partialState.state === 'completed') {
+      return new Err(getAttackNotPossibleError('GameIsCompleted'));
+    }
+
+    if (!(isGameInAttackPhase(this.state) || this.state.state === 'pending')) {
+      return new Err(getAttackNotPossibleError('GameNotInMovePhase'));
+    }
+
+    const piece = this.board.getPieceByCoord(from);
+
+    if (!piece) {
+      return new Err(getAttackNotPossibleError('AttackerPieceNotExistent'));
+    }
+
+    const dests = piece.evalAttack(this);
+    const attackIsPartOfDests = dests.find((d) => coordsAreEqual(d.to, to));
+
+    // Attack is Valid
+    if (!attackIsPartOfDests) {
+      return new Err(getAttackNotPossibleError('DestinationNotValid'));
+    }
+
+    const preparingState: GameStateInAttackPhaseWithPreparingSubmission = {
+      ...this.state,
+      state: 'inProgress',
+      winner: undefined,
+      submissionStatus: 'preparing',
+      phase: 'attack',
+
+      ...(isGameInAttackPhaseWithPreparingSubmission(this.state)
+        ? {
+            white: this.state.white,
+            black: this.state.black
+          }
+        : {
+            white: {
+              canDraw: true,
+              attacks: []
+            },
+            black: {
+              canDraw: true,
+              attacks: []
+            }
+          })
+    };
+
+    const attack: Attack = {
+      from,
+      to,
+      type: 'melee' // TODO: make it dynamic
+    };
+
+    // TODO: Update the board and all the other state derivates
+    this.partialState = {
+      ...preparingState,
+      ...(isGameInAttackPhaseWithPreparingSubmission(preparingState) && {
+        white: {
+          ...preparingState.white,
+          ...(piece.state.color === 'white' && {
+            attacks: [...preparingState.white.attacks, attack]
+          })
+        },
+        black: {
+          ...preparingState.black,
+          ...(piece.state.color === 'black' && {
+            attacks: [...preparingState.black.attacks, attack]
+          })
+        }
+      })
+    };
+
+    return new Ok({
+      attack,
+      gameState: this.state
+    });
   }
 
   get state(): GameState {

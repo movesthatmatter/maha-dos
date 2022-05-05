@@ -1,7 +1,5 @@
 import { Result } from 'ts-results';
-import { PieceLayoutState } from '../Board/types';
-import { AttackTargetPieceUndefined } from '../Game/errors';
-import { Game } from '../Game/Game';
+import { AttackNotPossibleError, Game, AttackOutcome } from '../Game';
 import { Attack, Move } from '../Game/types';
 import { IdentifiablePieceState, PieceState } from './types';
 
@@ -13,6 +11,20 @@ export abstract class Piece<L extends string = string> {
     this.state = { ...props, id };
   }
 
+  calculateNextState<P extends Partial<IdentifiablePieceState<L>>>(
+    nextState: P
+  ): IdentifiablePieceState<L> {
+    return {
+      ...this.state,
+      ...nextState
+    };
+  }
+
+  // abstract setStateDerivates(
+  //   prevState: IdentifiablePieceState<L>,
+  //   nextState: IdentifiablePieceState<L>
+  // ): void;
+
   // Here is where the rules for the move algortighm live
   // Returns all the possible moves for this piece
   // TODO: Does this actually need to be the Board not the Game?
@@ -23,11 +35,9 @@ export abstract class Piece<L extends string = string> {
   // TODO: Does this actually need to be the Board not the Game?
   abstract evalAttack(game: Game): Attack[];
 
-  //Here the attack gets processed on the current state
-  //Returns a new piece layout state that hold the updated stats and positions
-  //TODO: Does this live here or in the enigne?
-  abstract executeAttack(
-    state: Game,
+  // Here the attack gets processed on the current state
+  abstract calculateAttackOutcome(
+    game: Game,
     attack: Attack
-  ): Result<PieceLayoutState, AttackTargetPieceUndefined>;
+  ): Result<AttackOutcome, AttackNotPossibleError>;
 }

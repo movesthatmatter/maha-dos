@@ -1,5 +1,11 @@
 import { Err, Ok, Result } from 'ts-results';
-import { GameConfigurator, Move, ShortMove } from '../Game/types';
+import {
+  AttackNotPossibleError,
+  getAttackNotPossibleError,
+  AttackOutcome,
+  Game
+} from '../Game';
+import { GameConfigurator, Move, ShortMove, ShortAttack } from '../Game/types';
 import { Piece } from '../Piece/Piece';
 import { PieceRegistry } from '../Piece/types';
 import { Terrain } from '../Terrain/Terrain';
@@ -17,14 +23,6 @@ import {
 import { Coord } from '../util/types';
 import { BoardState } from './types';
 
-export interface IBoard {
-  state: BoardState;
-
-  getPieceById(id: string): Piece | undefined;
-
-  getPieceByCoord(coord: Coord): Piece | undefined;
-}
-
 type PieceAndCoordMappedById = Record<
   Piece['state']['id'],
   {
@@ -38,7 +36,7 @@ type PiecesState = {
   pieceById: PieceAndCoordMappedById;
 };
 
-export class Board<PR extends PieceRegistry> implements IBoard {
+export class Board<PR extends PieceRegistry> {
   private terrain: Terrain;
 
   private piecesState: PiecesState;
@@ -178,13 +176,18 @@ export class Board<PR extends PieceRegistry> implements IBoard {
     this._cachedState = next;
   }
 
+  // Deprecate it in favor of applyMoves, which signifies better that it happens once per turn
+  // @deprecate
   move(m: ShortMove): Result<Move, 'MoveNotPossible'> {
     return this.moveMultiple([m])
       .mapErr(() => 'MoveNotPossible' as const)
       .map(([move]) => move);
   }
 
+  // Rename this to applyMoves as it shouldn't happen multipel times
   moveMultiple(moves: ShortMove[]): Result<Move[], 'MovesNotPossible'> {
+    // TODO: Ensure the moves are valid!
+
     const pieces = moves.map((m) =>
       this.getPieceById(
         matrixGet(this.piecesState.layoutMatrix, [m.from.row, m.from.col]) || ''
@@ -231,5 +234,63 @@ export class Board<PR extends PieceRegistry> implements IBoard {
         piece: pieces[i].state
       }))
     );
+  }
+
+  // TODO: Test
+  applyAttacks(
+    game: Game,
+    attacks: ShortAttack[]
+  ): Result<AttackOutcome[], AttackNotPossibleError> {
+    const attackerPieces = attacks.map((a) =>
+      this.getPieceById(
+        matrixGet(this.piecesState.layoutMatrix, [a.from.row, a.from.col]) || ''
+      )
+    );
+
+    const absentAttackerPiece = attackerPieces.find((p) => !p);
+
+    if (absentAttackerPiece) {
+      return new Err(getAttackNotPossibleError('AttackerPieceNotExistent'));
+    }
+
+    const victimPieces = attacks.map((a) =>
+      this.getPieceById(
+        matrixGet(this.piecesState.layoutMatrix, [a.to.row, a.to.col]) || ''
+      )
+    );
+
+    const absentVictimPiece = attackerPieces.find((p) => !p);
+
+    if (!absentVictimPiece) {
+      return new Err(getAttackNotPossibleError('VictimPieceNotExistent'));
+    }
+
+    const attacksWithAtackerAndVictimPieces = attacks.map((attack, i) => ({
+      attack,
+      attacker: attackerPieces[i],
+      victim: victimPieces[i]
+    }));
+
+    return Result.all(
+      ...attacksWithAtackerAndVictimPieces.map((zip) =>
+        zip.attacker.calculateAttackOutcome(game, zip.attack)
+      )
+    )
+      .andThen((outcomes) =>
+        Result.all(
+          new Ok(outcomes),
+          this.moveMultiple(
+            outcomes
+              .filter((outcome) => outcome.hasMoved)
+              .map((outcome) => outcome.attack)
+          ).mapErr(() => getAttackNotPossibleError('DestinationNotValid'))
+        )
+      )
+      .map(([outcomes]) => {
+        // The must refresh!
+        this._cachedState = undefined;
+
+        return outcomes;
+      });
   }
 }

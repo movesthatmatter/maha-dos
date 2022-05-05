@@ -1,6 +1,12 @@
 type GameIsCompletedReason = 'GameIsCompleted';
+
 type GameNotInMovePhaseReason = 'GameNotInMovePhase';
+type GameNotInAttackPhaseReason = 'GameNotInAttackPhase';
+
 type PieceNotExistentReason = 'PieceNotExistent';
+type AttackerPieceNotExistentReason = 'AttackerPieceNotExistent';
+type VictimPieceNotExistentReason = 'VictimPieceNotExistent';
+
 type DestinationNotValidReason = 'DestinationNotValid';
 type PieceAlreadyMovedReason = 'PieceAlreadyMoved';
 
@@ -14,6 +20,7 @@ export type GameStateNotInAttackPhaseError = {
   content: undefined;
 };
 
+// TODO: Take the reason out of the content and use Tagged Unions if content is needed
 export type MoveNotPossibleError = {
   type: 'MoveNotPossible';
   content: {
@@ -26,9 +33,18 @@ export type MoveNotPossibleError = {
   };
 };
 
+// TODO: Take the reason out of the content and use Tagged Unions if content is needed
 export type AttackNotPossibleError = {
   type: 'AttackNotPossible';
-  content: undefined;
+  content: {
+    reason:
+      | GameIsCompletedReason
+      | GameNotInMovePhaseReason
+      | AttackerPieceNotExistentReason
+      | VictimPieceNotExistentReason
+      | DestinationNotValidReason;
+    // | PieceAlreadyMovedReason;
+  };
 };
 
 // I like this type of errors with a reason field b/c they could be easier
@@ -42,7 +58,7 @@ export type SubmitMovesNotPossibleError = {
 
 export type SubmitAttacksNotPossibleError = {
   type: 'SubmitAttacksNotPossible';
-  reason: undefined;
+  reason: GameNotInAttackPhaseReason | 'InvalidAttacks';
   content: undefined;
 };
 

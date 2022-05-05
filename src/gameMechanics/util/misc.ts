@@ -12,3 +12,10 @@ export const coordsAreEqual = (a: Coord, b: Coord) =>
 
 export const objectKeys = <O extends object>(o: O) =>
   Object.keys(o) as (keyof O)[];
+
+// type KeysOfType<T, K> = { [P in keyof T]: T[P] extends K ? P : never }[keyof T];
+
+// export const existsIn = <T, R extends KeysOfType<T, R>>(
+//   toCheck: T,
+//   againstList: KeysOfType<T, R>[]
+// ): toCheck is R => true;
