@@ -3,6 +3,7 @@ import {
   Attack,
   GameConfigurator,
   GameHistory,
+  GameStateInMovePhase,
   GameStateInProgress,
   Move
 } from '../../../gameMechanics/Game/types';
@@ -29,6 +30,22 @@ describe('eval moves for Knight', () => {
     if (!piece) {
       return;
     }
+
+    const { state } = game;
+    game.load({
+      ...state,
+      state: 'inProgress',
+      history: [],
+      phase: 'move',
+      white: {
+        canDraw: true,
+        moves: []
+      },
+      black: {
+        canDraw: true,
+        moves: []
+      }
+    } as GameStateInMovePhase);
 
     const moves = piece.evalMove(game);
 
