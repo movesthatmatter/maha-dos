@@ -1,5 +1,12 @@
 import { Board } from 'src/gameMechanics/Board/Board';
-import { coordToMatrixIndex, matrixInsertMany } from 'src/gameMechanics/util';
+import { toPrintableBoard } from 'src/gameMechanics/Board/util';
+import { Attack, ShortAttack } from 'src/gameMechanics/Game';
+import {
+  coordToMatrixIndex,
+  matrixInsertMany,
+  printMatrix
+} from 'src/gameMechanics/util';
+import { Result } from 'ts-results';
 import { DEFAULT_MAHA_CONFIGURATOR, mahaPieceRegistry } from './config';
 import { MahaGameReconciliator } from './MahaGameReconciliator';
 import { mahaChessSquareToCoord } from './util';
@@ -146,5 +153,225 @@ describe('submitMoves', () => {
         }
       ])
     );
+  });
+});
+
+describe('submitAttacks', () => {
+  test('one player submits attacks after first move phase - ok', () => {
+    const reconciliator = new MahaGameReconciliator();
+
+    const whiteMoves = [
+      {
+        from: mahaChessSquareToCoord('e2'),
+        to: mahaChessSquareToCoord('e4')
+      },
+      {
+        from: mahaChessSquareToCoord('d2'),
+        to: mahaChessSquareToCoord('d4')
+      }
+    ];
+
+    const blackMoves = [
+      {
+        from: mahaChessSquareToCoord('e7'),
+        to: mahaChessSquareToCoord('e5')
+      },
+      {
+        from: mahaChessSquareToCoord('d7'),
+        to: mahaChessSquareToCoord('d5')
+      }
+    ];
+
+    const resMoveSubmission = Result.all(
+      reconciliator.submitMoves({
+        color: 'white',
+        moves: whiteMoves
+      }),
+      reconciliator.submitMoves({
+        color: 'black',
+        moves: blackMoves
+      })
+    );
+
+    const boardStateBeforeAttack = reconciliator.board.state;
+
+    expect(resMoveSubmission.ok).toBe(true);
+    if (!resMoveSubmission.ok) {
+      return;
+    }
+
+    const whiteAttacks: ShortAttack[] = [
+      {
+        from: mahaChessSquareToCoord('e4'),
+        to: mahaChessSquareToCoord('d5'),
+        type: 'melee'
+      }
+    ];
+
+    const whiteAttackRes = reconciliator.submitAttacks({
+      color: 'white',
+      attacks: whiteAttacks
+    });
+
+    expect(whiteAttackRes.ok).toBe(true);
+    if (!whiteAttackRes.ok) {
+      return;
+    }
+
+    const actual = whiteAttackRes.val;
+
+    expect(actual.state).toBe('inProgress');
+    expect(actual.phase).toBe('attack');
+    expect(actual.submissionStatus).toBe('partial');
+    expect(actual.boardState).toEqual(boardStateBeforeAttack);
+    expect(actual.white).toEqual({
+      canDraw: false,
+      attacks: whiteAttacks,
+    });
+    expect(actual.black).toEqual({
+      canDraw: true,
+      attacks: undefined
+    });
+  });
+
+
+  test('both players submit attacks after first move phase - ok', () => {
+    const reconciliator = new MahaGameReconciliator();
+
+    const whiteMoves = [
+      {
+        from: mahaChessSquareToCoord('e2'),
+        to: mahaChessSquareToCoord('e4')
+      },
+      {
+        from: mahaChessSquareToCoord('d2'),
+        to: mahaChessSquareToCoord('d4')
+      }
+    ];
+
+    const blackMoves = [
+      {
+        from: mahaChessSquareToCoord('e7'),
+        to: mahaChessSquareToCoord('e5')
+      },
+      {
+        from: mahaChessSquareToCoord('d7'),
+        to: mahaChessSquareToCoord('d5')
+      }
+    ];
+
+    const whiteMovedPieces = whiteMoves.map((m) =>
+      reconciliator.board.getPieceByCoord(m.from)
+    );
+
+    const blackMovedPieces = blackMoves.map((m) =>
+      reconciliator.board.getPieceByCoord(m.from)
+    );
+
+    const resMoveSubmission = Result.all(
+      reconciliator.submitMoves({
+        color: 'white',
+        moves: whiteMoves
+      }),
+      reconciliator.submitMoves({
+        color: 'black',
+        moves: blackMoves
+      })
+    );
+
+    const boardStateBeforeAttack = reconciliator.board.state;
+
+    expect(resMoveSubmission.ok).toBe(true);
+    if (!resMoveSubmission.ok) {
+      return;
+    }
+
+    const whiteAttacks: ShortAttack[] = [
+      {
+        from: mahaChessSquareToCoord('e4'),
+        to: mahaChessSquareToCoord('d5'),
+        type: 'melee'
+      }
+    ];
+
+    const whiteAttackRes = reconciliator.submitAttacks({
+      color: 'white',
+      attacks: whiteAttacks
+    });
+
+    expect(whiteAttackRes.ok).toBe(true);
+    if (!whiteAttackRes.ok) {
+      return;
+    }
+
+    const blackAttacks: ShortAttack[] = [
+      {
+        from: mahaChessSquareToCoord('d5'),
+        to: mahaChessSquareToCoord('e4'),
+        type: 'melee'
+      }
+    ];
+
+    const blackAttackRes = reconciliator.submitAttacks({
+      color: 'black',
+      attacks: blackAttacks
+    });
+
+    expect(blackAttackRes.ok).toBe(true);
+    if (!blackAttackRes.ok) {
+      return;
+    }
+
+    const actual = blackAttackRes.val;
+
+    // const expectedGameTurn = [
+      
+    // ];
+
+    const expectedGameTurn = [
+      {
+        white: whiteMoves.map((m, i) => ({
+          ...m,
+          piece: whiteMovedPieces[i]?.state
+        })),
+        black: blackMoves.map((m, i) => ({
+          ...m,
+          piece: blackMovedPieces[i]?.state
+        }))
+      },
+      {
+        white: whiteAttacks.map((m, i) => ({
+          ...m,
+          // piece: whiteAttackedPieces[i]?.state
+        })),
+        black: blackAttacks.map((m, i) => ({
+          ...m,
+          // piece: blackMovedPieces[i]?.state
+        }))
+      }
+    ];
+
+    // printMatrix(boardStateBeforeAttack.pieceLayoutState);
+
+    expect(actual.state).toBe('inProgress');
+    expect(actual.phase).toBe('move');
+    expect(actual.submissionStatus).toBe('none');
+
+    expect(actual.history).toHaveLength(1);
+    expect(actual.history).toEqual([expectedGameTurn]);
+    
+    // add me now
+    // expect(actual.boardState).not.toEqual(boardStateBeforeAttack); // But how?
+
+
+    // expect(actual.boardState).toEqual(boardStateBeforeAttack);
+    // expect(actual.white).toEqual({
+    //   canDraw: false,
+    //   attacks: whiteAttacks,
+    // });
+    // expect(actual.black).toEqual({
+    //   canDraw: true,
+    //   attacks: undefined
+    // });
   });
 });
