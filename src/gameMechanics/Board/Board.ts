@@ -7,6 +7,7 @@ import {
   Matrix,
   matrixCreate,
   matrixGet,
+  matrixGetDimensions,
   MatrixIndex,
   matrixInsert,
   matrixInsertMany,
@@ -131,6 +132,50 @@ export class Board<PR extends PieceRegistry> implements IBoard {
     this._cachedState = next;
 
     return next;
+  }
+
+  setState(nextState: Partial<BoardState>) {
+    const next: BoardState = {
+      // ...this.state,
+
+      // TODO: This should probably work through the Terrain Class not set automatically
+      terrainState: nextState.terrainState || this.state.terrainState,
+
+      pieceLayoutState:
+        nextState.pieceLayoutState || this.state.pieceLayoutState
+    };
+
+    const [layoutMatrixRows, layoutMatrixCols] = matrixGetDimensions(
+      this.piecesState.layoutMatrix
+    );
+
+    this.piecesState = matrixReduce(
+      next.pieceLayoutState,
+      (prev, next, [row, col]) => {
+        if (next === 0) {
+          return prev;
+        }
+
+        // TODO: This doesn't handle adding a new piece to the layout (i.e. promotion) yet!
+
+        return {
+          layoutMatrix: matrixInsert(prev.layoutMatrix, [row, col], next.id),
+          pieceById: {
+            ...prev.pieceById,
+            [next.id]: {
+              piece: prev.pieceById[next.id].piece,
+              coord: { row, col }
+            }
+          }
+        };
+      },
+      {
+        layoutMatrix: matrixCreate(layoutMatrixRows, layoutMatrixCols, 0),
+        pieceById: this.piecesState.pieceById
+      } as PiecesState
+    );
+
+    this._cachedState = next;
   }
 
   move(m: ShortMove): Result<Move, 'MoveNotPossible'> {

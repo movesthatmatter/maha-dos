@@ -54,6 +54,11 @@ export const matrixCreate = <T = void>(
   val?: T
 ): Matrix<T> => range(rows).map(() => range(cols).map(() => val as T));
 
+export const matrixGetDimensions = <T>(m: Matrix<T>) => [
+  m.length,
+  (m[0] || []).length
+];
+
 export const duplicateMatrix = <T>(matrix: Matrix<T>) =>
   matrixMap(matrix, identity);
 

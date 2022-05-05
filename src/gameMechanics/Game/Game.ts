@@ -209,6 +209,8 @@ export class Game<PR extends PieceRegistry = PieceRegistry> implements IGame {
   // Loads a new GameState and does all the needed calculations
   // TODO: Rename to setState
   load({ boardState, ...partialState }: GameState): void {
+    this.board.setState(boardState);
+
     this.partialState = partialState;
 
     // TODO: Ensure the board state updates all of its derivates when set
