@@ -85,12 +85,10 @@ export class Queen extends Piece {
       pieceCoord,
       game.board.state.pieceLayoutState
     );
-
     const crit =
-      adjecentPieces.filter(
-        (p) => p instanceof King && p.state.color === this.state.color
-      ).length > 0;
-
+      adjecentPieces.filter((p) => {
+        return p.label === 'King' && p.color === this.state.color;
+      }).length > 0;
     if (
       history &&
       history.length > 0 &&

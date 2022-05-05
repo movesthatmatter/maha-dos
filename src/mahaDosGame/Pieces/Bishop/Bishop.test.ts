@@ -89,13 +89,7 @@ describe('Eval attacks for Bishop', () => {
     }
 
     const attacks = piece.evalAttack(game);
-
     const expected: Attack[] = [
-      {
-        from: { row: 2, col: 2 },
-        to: { row: 4, col: 1 },
-        type: 'melee'
-      },
       {
         from: { row: 2, col: 2 },
         to: { row: 0, col: 4 },
@@ -106,10 +100,15 @@ describe('Eval attacks for Bishop', () => {
         from: { row: 2, col: 2 },
         to: { row: 4, col: 4 },
         type: 'range'
+      },
+      {
+        from: { row: 2, col: 2 },
+        to: { row: 3, col: 1 },
+        type: 'range'
       }
     ];
 
-    expect(attacks).toBe(expected);
+    expect(attacks).toEqual(expected);
   });
 
   test('Attacks with previous move - cannot attack', () => {

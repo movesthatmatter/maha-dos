@@ -4,6 +4,8 @@ import { Piece } from '../../gameMechanics/Piece/Piece';
 import { IdentifiablePieceState } from '../../gameMechanics/Piece/types';
 import { Coord, range } from '../../gameMechanics/util';
 import { toDictIndexedBy } from '../../gameMechanics/utils';
+import { Matrix } from '../../gameMechanics/util';
+import { PieceLayoutState } from 'src/gameMechanics/Board/types';
 
 export function evalEachDirectionForMove(
   from: Coord,
@@ -45,10 +47,9 @@ export function evalEachDirectionForMove(
   return moves;
 }
 
-// TODO: Ensure this is good!
 export function getAllAdjecentPiecesToPosition(
   pos: Coord,
-  pieceLayoutState: Game['board']['state']['pieceLayoutState']
+  pieceLayout: PieceLayoutState
 ): IdentifiablePieceState[] {
   return [
     { row: -1, col: 0 },
@@ -63,15 +64,15 @@ export function getAllAdjecentPiecesToPosition(
     const target: Coord = { row: pos.row + dir.row, col: pos.col + dir.col };
 
     if (
-      target.row >= pieceLayoutState.length ||
-      target.col >= pieceLayoutState[0].length ||
+      target.row >= pieceLayout.length ||
+      target.col >= pieceLayout[0].length ||
       target.row < 0 ||
       target.col < 0
     ) {
       return accum;
     }
 
-    const targetPiece = pieceLayoutState[target.row][target.col];
+    const targetPiece = pieceLayout[target.row][target.col];
 
     if (targetPiece === 0) {
       return accum;

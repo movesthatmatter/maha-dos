@@ -1,12 +1,15 @@
 import { Game } from '../../../gameMechanics/Game/Game';
-import { Color } from '../../../gameMechanics/util/types';
+import { Color, Coord } from '../../../gameMechanics/util/types';
 import { Attack, Move } from '../../../gameMechanics/Game/types';
 import { Piece } from '../../../gameMechanics/Piece/Piece';
 import {
   IdentifiablePieceState,
   PieceDynamicProps
 } from '../../../gameMechanics/Piece/types';
-import { evalEachDirectionForMove } from '../utils';
+import {
+  evalEachDirectionForMove,
+  getAllAdjecentPiecesToPosition
+} from '../utils';
 import { Err, Ok, Result } from 'ts-results';
 import { PieceLayoutState } from '../../../gameMechanics/Board/types';
 import { AttackTargetPieceUndefined } from '../../../gameMechanics/Game/errors';
@@ -68,8 +71,40 @@ export class King extends Piece {
 
   evalAttack(game: Game): Attack[] {
     const pieceCoord = game.board.getPieceCoordById(this.state.id);
-
-    return [];
+    if (!pieceCoord) {
+      return [];
+    }
+    const defenseBonus =
+      getAllAdjecentPiecesToPosition(
+        pieceCoord,
+        game.board.state.pieceLayoutState
+      ).filter((p) => p.label === 'Rook' && p.color === this.state.color)
+        .length > 0;
+    return this.state.movesDirections.reduce((attacks, dir) => {
+      const target: Coord = {
+        row: pieceCoord.row + dir.row,
+        col: pieceCoord.col + dir.col
+      };
+      if (
+        target.row >= game.board.state.pieceLayoutState.length ||
+        target.col >= game.board.state.pieceLayoutState[0].length ||
+        target.row < 0 ||
+        target.col < 0
+      ) {
+        return attacks;
+      }
+      const targetPiece = game.board.getPieceByCoord(target);
+      if (targetPiece && targetPiece.state.color !== this.state.color) {
+        const attack: Attack = {
+          from: pieceCoord,
+          to: target,
+          type: 'melee',
+          ...(defenseBonus && { defenseBonus: true })
+        };
+        return [...attacks, attack];
+      }
+      return attacks;
+    }, [] as Attack[]);
   }
 
   executeAttack(

@@ -85,7 +85,7 @@ export class Knight extends Piece {
       getAllAdjecentPiecesToPosition(
         pieceCoord,
         game.board.state.pieceLayoutState
-      ).filter((p) => p instanceof Queen && p.state.color === this.state.color)
+      ).filter((p) => p.label === 'Queen' && p.color === this.state.color)
         .length > 0;
     this.state.movesDirections.map((dir) => {
       const target: Coord = {
