@@ -1,50 +1,84 @@
 import { Game } from '../../gameMechanics/Game/Game';
-import { Move } from '../../gameMechanics/Game/types';
+import { GameStateInMovePhase, Move } from '../../gameMechanics/Game/types';
 import { Piece } from '../../gameMechanics/Piece/Piece';
 import { IdentifiablePieceState } from '../../gameMechanics/Piece/types';
 import { Coord, range } from '../../gameMechanics/util';
 import { toDictIndexedBy } from '../../gameMechanics/utils';
-import { Matrix } from '../../gameMechanics/util';
 import { PieceLayoutState } from 'src/gameMechanics/Board/types';
+
+const determineRange = (moves: Coord[], moveRange: number) => {
+  return moves.reduce((totalRange, dir) => {
+    return [
+      ...totalRange,
+      ...range(moveRange, 1).map((r) => ({
+        row: dir.row * r,
+        col: dir.col * r
+      }))
+    ];
+  }, [] as Coord[]);
+};
+
+function isDefined<T>(m: T | undefined): m is T {
+  return m !== undefined;
+}
+
+export function stringifyCoord(c: Coord): string {
+  return `row:${c.row}-col:${c.col}`;
+}
 
 export function evalEachDirectionForMove(
   from: Coord,
   piece: Piece,
   game: Game
 ): Move[] {
-  const moves: Move[] = [];
-  piece.state.movesDirections.map((dir) => {
+  const totalMoves = piece.state.movesDirections.reduce((moves, dir) => {
     let hitObstacle = false;
-    range(piece.state.moveRange, 1).map((r) => {
-      if (hitObstacle) {
-        return;
-      }
-      const targetSq: Coord = {
-        row: from.row + dir.row * r,
-        col: from.col + dir.col * r
-      };
-      if (
-        targetSq.row >= game.board.state.pieceLayoutState.length ||
-        targetSq.col >= game.board.state.pieceLayoutState[0].length ||
-        targetSq.row < 0 ||
-        targetSq.col < 0
-      ) {
-        return;
-      }
-      if (game.board.state.pieceLayoutState[targetSq.row][targetSq.col] === 0) {
-        const move: Move = {
-          from,
-          to: targetSq,
-          piece: piece.state
+    const mm = range(piece.state.moveRange, 1)
+      .map((r) => {
+        if (hitObstacle) {
+          return undefined;
+        }
+        const targetSq: Coord = {
+          row: from.row + dir.row * r,
+          col: from.col + dir.col * r
         };
-        moves.push(move);
-      } else {
-        hitObstacle = true;
-        return;
-      }
-    });
+        if (
+          targetSq.row >= game.board.state.pieceLayoutState.length ||
+          targetSq.col >= game.board.state.pieceLayoutState[0].length ||
+          targetSq.row < 0 ||
+          targetSq.col < 0
+        ) {
+          return undefined;
+        }
+        if (
+          game.board.state.pieceLayoutState[targetSq.row][targetSq.col] === 0
+        ) {
+          const move: Move = {
+            from,
+            to: targetSq,
+            piece: piece.state
+          };
+          return move;
+        } else {
+          hitObstacle = true;
+          return undefined;
+        }
+      })
+      .filter((p) => isDefined(p)) as Move[];
+
+    return [...moves, ...mm];
+  }, [] as Move[]);
+  const otherMovesByDestination = toDictIndexedBy(
+    (game.state as GameStateInMovePhase)[piece.state.color].moves || [],
+    (move) => stringifyCoord(move.to)
+  );
+
+  return totalMoves.filter((move) => {
+    if (stringifyCoord(move.to) in otherMovesByDestination) {
+      return false;
+    }
+    return true;
   });
-  return moves;
 }
 
 export function getAllAdjecentPiecesToPosition(

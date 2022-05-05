@@ -1,6 +1,10 @@
 import { Game } from '../../../gameMechanics/Game/Game';
 import { Color } from '../../../gameMechanics/util/types';
-import { Attack, Move } from '../../../gameMechanics/Game/types';
+import {
+  Attack,
+  GameStateInProgress,
+  Move
+} from '../../../gameMechanics/Game/types';
 import { Piece } from '../../../gameMechanics/Piece/Piece';
 import {
   IdentifiablePieceState,
@@ -14,7 +18,6 @@ import {
 } from '../utils';
 import { PieceLayoutState } from '../../../gameMechanics/Board/types';
 import { Err, Ok, Result } from 'ts-results';
-import { Queen } from '../Queen';
 import { AttackTargetPieceUndefined } from '../../../gameMechanics/Game/errors';
 
 const pieceLabel = 'Knight';
@@ -68,7 +71,9 @@ export class Knight extends Piece {
     if (!pieceCoord) {
       return [];
     }
-
+    if (!(game.state as GameStateInProgress)[this.state.color].canDraw) {
+      return [];
+    }
     return evalEachDirectionForMove(pieceCoord, this, game);
   }
 
