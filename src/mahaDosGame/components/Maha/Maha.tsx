@@ -10,6 +10,7 @@ import { Color, Coord, noop } from '../../../gameMechanics/util';
 import { MahaGame } from '../../..//mahaDosGame/MahaGame';
 import { MahaChessTerrain, MahaChessTerrainProps } from '../MahaTerrain';
 import { Button } from '../Button';
+import { toPrintableBoard } from '../../../gameMechanics/Board/util';
 
 export type MahaProps = {
   onSubmitMoves: (
@@ -70,16 +71,20 @@ export const Maha: React.FC<MahaProps> = ({
     }
   }, [gameState]);
 
+  const workingGameState = preparingGameState || gameState;
+
   return (
     <>
       <MahaChessTerrain
         sizePx={500}
-        gameState={preparingGameState || gameState}
+        gameState={workingGameState}
         styledCoords={destinationSquares?.map((dest) => ({
           ...dest,
           style: destinationSquareStyle
         }))}
         onPieceTouched={(pieceState, coord) => {
+          console.log('on piece touched', pieceState, coord, workingGameState);
+
           if (!canInteract) {
             return;
           }
@@ -88,12 +93,32 @@ export const Maha: React.FC<MahaProps> = ({
             return;
           }
 
+          if (workingGameState.state !== 'inProgress') {
+            return;
+          }
+
           const piece = localGameRef.current.board.getPieceById(pieceState.id);
+          const pieceCoord = localGameRef.current.board.getPieceCoordById(pieceState.id);
 
-          const dests = piece?.evalMove(localGameRef.current);
+          console.log('on touched piece', piece)
+          console.log('on touched piece coord', pieceCoord)
+          console.dir(toPrintableBoard(localGameRef.current.board.state));
+          
 
-          if (dests) {
-            setDestinationSquares(dests.map((d) => d.to));
+          if (workingGameState.phase === 'move') {
+            const dests = piece?.evalMove(localGameRef.current);
+
+            if (dests) {
+              setDestinationSquares(dests.map((d) => d.to));
+            }
+          } else {
+            const dests = piece?.evalAttack(localGameRef.current);
+
+            console.log('atack dests', dests);
+
+            if (dests) {
+              setDestinationSquares(dests.map((d) => d.to));
+            }
           }
 
           onPieceTouched(pieceState, coord);
@@ -118,18 +143,19 @@ export const Maha: React.FC<MahaProps> = ({
             });
         }}
       />
-      {preparingGameState && isGameInMovePhaseWithPreparingSubmission(preparingGameState) && (
-        <>
-          <br />
-          <Button
-            primary
-            label={`Submit`}
-            onClick={() => {
-              onSubmitMoves(preparingGameState);
-            }}
-          />
-        </>
-      )}
+      {preparingGameState &&
+        isGameInMovePhaseWithPreparingSubmission(preparingGameState) && (
+          <>
+            <br />
+            <Button
+              primary
+              label={`Submit`}
+              onClick={() => {
+                onSubmitMoves(preparingGameState);
+              }}
+            />
+          </>
+        )}
     </>
   );
 };
