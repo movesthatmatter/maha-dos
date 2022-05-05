@@ -14,7 +14,7 @@ import {
   matrixReduce
 } from '../util';
 import { Coord } from '../util/types';
-import { BoardState, PieceLayoutState } from './types';
+import { BoardState } from './types';
 
 export interface IBoard {
   state: BoardState;
@@ -88,58 +88,6 @@ export class Board<PR extends PieceRegistry> implements IBoard {
       } as PiecesState
     );
   }
-
-  // private indexPieces(pieceLayoutState: PieceLayoutState) {
-  //   // return matrixForMap(pieceLayoutState, (pieceOrSquare, [row, col]) => {
-  //   //   if (pieceOrSquare === 0) {
-  //   //     // Square
-  //   //     return;
-  //   //   }
-  //   //   // Piece
-  //   //   this.pieceCoordsByPieceId[pieceOrSquare.id] = { row, col };
-  //   // });
-  //   // this. =
-  // }
-
-  // private getDerivedState() {
-  //   const nextTerrainState = this.terrain.state;
-  //   const nextPieceLayoutState = matrixMap(this.pieceLayout, (x) =>
-  //     x === 0 ? x : x.state
-  //   );
-
-  //   return {
-  //     state: {
-  //       terrainState: nextTerrainState,
-  //       pieceLayoutState: nextPieceLayoutState
-  //     },
-  //     pieceCoordsByPieceId: matrixReduce(
-  //       nextPieceLayoutState,
-  //       (accum, next, [row, col]) => {
-  //         if (next === 0) {
-  //           return accum;
-  //         }
-
-  //         return {
-  //           ...accum,
-  //           [next.id]: { row, col }
-  //         };
-  //       },
-  //       {} as Record<string, Coord>
-  //     )
-  //   };
-  // }
-
-  // static getDerivedPieceLayoutFromPieceLayoutState(
-  //   pieceLayoutState: PieceLayoutState
-  // ) {
-  //   const pieceLayout = pieceLayoutState.map(() => {});
-  // }
-
-  // private setDerivedState() {
-  //   const next = this.getDerivedState();
-
-  //   this._state = next;
-  // }
 
   getPieceByCoord(coord: Coord) {
     const row = this.piecesState.layoutMatrix[coord.row];
@@ -229,6 +177,9 @@ export class Board<PR extends PieceRegistry> implements IBoard {
       )
     );
 
+    // Expire the cache!
+    this._cachedState = undefined;
+
     return new Ok(
       moves.map((m, i) => ({
         ...m,
@@ -236,77 +187,4 @@ export class Board<PR extends PieceRegistry> implements IBoard {
       }))
     );
   }
-
-  // setState<T extends BoardState>(nextGetter: T | ((prev: BoardState) => T)): T {
-  //   const prevState = this.state;
-
-  //   const nextState =
-  //     typeof nextGetter === 'function' ? nextGetter(prevState) : nextGetter;
-
-  //   nextState.pieceLayoutState;
-
-  //   // const next
-
-  //   // const nextPieceLayoutState = matrixInsertMany(prevState.pieceLayoutState, [
-  //   //   // {
-  //   //   //   index: [move.from.row, move.from.col],
-  //   //   //   nextVal: 0
-  //   //   // },
-  //   //   // {
-  //   //   //   index: [move.to.row, move.to.col],
-  //   //   //   nextVal: move.piece
-  //   //   // }
-  //   // ]);
-
-  //   // const nextPieceState = matrixReduce(
-  //   //   nextState.pieceLayoutState,
-  //   //   (prev, next, [row, col]) => {
-  //   //     if (next === 0) {
-  //   //       return prev;
-  //   //     }
-
-  //   //     const piece = next;
-
-  //   //     piece
-
-  //   //     // The id gets created by the original Coord, but this is open to change!
-  //   //     // const id = `${nextLabel}-${row}-${col}`;
-  //   //     // const piece = pieceRegistry[nextLabel](id);
-
-  //   //     const nextLayoutMatrix = matrixInsert(
-  //   //       prev.layoutMatrix,
-  //   //       [row, col],
-  //   //       id
-  //   //     );
-
-  //   //     return {
-  //   //       pieceById: {
-  //   //         ...prev.pieceById,
-  //   //         [id]: {
-  //   //           piece,
-  //   //           coord: { row, col }
-  //   //         }
-  //   //       },
-  //   //       layoutMatrix: nextLayoutMatrix
-  //   //     };
-  //   //   },
-  //   //   {
-  //   //     layoutMatrix: matrixCreate(
-  //   //       props.terrain.width,
-  //   //       props.terrain.height,
-  //   //       0
-  //   //     ),
-  //   //     pieceById: {}
-  //   //   } as PiecesState
-  //   // )
-  //   // this.indexPieces(next.pieceLayoutState);
-
-  //   // const x = this.getDerivedState();
-
-  //   // this._state = next;
-
-  //   // TODO: Add any derivates
-  // }
-
-  // TODO: Ensure the state gets refreshed anytime there are updates!
 }

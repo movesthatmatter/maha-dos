@@ -16,10 +16,12 @@ import {
   GameStateInMovePhaseWithNoSubmission,
   GameStateInMovePhaseWithPartialSubmission,
   isGameInMovePhase,
-  isGameInMovePhaseWithNoSubmission,
   isGameInMovePhaseWithPartialSubmission,
-  Move
+  Move,
+  PartialGameTurn,
+  ShortMove
 } from './types';
+import { toOppositeColor } from '../util/game';
 
 export interface GameReconciliator extends Game {
   submitMoves(p: { color: Color; moves: Move[] }): Result<
@@ -52,70 +54,73 @@ export interface GameReconciliator extends Game {
   >;
 }
 
-export class GameReconciliator implements GameReconciliator {
+export class GameReconciliator extends Game implements GameReconciliator {
   submitMoves({
     color,
     moves
   }: {
     color: Color;
-    moves: Move[];
+    moves: ShortMove[];
   }): Result<
     | GameStateInMovePhaseWithPartialSubmission
     | GameStateInAtttackPhaseWithNoSubmission,
     SubmitMovesNotPossibleError
   > {
-    // Specs:
-    // Must Be In Move Phase
-    // Must Be in No Submision or PartialSubmission
-    // If in Partial Submission it Returns GameStateInAtttackPhaseWithNoSubmission otherwise GameStateInMovePhaseWithPartialSubmission
-
-    if (!isGameInMovePhase(this.state)) {
+    if (!(this.state.state === 'pending' || isGameInMovePhase(this.state))) {
       return new Err(getSubmitMovesNotPossibleError('GameNotInMovePhase'));
     }
 
-    // TODO This could actually do a test to see if the moves were succesful!
-    // return Result
-    //   .all(...moves.map((m) => this.board.move(m)))
-    //   .map(() => {
-
-    //   })
-    //   .mapErr(() => {})
-
-    // const prevState = {
-    //   ...this.state,
-    // }
-
     const prevGame = this.state;
+    const oppositeColor = toOppositeColor(color);
 
-    if (isGameInMovePhaseWithNoSubmission(prevGame)) {
-      const nextState: GameStateInMovePhaseWithPartialSubmission = {
-        ...prevGame,
-        state: 'inProgress',
-        phase: 'move',
-        winner: undefined,
-        submissionStatus: 'partial',
-        // canD
-        ...(color === 'white'
+    if (
+      isGameInMovePhaseWithPartialSubmission(prevGame) &&
+      prevGame[color].canDraw
+    ) {
+      // TODO: This shouldn't have to be recasted as the canDraw check above should suffice
+      //  but for some reason the compiler doesn't see it
+      const oppositeColorMoves = prevGame[oppositeColor].moves as ShortMove[];
+
+      const currentColorMoves = moves;
+
+      const oppositeColorMovesRes = this.board.moveMultiple(oppositeColorMoves);
+
+      if (!oppositeColorMovesRes.ok) {
+        return new Err(getSubmitMovesNotPossibleError('InvalidMoves'));
+      }
+
+      const currentColorMovesRes = this.board.moveMultiple(currentColorMoves);
+
+      if (!currentColorMovesRes.ok) {
+        return new Err(getSubmitMovesNotPossibleError('InvalidMoves'));
+      }
+
+      const nextGameTurn: PartialGameTurn = [
+        color === 'white'
           ? {
-              white: {
-                canDraw: false,
-                moves
-              },
-              black: {
-                canDraw: true,
-                moves: undefined
-              }
+              white: currentColorMovesRes.val,
+              black: oppositeColorMovesRes.val
             }
           : {
-              white: {
-                canDraw: true,
-                moves: undefined
-              },
-              black: {
-                canDraw: false,
-                moves
-              }
-            })
+              white: oppositeColorMovesRes.val,
+              black: currentColorMovesRes.val
+            }
+      ];
+
+      const nextState: GameStateInAtttackPhaseWithNoSubmission = {
+        ...prevGame,
+        phase: 'attack',
+        submissionStatus: 'none',
+        history: [...prevGame.history, nextGameTurn],
+        white: {
+          canDraw: true,
+          attacks: undefined
+        },
+        black: {
+          canDraw: true,
+          attacks: undefined
+        },
+        boardState: this.board.state
       };
 
       const { boardState, ...nextPartialState } = nextState;
@@ -125,65 +130,39 @@ export class GameReconciliator implements GameReconciliator {
       return new Ok(nextState);
     }
 
-    // TODO: Add the other logic for preparing game!
-    return new Err(getSubmitMovesNotPossibleError('GameNotInMovePhase'));
+    const nextState: GameStateInMovePhaseWithPartialSubmission = {
+      ...prevGame,
+      state: 'inProgress',
+      phase: 'move',
+      winner: undefined,
+      submissionStatus: 'partial',
+      ...(color === 'white'
+        ? {
+            white: {
+              canDraw: false,
+              moves
+            },
+            black: {
+              canDraw: true,
+              moves: undefined
+            }
+          }
+        : {
+            white: {
+              canDraw: true,
+              moves: undefined
+            },
+            black: {
+              canDraw: false,
+              moves
+            }
+          })
+    };
 
-    // if (isGameInMovePhaseWithPartialSubmission(this.state)) {
-    //   // Returns GameStateInAtttackPhaseWithNoSubmission
-    //   // return this.board
-    //   // .moveMultiple(moves)
-    //   // .mapErr(
-    //   //   () =>
-    //   //     ({
-    //   //       type: 'SubmitMovesNotPossible',
-    //   //       reason: 'GameNotInMovePhase',
-    //   //       content: undefined
-    //   //     } as const)
-    //   // )
-    //   // .map(() => {
-    //   //   this
-    //   //   // this.state = nextState;
-    //   //   return nextState;
-    //   //   // this.state = {
-    //   //   //   ...this.state,
-    //   //   // }
-    //   //   // return this.state;
-    //   //   // if (isGameInMovePhaseWithNoSubmission(prevState)) {
-    //   //   //   return this.state as GameStateInMovePhaseWithPartialSubmission;
-    //   //   // }
-    //   //   // return this.state as ;
-    //   // });
-    // }
+    const { boardState, ...nextPartialState } = nextState;
 
-    // return this.state;
+    this.partialState = nextPartialState;
 
-    // const nextPieceLayoutState = matrixInsertMany(
-    //   this.board.state.pieceLayoutState,
-    //   moves.reduce<
-    //     {
-    //       index: [number, number];
-    //       nextVal: 0 | IdentifiablePieceState;
-    //     }[]
-    //   >(
-    //     (accum, nextMove) => [
-    //       ...accum,
-    //       {
-    //         index: [nextMove.from.row, nextMove.from.col],
-    //         nextVal: 0
-    //       },
-    //       {
-    //         index: [nextMove.to.row, nextMove.to.col],
-    //         nextVal: nextMove.piece
-    //       }
-    //     ],
-    //     []
-    //   )
-    // );
-
-    // this.state.boardState.pieceLayoutState = nextPieceLayoutState;
-
-    // this.board. = {}
-
-    // return
+    return new Ok(nextState);
   }
 }

@@ -1,3 +1,4 @@
+import { Coord } from '.';
 import { identity, range } from './misc';
 
 export type Matrix<T> = T[][];
@@ -95,12 +96,18 @@ export const matrixGet = <T>(matrix: Matrix<T>, [row, col]: MatrixIndex) => {
   return matrixRow[col];
 };
 
-// export const matrix = <T>(matrix: Matrix<T>, [row, col]: MatrixIndex) => {
-//   const matrixRow = matrix[row];
+export const printMatrix = <T>(matrix: Matrix<T>) => {
+  let res = '';
 
-//   if (!matrixRow) {
-//     return false;
-//   }
+  matrix.forEach((row) => {
+    res += `${row.join(' | ')}\n`;
+  });
 
-//   return matrixRow[col];
-// };
+  console.dir(res);
+};
+
+export const coordToMatrixIndex = (c: Coord): MatrixIndex => [c.row, c.col];
+export const matrixIndexToCoord = ([row, col]: MatrixIndex): Coord => ({
+  row,
+  col
+});

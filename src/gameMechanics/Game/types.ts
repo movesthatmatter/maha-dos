@@ -32,6 +32,9 @@ export type Attack = {
   aoe?: Coord[];
 };
 
+// // A Partial Game In Move Phase doesn't have the Attack Phase
+// export type PartialGameTurn = [{ white: Move[]; black: Move[] }];
+
 // A Partial Game In Move Phase doesn't have the Attack Phase
 export type PartialGameTurnMovePhase = [{ [k in Color]: Move[] | undefined }];
 
@@ -44,16 +47,17 @@ export type PartialGameTurn =
   | PartialGameTurnMovePhase
   | PartialGameTurnAttackPhase;
 
+
 export type FullGameTurn = [
   { [k in Color]: Move[] },
   { [k in Color]: Attack[] }
 ];
-
 export type GameTurn = PartialGameTurn | FullGameTurn;
 
 // TODO: The reconciliation for a whole history could become to costly
 //  so in that case we will need to optimize it (caching, memoizine, save the pieceLayout at each step, etc..)
 //  but for now we leave it as is, b/c this is the most raw data!
+// export type GameHistory = FullGameTurn[] | [...FullGameTurn[], PartialGameTurn];
 export type GameHistory = GameTurn[];
 
 export type GameStatePending = {
@@ -94,11 +98,11 @@ export type InProgressGameStatePhaseSlice =
           submissionStatus: 'preparing';
           white: {
             canDraw: true;
-            moves: Move[];
+            moves: ShortMove[];
           };
           black: {
             canDraw: true;
-            moves: Move[];
+            moves: ShortMove[];
           };
         }
       | {
@@ -109,14 +113,14 @@ export type InProgressGameStatePhaseSlice =
           };
           black: {
             canDraw: false; // When canDraw is false it means player Submitted
-            moves: Move[];
+            moves: ShortMove[];
           };
         }
       | {
           submissionStatus: 'partial';
           white: {
             canDraw: false; // When canDraw is false it means player Submitted
-            moves: Move[];
+            moves: ShortMove[];
           };
           black: {
             canDraw: true;
@@ -153,7 +157,7 @@ export type InProgressGameStatePhaseSlice =
           submissionStatus: 'partial';
           white: {
             canDraw: true;
-            attacks: Attack[];
+            attacks: undefined;
           };
           black: {
             canDraw: false; // When Can Draw is false it means player Submitted
@@ -168,7 +172,7 @@ export type InProgressGameStatePhaseSlice =
           };
           black: {
             canDraw: true;
-            attacks: Attack[];
+            attacks: undefined;
           };
         }
     ));
@@ -262,4 +266,3 @@ export type GameConfigurator<PR extends PieceRegistry> = {
   terrain: TerrainProps;
   pieceLayout: Matrix<keyof PR | 0>;
 };
-

@@ -497,6 +497,7 @@ describe('eval attacks for Queen', () => {
       return;
     }
 
+
     const state = game.state;
     game.load({
       ...state,

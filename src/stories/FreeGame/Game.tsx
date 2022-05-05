@@ -7,18 +7,17 @@ import {
 } from '../../gameMechanics/Game/types';
 import { Maha, MahaProps } from '../../mahaDosGame/components/Maha';
 import { Color } from '../../gameMechanics/util';
-import { Button } from '../../mahaDosGame/components/Button';
+import { moveToMahaChessMove } from '../../mahaDosGame/util';
 
 type Props = {
   color: Color;
   onSubmitMoves: MahaProps['onSubmitMoves'];
+  gameState: MahaProps['gameState'];
 };
 
 export const MahaGame: React.FC<Props> = (props) => {
   const [pieceInfo, setPieceInfo] = useState<PieceState>();
   const [myMoves, setMyMoves] = useState<Move[]>();
-
-  // const gameReconciliator = useRef(new GameReconci)
 
   return (
     <div
@@ -28,7 +27,7 @@ export const MahaGame: React.FC<Props> = (props) => {
     >
       <div>
         <Maha
-          // gameState={}
+          gameState={props.gameState}
           canInteract
           onSubmitMoves={props.onSubmitMoves}
           onSubmitAttacks={() => {
@@ -40,13 +39,15 @@ export const MahaGame: React.FC<Props> = (props) => {
             if (
               isGameInMovePhaseWithPartialOrPreparingSubmission(next.gameState)
             ) {
-              setMyMoves(next.gameState[props.color].moves);
+              setMyMoves((prev) => [...(prev || []), next.move]);
             }
           }}
         />
         <br />
         {myMoves?.map((m) => (
-          <span>{`${m.piece.label}: ${m.from.row}.${m.from.col} > ${m.to.row}.${m.to.col}, `}</span>
+          <span>{`${m.piece.label}:${moveToMahaChessMove(m)?.from}-${
+            moveToMahaChessMove(m)?.to
+          }, `}</span>
         ))}
       </div>
       <div
@@ -59,6 +60,10 @@ export const MahaGame: React.FC<Props> = (props) => {
           justifyContent: 'center'
         }}
       >
+        <h6>
+          {props.gameState?.state === 'inProgress' && props.gameState.phase}
+        </h6>
+        <br />
         {pieceInfo && <PieceInfo piece={pieceInfo} />}
       </div>
     </div>

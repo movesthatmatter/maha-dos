@@ -20,7 +20,7 @@ export type MahaProps = {
   ) => void;
   canInteract?: boolean;
   playingColor: Color;
-  gameState?: GameState;
+  gameState: GameState; // always receives a game state even if default/pending
   onPieceTouched?: MahaChessTerrainProps['onPieceTouched'];
   onMoveDrawn?: (p: { move: Move; gameState: GameState }) => void;
 };
@@ -49,13 +49,24 @@ export const Maha: React.FC<MahaProps> = ({
   onPieceTouched = noop,
   onMoveDrawn = noop
 }) => {
-  const gameRef = useRef(getGameFromState(gameState));
-  const [state, setState] = useState(gameRef.current.state);
+  const localGameRef = useRef(getGameFromState(gameState));
   const [destinationSquares, setDestinationSquares] = useState<Coord[]>();
 
+  const [preparingGameState, setPreparingGameState] = useState<GameState>();
+
+  // Keep the current game in sync
   useEffect(() => {
-    if (gameState) {
-      gameRef.current.load(gameState);
+    // Only in these situations the given state changes the local one
+    // TODO: Test this
+    if (
+      gameState.state !== localGameRef.current.state.state ||
+      (localGameRef.current.state.state === 'inProgress' &&
+        gameState.state === 'inProgress' &&
+        localGameRef.current.state.phase !== gameState.phase)
+    ) {
+      localGameRef.current.load(gameState);
+
+      setPreparingGameState(undefined);
     }
   }, [gameState]);
 
@@ -63,13 +74,11 @@ export const Maha: React.FC<MahaProps> = ({
     <>
       <MahaChessTerrain
         sizePx={500}
-        gameState={state}
+        gameState={preparingGameState || gameState}
         styledCoords={destinationSquares?.map((dest) => ({
           ...dest,
           style: destinationSquareStyle
         }))}
-        // onPieceTouched={onPieceTouched}
-
         onPieceTouched={(pieceState, coord) => {
           if (!canInteract) {
             return;
@@ -79,15 +88,13 @@ export const Maha: React.FC<MahaProps> = ({
             return;
           }
 
-          const piece = gameRef.current.board.getPieceById(pieceState.id);
+          const piece = localGameRef.current.board.getPieceById(pieceState.id);
 
-          const dests = piece?.evalMove(gameRef.current);
+          const dests = piece?.evalMove(localGameRef.current);
 
           if (dests) {
             setDestinationSquares(dests.map((d) => d.to));
           }
-
-          // console.log('dests', piece, dests);
 
           onPieceTouched(pieceState, coord);
         }}
@@ -100,36 +107,25 @@ export const Maha: React.FC<MahaProps> = ({
             return;
           }
 
-          gameRef.current
+          localGameRef.current
             .drawMove(move.from, move.to)
             .mapErr((e) => {
-              console.log('error move', e);
+              // console.log('error move', e);
             })
             .map((next) => {
               onMoveDrawn(next);
-              setState(next.gameState);
-
-              console.log('moved successfully', next);
+              setPreparingGameState(next.gameState);
             });
         }}
-        // onUpdated={(next: GameState) => {
-        //   if (isGameStateInMovePhaseWithPartialOrPreparingSubmission(next)) {
-        //     setMovesbyColor(() => ({
-        //       white: next.white.moves,
-        //       black: next.black.moves
-        //     }));
-        //     DEFA;
-        //   }
-        // }}
       />
-      {isGameInMovePhaseWithPreparingSubmission(state) && (
+      {preparingGameState && isGameInMovePhaseWithPreparingSubmission(preparingGameState) && (
         <>
           <br />
           <Button
             primary
             label={`Submit`}
             onClick={() => {
-              onSubmitMoves(state);
+              onSubmitMoves(preparingGameState);
             }}
           />
         </>
