@@ -5,6 +5,7 @@ import {
   GameConfigurator,
   GameHistory,
   GameStateInProgress,
+  GameStateInMovePhase,
   Move
 } from '../../../gameMechanics/Game/types';
 import { mahaPieceRegistry } from '../registry';
@@ -33,6 +34,22 @@ describe('eval pawn moves', () => {
     if (!(pieceWhite && pieceBlack)) {
       return;
     }
+
+    const { state } = game;
+    game.load({
+      ...state,
+      state: 'inProgress',
+      history: [],
+      phase: 'move',
+      white: {
+        canDraw: true,
+        moves: []
+      },
+      black: {
+        canDraw: true,
+        moves: []
+      }
+    } as GameStateInMovePhase);
 
     const movesBlack = pieceBlack.evalMove(game);
     const movesWhite = pieceWhite.evalMove(game);
@@ -73,6 +90,22 @@ describe('eval pawn moves', () => {
     if (!(pieceWhite && pieceBlack)) {
       return;
     }
+
+    const { state } = game;
+    game.load({
+      ...state,
+      state: 'inProgress',
+      history: [],
+      phase: 'move',
+      white: {
+        canDraw: true,
+        moves: []
+      },
+      black: {
+        canDraw: true,
+        moves: []
+      }
+    } as GameStateInMovePhase);
 
     //TODO - find better way to test this - this gets implemented into Pawn at constructor and
     // piecehasMoved will be changed by the engine when it applies the move.
