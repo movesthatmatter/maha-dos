@@ -4,7 +4,8 @@ import {
   Attack,
   GameStateInProgress,
   GameStateInMovePhase,
-  Move
+  Move,
+  AttackOutcome
 } from '../../../gameMechanics/Game/types';
 import { Piece } from '../../../gameMechanics/Piece/Piece';
 import {
@@ -20,6 +21,7 @@ import {
 import { PieceLayoutState } from '../../../gameMechanics/Board/types';
 import { Err, Ok, Result } from 'ts-results';
 import { AttackTargetPieceUndefined } from '../../../gameMechanics/Game/errors';
+import { AttackNotPossibleError } from '../../../gameMechanics/Game/errors/types';
 
 const pieceLabel = 'Knight';
 
@@ -125,18 +127,61 @@ export class Knight extends Piece {
     return attacks;
   }
 
-  executeAttack(
+  calculateAttackOutcome(
     game: Game,
     attack: Attack
-  ): Result<PieceLayoutState, AttackTargetPieceUndefined> {
+  ): Result<AttackOutcome, AttackNotPossibleError> {
     const targetPiece = game.board.getPieceByCoord(attack.to);
+
     //TODO: Better typecheck. Deal with error handling
-    if (targetPiece) {
+    if (!targetPiece) {
       return new Err({
-        type: 'TargetPieceIsUndefined',
-        content: undefined
+        type: 'AttackNotPossible',
+        content: {
+          reason: 'AttackerPieceNotExistent'
+        }
       });
     }
-    return Ok({} as PieceLayoutState);
+
+    const moved = getPieceMoveThisTurn(this, game);
+    const attackBonus =
+      getAllAdjecentPiecesToPosition(
+        attack.from,
+        game.board.state.pieceLayoutState
+      ).filter((p) => p.label === 'Queen' && p.color === this.state.color)
+        .length > 0;
+
+    const moveDamage = moved ? 1 : 0;
+    const bonusDamage = attackBonus ? 1 : 0;
+
+    let kingDefense = 0;
+    if (targetPiece.state.label === 'King') {
+      kingDefense =
+        getAllAdjecentPiecesToPosition(
+          attack.to,
+          game.board.state.pieceLayoutState
+        ).filter(
+          (p) => p.label === 'Rook' && p.color === targetPiece.state.color
+        ).length > 0
+          ? 1
+          : 0;
+    }
+
+    const defenseBonus =
+      targetPiece.state.label === 'Bishop' ||
+      targetPiece.state.label === 'Knight'
+        ? 1
+        : 0;
+
+    return Ok({
+      attack,
+      hasMoved: true,
+      damage:
+        this.state.attackDamage +
+        moveDamage +
+        bonusDamage -
+        defenseBonus -
+        kingDefense
+    });
   }
 }

@@ -32,15 +32,15 @@ export type ShortAttack = {
 
 // TODO: This is actuall just the ShortAttack as the SpecialAttacks aren't needed here!
 // TODO: Take the SpecialAttacks out as they aren't needed in the Attack
-export type Attack = ShortAttack & SpecialAttacks
+export type Attack = ShortAttack & SpecialAttacks;
 
 export type SpecialAttacks = {
-  heal?: boolean;
-  crit?: boolean;
-  attackBonus?: boolean;
-  defenseBonus?: boolean;
-  defensePenalty?: boolean;
-  movementAttackBonus?: boolean;
+  // heal?: boolean;
+  // crit?: boolean;
+  // attackBonus?: boolean;
+  // defenseBonus?: boolean;
+  // defensePenalty?: boolean;
+  // movementAttackBonus?: boolean;
   aoe?: Coord[];
 };
 

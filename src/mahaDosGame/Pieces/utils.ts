@@ -26,6 +26,16 @@ export function stringifyCoord(c: Coord): string {
   return `row:${c.row}-col:${c.col}`;
 }
 
+export function calculateDistanceBetween2Coords(
+  dest: Coord,
+  target: Coord
+): number {
+  return Math.max(
+    Math.abs(dest.row - target.row),
+    Math.abs(dest.col - target.col)
+  );
+}
+
 export function evalEachDirectionForMove(
   from: Coord,
   piece: Piece,

@@ -223,11 +223,6 @@ describe('Eval attacks for Bishop', () => {
       history
     } as GameStateInProgress);
 
-    // const piece = new Bishop(
-    //   'black',
-    //   generatePieceLabel('black', 'bB', { row: 2, col: 2 })
-    // );
-
     const piece = game.board.getPieceByCoord({ row: 2, col: 2 });
 
     expect(piece).toBeDefined();
@@ -253,6 +248,57 @@ describe('Eval attacks for Bishop', () => {
       {
         from: { row: 2, col: 2 },
         to: { row: 1, col: 1 },
+        type: 'range',
+        heal: true
+      }
+    ];
+
+    expect(attacks).toEqual(expected);
+  });
+
+  test('pieces more than 3 squares away and less than 3 sqaures away - healing test', () => {
+    const configuration: GameConfigurator<typeof mahaPieceRegistry> = {
+      terrain: { width: 8 },
+      pieceLayout: [
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 'wQ', 0],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 'wR', 0, 0, 0, 0, 0, 0],
+        [0, 0, 'wB', 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        ['bQ', 0, 0, 0, 'wQ', 0, 0, 0]
+      ]
+    };
+
+    const game = new MahaGame(configuration);
+    const state = game.state;
+
+    const piece = game.board.getPieceByCoord({ row: 5, col: 2 });
+
+    expect(piece).toBeDefined();
+
+    if (!piece) {
+      return;
+    }
+
+    const attacks = piece.evalAttack(game);
+
+    const expected: Attack[] = [
+      {
+        from: { row: 5, col: 2 },
+        to: { row: 7, col: 4 },
+        type: 'range',
+        heal: true
+      },
+      {
+        from: { row: 5, col: 2 },
+        to: { row: 7, col: 0 },
+        type: 'range'
+      },
+      {
+        from: { row: 5, col: 2 },
+        to: { row: 4, col: 1 },
         type: 'range',
         heal: true
       }

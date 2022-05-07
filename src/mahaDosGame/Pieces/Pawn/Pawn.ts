@@ -1,15 +1,20 @@
 import { Game } from '../../../gameMechanics/Game/Game';
 import { Color, Coord } from '../../../gameMechanics/util/types';
-import { Attack, Move } from '../../../gameMechanics/Game/types';
+import { Attack, Move, AttackOutcome } from '../../../gameMechanics/Game/types';
 import { Piece } from '../../../gameMechanics/Piece/Piece';
 import {
   IdentifiablePieceState,
   PieceDynamicProps
 } from '../../../gameMechanics/Piece/types';
-import { evalEachDirectionForMove, getPieceMoveThisTurn } from '../utils';
+import {
+  evalEachDirectionForMove,
+  getAllAdjecentPiecesToPosition,
+  getPieceMoveThisTurn
+} from '../utils';
 import { Err, Ok, Result } from 'ts-results';
 import { PieceLayoutState } from '../../../gameMechanics/Board/types';
 import { AttackTargetPieceUndefined } from '../../../gameMechanics/Game/errors';
+import { AttackNotPossibleError } from '../../../gameMechanics/Game/errors/types';
 
 const pieceLabel = 'Pawn';
 
@@ -78,8 +83,6 @@ export class Pawn extends Piece {
       return [];
     }
 
-    const moved = getPieceMoveThisTurn(this, game);
-
     return this.state.attackDirection.reduce((attacks, dir) => {
       const target: Coord = {
         row: pieceCoord.row + dir.row,
@@ -98,8 +101,7 @@ export class Pawn extends Piece {
         const attack: Attack = {
           from: pieceCoord,
           to: target,
-          type: 'melee',
-          ...(moved && { movementAttackBonus: true })
+          type: 'melee'
         };
         return [...attacks, attack];
       }
@@ -107,18 +109,46 @@ export class Pawn extends Piece {
     }, [] as Attack[]);
   }
 
-  executeAttack(
+  calculateAttackOutcome(
     game: Game,
     attack: Attack
-  ): Result<PieceLayoutState, AttackTargetPieceUndefined> {
+  ): Result<AttackOutcome, AttackNotPossibleError> {
     const targetPiece = game.board.getPieceByCoord(attack.to);
+
     //TODO: Better typecheck. Deal with error handling
-    if (targetPiece) {
+    if (!targetPiece) {
       return new Err({
-        type: 'TargetPieceIsUndefined',
-        content: undefined
+        type: 'AttackNotPossible',
+        content: {
+          reason: 'AttackerPieceNotExistent'
+        }
       });
     }
-    return Ok({} as PieceLayoutState);
+    const moved = getPieceMoveThisTurn(this, game);
+
+    let kingDefense = 0;
+    if (targetPiece.state.label === 'King') {
+      kingDefense =
+        getAllAdjecentPiecesToPosition(
+          attack.to,
+          game.board.state.pieceLayoutState
+        ).filter(
+          (p) => p.label === 'Rook' && p.color === targetPiece.state.color
+        ).length > 0
+          ? 1
+          : 0;
+    }
+
+    const defenseBonus =
+      targetPiece.state.label === 'Bishop' ||
+      targetPiece.state.label === 'Knight'
+        ? 1
+        : 0;
+
+    return Ok({
+      attack,
+      hasMoved: true,
+      damage: (moved ? 2 : 1) - defenseBonus - kingDefense
+    });
   }
 }
