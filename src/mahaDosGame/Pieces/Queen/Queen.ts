@@ -12,10 +12,7 @@ import {
   getAllAdjecentPiecesToPosition
 } from '../utils';
 import { Err, Ok, Result } from 'ts-results';
-import { PieceLayoutState } from '../../../gameMechanics/Board/types';
 import { toDictIndexedBy } from '../../../gameMechanics/utils';
-import { King } from '../King';
-import { AttackTargetPieceUndefined } from '../../../gameMechanics/Game/errors';
 import { AttackNotPossibleError } from '../../../gameMechanics/Game/errors/types';
 
 const pieceLabel = 'Queen';
@@ -82,10 +79,6 @@ export class Queen extends Piece {
 
     const attacks: Attack[] = [];
     const { history } = game.state;
-    const adjecentPieces = getAllAdjecentPiecesToPosition(
-      pieceCoord,
-      game.board.state.pieceLayoutState
-    );
 
     if (
       history &&

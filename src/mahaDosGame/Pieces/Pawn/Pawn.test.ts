@@ -246,14 +246,12 @@ describe('eval attacks', () => {
       {
         from: { row: 6, col: 2 },
         to: { row: 5, col: 3 },
-        type: 'melee',
-        movementAttackBonus: true
+        type: 'melee'
       },
       {
         from: { row: 6, col: 2 },
         to: { row: 5, col: 1 },
-        type: 'melee',
-        movementAttackBonus: true
+        type: 'melee'
       }
     ];
 
@@ -261,14 +259,12 @@ describe('eval attacks', () => {
       {
         from: { row: 2, col: 1 },
         to: { row: 3, col: 0 },
-        type: 'melee',
-        movementAttackBonus: true
+        type: 'melee'
       },
       {
         from: { row: 2, col: 1 },
         to: { row: 3, col: 2 },
-        type: 'melee',
-        movementAttackBonus: true
+        type: 'melee'
       }
     ];
 

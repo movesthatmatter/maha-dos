@@ -12,8 +12,6 @@ import {
   getPieceMoveThisTurn
 } from '../utils';
 import { Err, Ok, Result } from 'ts-results';
-import { PieceLayoutState } from '../../../gameMechanics/Board/types';
-import { AttackTargetPieceUndefined } from '../../../gameMechanics/Game/errors';
 import { AttackNotPossibleError } from '../../../gameMechanics/Game/errors/types';
 
 const pieceLabel = 'Pawn';

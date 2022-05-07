@@ -257,38 +257,32 @@ describe('eval attacks for Queen', () => {
       {
         from: { row: 3, col: 2 },
         to: { row: 2, col: 3 },
-        type: 'melee',
-        crit: true
+        type: 'melee'
       },
       {
         from: { row: 3, col: 2 },
         to: { row: 3, col: 4 },
-        type: 'range',
-        crit: true
+        type: 'range'
       },
       {
         from: { row: 3, col: 2 },
         to: { row: 5, col: 2 },
-        type: 'range',
-        crit: true
+        type: 'range'
       },
       {
         from: { row: 3, col: 2 },
         to: { row: 5, col: 0 },
-        type: 'range',
-        crit: true
+        type: 'range'
       },
       {
         from: { row: 3, col: 2 },
         to: { row: 3, col: 0 },
-        type: 'range',
-        crit: true
+        type: 'range'
       },
       {
         from: { row: 3, col: 2 },
         to: { row: 1, col: 0 },
-        type: 'range',
-        crit: true
+        type: 'range'
       }
     ];
     expect(attacks).toEqual(expected);
@@ -351,8 +345,7 @@ describe('eval attacks for Queen', () => {
       {
         from: { row: 3, col: 2 },
         to: { row: 2, col: 1 },
-        type: 'melee',
-        crit: true
+        type: 'melee'
       }
     ];
     expect(attacks).toEqual(expected);

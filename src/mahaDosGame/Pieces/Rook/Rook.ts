@@ -11,10 +11,8 @@ import {
   calculateDistanceBetween2Coords,
   getAllAdjecentPiecesToPosition
 } from '../utils';
-import { PieceLayoutState } from '../../../gameMechanics/Board/types';
 import { Err, Ok, Result } from 'ts-results';
 import { toDictIndexedBy } from '../../../gameMechanics/utils';
-import { AttackTargetPieceUndefined } from '../../..//gameMechanics/Game/errors';
 import { range } from '../../../gameMechanics/util';
 import { AttackNotPossibleError } from '../../../gameMechanics/Game/errors/types';
 

@@ -114,39 +114,33 @@ export class Bishop extends Piece {
         }
 
         if (r === 1) {
-          if (targetPiece?.state.label === 'Rook') {
+          if (targetPiece.state.label === 'Rook') {
             attacks.push({
               from: pieceCoord,
               to: target,
-              type: 'range',
-              ...(targetPiece.state.color === this.state.color && {
-                heal: true
-              })
+              type: 'range'
             });
             hitObstacle = true;
             return;
           }
         } else {
-          if (targetPiece) {
-            if (targetPiece.state.color !== this.state.color) {
+          if (targetPiece.state.color !== this.state.color) {
+            attacks.push({
+              from: pieceCoord,
+              to: target,
+              type: 'range'
+            });
+          } else {
+            if (r < 4) {
               attacks.push({
                 from: pieceCoord,
                 to: target,
                 type: 'range'
               });
-            } else {
-              if (r < 4) {
-                attacks.push({
-                  from: pieceCoord,
-                  to: target,
-                  type: 'range',
-                  heal: true
-                });
-              }
             }
-            hitObstacle = true;
-            return;
           }
+          hitObstacle = true;
+          return;
         }
       });
     });

@@ -226,26 +226,22 @@ describe('eval attacks', () => {
       {
         from: { row: 3, col: 2 },
         to: { row: 2, col: 2 },
-        type: 'melee',
-        defenseBonus: true
+        type: 'melee'
       },
       {
         from: { row: 3, col: 2 },
         to: { row: 3, col: 3 },
-        type: 'melee',
-        defenseBonus: true
+        type: 'melee'
       },
       {
         from: { row: 3, col: 2 },
         to: { row: 4, col: 3 },
-        type: 'melee',
-        defenseBonus: true
+        type: 'melee'
       },
       {
         from: { row: 3, col: 2 },
         to: { row: 4, col: 1 },
-        type: 'melee',
-        defenseBonus: true
+        type: 'melee'
       }
     ];
 

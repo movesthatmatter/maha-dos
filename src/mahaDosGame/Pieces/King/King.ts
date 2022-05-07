@@ -12,8 +12,6 @@ import {
   getPieceMoveThisTurn
 } from '../utils';
 import { Err, Ok, Result } from 'ts-results';
-import { PieceLayoutState } from '../../../gameMechanics/Board/types';
-import { AttackTargetPieceUndefined } from '../../../gameMechanics/Game/errors';
 import { AttackNotPossibleError } from '../../../gameMechanics/Game/errors/types';
 
 const pieceLabel = 'King';
@@ -76,12 +74,7 @@ export class King extends Piece {
     if (!pieceCoord) {
       return [];
     }
-    const defenseBonus =
-      getAllAdjecentPiecesToPosition(
-        pieceCoord,
-        game.board.state.pieceLayoutState
-      ).filter((p) => p.label === 'Rook' && p.color === this.state.color)
-        .length > 0;
+
     return this.state.movesDirections.reduce((attacks, dir) => {
       const target: Coord = {
         row: pieceCoord.row + dir.row,
@@ -100,8 +93,7 @@ export class King extends Piece {
         const attack: Attack = {
           from: pieceCoord,
           to: target,
-          type: 'melee',
-          ...(defenseBonus && { defenseBonus: true })
+          type: 'melee'
         };
         return [...attacks, attack];
       }
