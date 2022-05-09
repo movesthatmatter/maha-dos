@@ -3,7 +3,6 @@ import { Game } from './Game';
 import { generate } from '../../mahaDosGame/helpers';
 import { mahaPieceRegistry } from '../../mahaDosGame/Pieces/registry';
 import { generatePieceLabel } from '../Board/util';
-import { Move, Attack } from './types';
 import { King } from 'src/mahaDosGame/Pieces/King';
 import { Knight } from 'src/mahaDosGame/Pieces/Knight';
 import { Rook } from 'src/mahaDosGame/Pieces/Rook';

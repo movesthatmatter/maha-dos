@@ -1,6 +1,11 @@
 import { Game } from '../../../gameMechanics/Game/Game';
-import { Color, Coord } from '../../../gameMechanics/util/types';
-import { Attack, Move, AttackOutcome } from '../../../gameMechanics/Game/types';
+import { Coord } from '../../../gameMechanics/util/types';
+import {
+  Move,
+  Attack,
+  AttackOutcome,
+  Color
+} from 'src/gameMechanics/commonTypes';
 import { Piece } from '../../../gameMechanics/Piece/Piece';
 import {
   IdentifiablePieceState,

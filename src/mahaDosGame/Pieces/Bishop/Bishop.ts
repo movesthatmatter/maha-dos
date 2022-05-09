@@ -1,7 +1,5 @@
 import { Err, Ok, Result } from 'ts-results';
 import { Game } from '../../../gameMechanics/Game/Game';
-import { Color } from '../../../gameMechanics/util/types';
-import { Attack, Move, AttackOutcome } from '../../../gameMechanics/Game/types';
 import { Piece } from '../../../gameMechanics/Piece/Piece';
 import {
   IdentifiablePieceState,
@@ -14,6 +12,12 @@ import {
   evalEachDirectionForMove,
   getAllAdjecentPiecesToPosition
 } from '../utils';
+import {
+  Attack,
+  AttackOutcome,
+  Color,
+  Move
+} from 'src/gameMechanics/commonTypes';
 
 const pieceLabel = 'Bishop';
 

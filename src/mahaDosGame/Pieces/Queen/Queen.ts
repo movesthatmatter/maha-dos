@@ -1,6 +1,4 @@
 import { Game } from '../../../gameMechanics/Game/Game';
-import { Color } from '../../../gameMechanics/util/types';
-import { Attack, Move, AttackOutcome } from '../../../gameMechanics/Game/types';
 import { Piece } from '../../../gameMechanics/Piece/Piece';
 import {
   IdentifiablePieceState,
@@ -14,6 +12,7 @@ import {
 import { Err, Ok, Result } from 'ts-results';
 import { toDictIndexedBy } from '../../../gameMechanics/utils';
 import { AttackNotPossibleError } from '../../../gameMechanics/Game/errors/types';
+import { AttackOutcome, Move, Attack, Color } from 'src/gameMechanics/commonTypes';
 
 const pieceLabel = 'Queen';
 

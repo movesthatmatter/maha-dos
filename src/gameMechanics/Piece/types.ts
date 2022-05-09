@@ -1,6 +1,6 @@
-import { Color, MoveDirection } from '../util/types';
-import { Piece } from './Piece';
 import { Coord } from '../../gameMechanics/util';
+import { Color, MoveDirection } from '../commonTypes';
+import { Piece } from './Piece';
 
 export type PieceStaticProps<L extends string = string> = {
   label: L; // pawn, knight, bishop, queen, king, but also beserk king and whatever other new ones
@@ -43,7 +43,7 @@ export type IdentifiablePieceState<L extends string = string> = {
 } & PieceState<L>;
 
 export type PieceFactory = (
-  id: IdentifiablePieceState<'Knight'>['id'],
+  id: IdentifiablePieceState<any>['id'],
   dynamicProps?: PieceDynamicProps
 ) => Piece;
 

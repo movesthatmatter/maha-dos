@@ -1,17 +1,19 @@
 import { MahaGame } from '../../MahaGame';
 import { Bishop } from './Bishop';
 import {
-  Attack,
   GameConfigurator,
-  GameHistory,
   GameStateInProgress,
-  GameStateInMovePhase,
-  Move,
-  PartialGameTurn
+  GameStateInMovePhase
 } from '../../../gameMechanics/Game/types';
 import { mahaPieceRegistry } from '../registry';
 import { generatePieceLabel } from '../../../gameMechanics/Board/util';
 import { generate } from '../../..//mahaDosGame/helpers';
+import {
+  Attack,
+  GameHistory,
+  Move,
+  PartialGameTurn
+} from 'src/gameMechanics/commonTypes';
 
 test('eval moves', () => {
   const configuration: GameConfigurator<typeof mahaPieceRegistry> = {

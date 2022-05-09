@@ -1,4 +1,4 @@
-import { Coord } from '.';
+import { Coord } from './types';
 import { identity, range } from './misc';
 
 export type Matrix<T> = T[][];

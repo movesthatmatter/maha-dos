@@ -1,6 +1,4 @@
-import { Color, Coord } from '../../../gameMechanics/util/types';
 import { Game } from '../../../gameMechanics/Game/Game';
-import { Attack, Move, AttackOutcome } from '../../../gameMechanics/Game/types';
 import { Piece } from '../../../gameMechanics/Piece/Piece';
 import {
   IdentifiablePieceState,
@@ -13,8 +11,14 @@ import {
 } from '../utils';
 import { Err, Ok, Result } from 'ts-results';
 import { toDictIndexedBy } from '../../../gameMechanics/utils';
-import { range } from '../../../gameMechanics/util';
+import { Coord, range } from '../../../gameMechanics/util';
 import { AttackNotPossibleError } from '../../../gameMechanics/Game/errors/types';
+import {
+  Attack,
+  AttackOutcome,
+  Color,
+  Move
+} from 'src/gameMechanics/commonTypes';
 
 type PieceLabel = 'Rook';
 

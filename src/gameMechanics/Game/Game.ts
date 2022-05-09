@@ -1,9 +1,7 @@
 import { Err, Ok, Result } from 'ts-results';
 import { Coord } from '../util/types';
 import {
-  Attack,
   GameConfigurator,
-  GameHistory,
   GameState,
   GameStateCompleted,
   GameStateInAttackPhaseWithPreparingSubmission,
@@ -11,15 +9,13 @@ import {
   GameStateInProgress,
   GameStatePending,
   GameWinner,
-  InProgressGameStatePhaseSlice,
-  Move
+  InProgressGameStatePhaseSlice
 } from './types';
 import {
   getMoveNotPossibleError,
   getAttackNotPossibleError
 } from './errors/helpers';
 import { Board } from '../Board/Board';
-import { PieceRegistry } from '../Piece/types';
 import { coordsAreEqual } from '../util';
 import { AttackNotPossibleError, MoveNotPossibleError } from './errors';
 import {
@@ -28,39 +24,9 @@ import {
   isGameInMovePhase,
   isGameInMovePhaseWithPreparingSubmission
 } from './helpers';
-
-export interface IGame<PR extends PieceRegistry = PieceRegistry> {
-  state: GameState;
-
-  board: Board<PR>;
-
-  // Loads a new GameState and does all the needed calculations
-  load(state: GameState): void;
-
-  // When a Move is Succesfully Drawn it gets appended to the nextMoves List of the "move" phase
-  drawMove(
-    from: Coord,
-    to: Coord
-  ): Result<
-    {
-      move: Move;
-      gameState: GameState;
-    },
-    MoveNotPossibleError
-  >;
-
-  // When an Attack is Succesfully Drawn it gets appended to the nextAttacks List of the "attack" phase
-  drawAttack(
-    from: Coord,
-    to: Coord
-  ): Result<
-    {
-      attack: Attack;
-      gameState: GameState;
-    },
-    AttackNotPossibleError
-  >;
-}
+import { IGame } from './IGame';
+import { Attack, GameHistory, Move } from '../commonTypes';
+import { PieceRegistry } from '../Piece/types';
 
 type GameProps = {
   history: GameHistory;

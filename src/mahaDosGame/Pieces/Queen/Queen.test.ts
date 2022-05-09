@@ -1,16 +1,17 @@
 import { MahaGame } from 'src/mahaDosGame/MahaGame';
 import { Queen } from './Queen';
 import {
-  Attack,
   GameConfigurator,
-  GameHistory,
   GameStateInProgress,
-  GameStateInMovePhase,
-  Move,
-  PartialGameTurn
+  GameStateInMovePhase
 } from '../../../gameMechanics/Game/types';
+import {
+  Move,
+  Attack,
+  GameHistory,
+  PartialGameTurn
+} from 'src/gameMechanics/commonTypes';
 import { mahaPieceRegistry } from '../registry';
-import { generatePieceLabel } from 'src/gameMechanics/Board/util';
 import { Pawn } from '../Pawn';
 
 describe('eval moves for Queen', () => {

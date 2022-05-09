@@ -1,15 +1,12 @@
 import { MahaGame } from '../../MahaGame';
 import {
-  Attack,
   GameConfigurator,
-  GameHistory,
   GameStateInProgress,
   GameStateInMovePhase,
-  Move,
-  PartialGameTurn
 } from '../../../gameMechanics/Game/types';
 import { mahaPieceRegistry } from '../registry';
 import { generate } from '../../../mahaDosGame/helpers';
+import { Attack, GameHistory, Move, PartialGameTurn } from 'src/gameMechanics/commonTypes';
 
 describe('eval moves for rooks', () => {
   test('eval move', () => {

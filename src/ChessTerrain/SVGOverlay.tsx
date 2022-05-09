@@ -1,15 +1,10 @@
 import React, { CSSProperties } from 'react';
-import { formatDiagnostic } from 'typescript';
+import { LineVector } from 'src/gameMechanics/util';
 
-export type ArrowCoords = {
-  from: {
-    x: number;
-    y: number;
-  };
-  to: {
-    x: number;
-    y: number;
-  };
+const DEFAULT_ARROW_STROKE_COLOR = 'purple';
+
+export type Arrow = LineVector & {
+  strokeColor?: string;
 };
 
 type Props = {
@@ -19,10 +14,10 @@ type Props = {
   // className
   style?: CSSProperties;
 
-  arrows?: ArrowCoords[];
+  arrows?: Arrow[];
 };
 
-const Arrow: React.FC<Props> = ({
+export const SVGOverlay: React.FC<Props> = ({
   width,
   height,
   fill,
@@ -50,7 +45,7 @@ const Arrow: React.FC<Props> = ({
         xmlns="http://www.w3.org/2000/svg"
         xmlnsXlink="http://www.w3.org/1999/xlink"
       >
-        {arrows?.map(({ from, to }) => (
+        {arrows?.map(({ from, to, strokeColor }) => (
           <>
             <defs>
               <marker
@@ -71,7 +66,7 @@ const Arrow: React.FC<Props> = ({
               y1={from.y}
               x2={to.x}
               y2={to.y}
-              stroke="black"
+              stroke={strokeColor || DEFAULT_ARROW_STROKE_COLOR}
             />
           </>
         ))}
@@ -101,39 +96,39 @@ const Arrow: React.FC<Props> = ({
   );
 };
 
-export default Arrow;
+// export default Arrow;
 
-{
-  /* <svg>
-  <defs>
-    <marker
-      id="arrowhead-g"
-      orient="auto"
-      markerWidth="4"
-      markerHeight="8"
-      refX="2.05"
-      refY="2.01"
-      cgKey="g"
-    >
-      <path d="M0,0 V4 L3,2 Z" fill="#15781B"></path>
-    </marker>
-  </defs>
-  <line
-    stroke="#15781B"
-    stroke-width="8.18359375"
-    stroke-linecap="round"
-    marker-end="url(#arrowhead-g)"
-    opacity="1"
-    x1="78.5625"
-    y1="340.4375"
-    x2="78.5625"
-    y2="243.87109375"
-    cgHash="419,419,g7,g5,green"
-  ></line>
-</svg>; */
-}
+// {
+//   /* <svg>
+//   <defs>
+//     <marker
+//       id="arrowhead-g"
+//       orient="auto"
+//       markerWidth="4"
+//       markerHeight="8"
+//       refX="2.05"
+//       refY="2.01"
+//       cgKey="g"
+//     >
+//       <path d="M0,0 V4 L3,2 Z" fill="#15781B"></path>
+//     </marker>
+//   </defs>
+//   <line
+//     stroke="#15781B"
+//     stroke-width="8.18359375"
+//     stroke-linecap="round"
+//     marker-end="url(#arrowhead-g)"
+//     opacity="1"
+//     x1="78.5625"
+//     y1="340.4375"
+//     x2="78.5625"
+//     y2="243.87109375"
+//     cgHash="419,419,g7,g5,green"
+//   ></line>
+// </svg>; */
+// }
 
-{
-  /* <path d="M16.1147 43.5H25.1147H34.1147V99H16.1147V43.5Z" fill="#C4C4C4"/>
-<path d="M25.1147 0L50.2295 43.5H0L25.1147 0Z" fill="#C4C4C4"/> */
-}
+// {
+//   /* <path d="M16.1147 43.5H25.1147H34.1147V99H16.1147V43.5Z" fill="#C4C4C4"/>
+// <path d="M25.1147 0L50.2295 43.5H0L25.1147 0Z" fill="#C4C4C4"/> */
+// }

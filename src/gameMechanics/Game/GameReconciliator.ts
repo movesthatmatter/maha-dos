@@ -1,26 +1,18 @@
 import { Err, Ok, Result } from 'ts-results';
-import { Color } from '../util/types';
 import { Game } from './Game';
 import {
   GameStateNotInMovePhaseError,
-  GameStateNotInAttackPhaseError,
   SubmitMovesNotPossibleError,
   SubmitAttacksNotPossibleError,
   getSubmitMovesNotPossibleError,
   getSubmitAttacksNotPossibleError
 } from './errors';
 import {
-  Attack,
-  FullGameTurn,
   GameStateCompleted,
   GameStateInAttackPhaseWithPartialSubmission,
   GameStateInAtttackPhaseWithNoSubmission,
   GameStateInMovePhaseWithNoSubmission,
-  GameStateInMovePhaseWithPartialSubmission,
-  Move,
-  PartialGameTurn,
-  ShortAttack,
-  ShortMove
+  GameStateInMovePhaseWithPartialSubmission
 } from './types';
 import { toOppositeColor } from '../util/game';
 import {
@@ -29,6 +21,7 @@ import {
   isGameInMovePhase,
   isGameInMovePhaseWithPartialSubmission
 } from './helpers';
+import { Attack, Color, Move, PartialGameTurn, ShortAttack, ShortMove } from '../commonTypes';
 
 export interface GameReconciliator extends Game {
   submitMoves(p: {
@@ -206,22 +199,23 @@ export class GameReconciliator extends Game implements GameReconciliator {
     ) {
       // TODO: This shouldn't have to be recasted as the canDraw check above should suffice
       //  but for some reason the compiler doesn't see it
-      const oppositeColorAttacks = prevGame[oppositeColor].attacks as ShortMove[];
+      const oppositeColorAttacks = prevGame[oppositeColor]
+        .attacks as ShortMove[];
       const currentColorAttacks = attacks;
 
-      const oppositeColorAttacksRes = this.board.moveMultiple(oppositeColorAttacks);
+      const oppositeColorAttacksRes =
+        this.board.moveMultiple(oppositeColorAttacks);
 
       if (!oppositeColorAttacksRes.ok) {
         return new Err(getSubmitAttacksNotPossibleError('InvalidAttacks'));
       }
 
-      const currentColorAttacksRes = this.board.moveMultiple(currentColorAttacks);
+      const currentColorAttacksRes =
+        this.board.moveMultiple(currentColorAttacks);
 
       if (!currentColorAttacksRes.ok) {
         return new Err(getSubmitAttacksNotPossibleError('InvalidAttacks'));
       }
-
-
 
       // const prevPartialTurn: PartialGameTurn = prevGame.history.slice(-1)[0];
 

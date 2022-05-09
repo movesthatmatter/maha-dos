@@ -1,14 +1,11 @@
 import { Err, Ok, Result } from 'ts-results';
 import {
   AttackNotPossibleError,
-  getAttackNotPossibleError,
-  AttackOutcome,
-  Game
-} from '../Game';
-import { GameConfigurator, Move, ShortMove, ShortAttack } from '../Game/types';
+  getAttackNotPossibleError
+} from '../Game/errors';
+import { IGame } from '../Game/IGame';
 import { Piece } from '../Piece/Piece';
-import { PieceRegistry } from '../Piece/types';
-import { Terrain } from '../Terrain/Terrain';
+import { Terrain } from '../Terrain';
 import {
   Matrix,
   matrixCreate,
@@ -22,6 +19,10 @@ import {
 } from '../util';
 import { Coord } from '../util/types';
 import { BoardState } from './types';
+import { IBoard } from './IBoard';
+import { PieceRegistry } from '../Piece/types';
+import { GameConfigurator } from '../Game/types';
+import { AttackOutcome, Move, ShortAttack, ShortMove } from '../commonTypes';
 
 type PieceAndCoordMappedById = Record<
   Piece['state']['id'],
@@ -36,7 +37,7 @@ type PiecesState = {
   pieceById: PieceAndCoordMappedById;
 };
 
-export class Board<PR extends PieceRegistry> {
+export class Board<PR extends PieceRegistry> implements IBoard<PR> {
   private terrain: Terrain;
 
   private piecesState: PiecesState;
@@ -238,7 +239,7 @@ export class Board<PR extends PieceRegistry> {
 
   // TODO: Test
   applyAttacks(
-    game: Game,
+    game: IGame,
     attacks: ShortAttack[]
   ): Result<AttackOutcome[], AttackNotPossibleError> {
     const attackerPieces = attacks.map((a) =>

@@ -1,6 +1,7 @@
 import { Result } from 'ts-results';
-import { AttackNotPossibleError, Game, AttackOutcome } from '../Game';
-import { Attack, Move } from '../Game/types';
+import { Attack, AttackOutcome, Move } from '../commonTypes';
+import { AttackNotPossibleError } from '../Game/errors';
+import { IGame } from '../Game/IGame';
 import { IdentifiablePieceState, PieceState } from './types';
 
 // TODO: Don'l default the L here - it must be given from outside
@@ -28,16 +29,16 @@ export abstract class Piece<L extends string = string> {
   // Here is where the rules for the move algortighm live
   // Returns all the possible moves for this piece
   // TODO: Does this actually need to be the Board not the Game?
-  abstract evalMove(game: Game): Move[];
+  abstract evalMove(game: IGame): Move[];
 
   // Here is where the rules for the attack algorithm live
   // Returns all the possible attacks from this piece
   // TODO: Does this actually need to be the Board not the Game?
-  abstract evalAttack(game: Game): Attack[];
+  abstract evalAttack(game: IGame): Attack[];
 
   // Here the attack gets processed on the current state
   abstract calculateAttackOutcome(
-    game: Game,
+    game: IGame,
     attack: Attack
   ): Result<AttackOutcome, AttackNotPossibleError>;
 }

@@ -6,27 +6,31 @@ import React, {
   useMemo,
   useState
 } from 'react';
+import { toPrintableBoard } from '../gameMechanics/Board/util';
 import { BoardState } from '../gameMechanics/Board/types';
-import { Move } from '../gameMechanics/Game/types';
 import { IdentifiablePieceState } from '../gameMechanics/Piece/types';
 import {
   Coord,
+  matrixGet,
   matrixIndexToCoord,
   matrixReduce,
   noop
 } from '../gameMechanics/util';
-import Arrow from './ArrowSVG';
+import { SVGOverlay, Arrow } from './SVGOverlay';
+import { Color, Move } from 'src/gameMechanics/commonTypes';
 
-type ArrowChessCoords = {
-  from: Coord;
-  to: Coord;
-};
+// type ArrowChessCoords = {
+//   from: Coord;
+//   to: Coord;
+//   color?: string;
+// };
 
 export type ChessTerrainProps = {
   sizePx: number;
   board: BoardState;
 
-  arrows?: ArrowChessCoords[];
+  playingColor: Color;
+  arrows?: Arrow[];
   styledCoords?: (Coord & { style?: CSSProperties })[];
 
   // This is always on TouchPiece
@@ -47,6 +51,8 @@ const coordToArrow = (squareSize: number, val: number) =>
 export const ChessTerrain: React.FC<ChessTerrainProps> = ({
   onPieceTouched = noop,
   onPieceDestinationSet = noop,
+  onSquareTouched = noop,
+  playingColor,
   board,
   sizePx,
   arrows = [],
@@ -85,6 +91,11 @@ export const ChessTerrain: React.FC<ChessTerrainProps> = ({
     });
   }, [board.pieceLayoutState]);
 
+  useEffect(() => {
+    console.log('ChessTerrain updated pieceLayoutState');
+    console.log(toPrintableBoard(board));
+  }, [board.pieceLayoutState]);
+
   const squareSize = useMemo(
     () => sizePx / board.terrainState.length,
     [sizePx, board.terrainState.length]
@@ -115,16 +126,42 @@ export const ChessTerrain: React.FC<ChessTerrainProps> = ({
         col: Math.floor(x / squareSize)
       };
 
-      if (touchedPiece) {
+      const piece = matrixGet(board.pieceLayoutState, [coord.row, coord.col]);
+
+      console.log('touched coord', coord, piece === 0 ? undefined : piece?.id);
+      console.log(toPrintableBoard(board));
+
+      if (touchedPiece && touchedPiece.piece.color === playingColor) {
         onPieceDestinationSet({
           from: touchedPiece.coord,
           to: coord,
           piece: touchedPiece.piece
         });
+
         setTouchedPiece(undefined);
+        return;
       }
+
+      if (piece && piece.id !== touchedPiece?.piece.id) {
+        setTouchedPiece({
+          coord,
+          piece
+        });
+
+        return;
+      }
+
+      onSquareTouched(coord);
+      setTouchedPiece(undefined);
     },
-    [squareSize, touchedPiece]
+    [
+      onPieceDestinationSet,
+      onSquareTouched,
+      squareSize,
+      touchedPiece,
+      board,
+      playingColor
+    ]
   );
 
   return (
@@ -142,18 +179,19 @@ export const ChessTerrain: React.FC<ChessTerrainProps> = ({
         // backgroundPosition: `0 ${props.sizePx * 2}`,
       }}
     >
-      <Arrow
-        fill="purple"
+      <SVGOverlay
+        // fill="purple"
         width={sizePx}
         height={sizePx}
-        arrows={arrows.map(({ from, to }) => ({
+        arrows={arrows.map((arrow) => ({
+          ...arrow,
           from: {
-            x: coordToArrow(squareSize, from.col),
-            y: coordToArrow(squareSize, from.row)
+            x: coordToArrow(squareSize, arrow.from.y),
+            y: coordToArrow(squareSize, arrow.from.x)
           },
           to: {
-            x: coordToArrow(squareSize, to.col),
-            y: coordToArrow(squareSize, to.row)
+            x: coordToArrow(squareSize, arrow.to.y),
+            y: coordToArrow(squareSize, arrow.to.x)
           }
         }))}
       />
@@ -197,14 +235,6 @@ export const ChessTerrain: React.FC<ChessTerrainProps> = ({
 
               transition: 'all 150ms linear'
             }}
-            onClick={(e) => {
-              setTouchedPiece({
-                coord,
-                piece
-              });
-
-              e.stopPropagation();
-            }}
           >
             {piece.label}
             <br />
@@ -220,7 +250,8 @@ export const ChessTerrain: React.FC<ChessTerrainProps> = ({
           top: 0,
           right: 0,
           bottom: 0,
-          cursor: 'pointer'
+          cursor: 'pointer',
+          zIndex: 9999
         }}
         onClick={onBoardClick}
       />

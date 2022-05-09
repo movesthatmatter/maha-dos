@@ -1,15 +1,11 @@
 import { MahaGame } from '../../MahaGame';
-import { Pawn } from './Pawn';
 import {
-  Attack,
   GameConfigurator,
-  GameHistory,
   GameStateInProgress,
-  GameStateInMovePhase,
-  Move
+  GameStateInMovePhase
 } from '../../../gameMechanics/Game/types';
+import { Move, Attack, GameHistory } from 'src/gameMechanics/commonTypes';
 import { mahaPieceRegistry } from '../registry';
-import { generatePieceLabel } from '../../../gameMechanics/Board/util';
 
 describe('eval pawn moves', () => {
   test('eval move after first moved', () => {

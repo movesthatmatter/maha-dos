@@ -1,11 +1,6 @@
 import { Board } from 'src/gameMechanics/Board/Board';
-import { toPrintableBoard } from 'src/gameMechanics/Board/util';
-import { Attack, ShortAttack } from 'src/gameMechanics/Game';
-import {
-  coordToMatrixIndex,
-  matrixInsertMany,
-  printMatrix
-} from 'src/gameMechanics/util';
+import { ShortAttack } from 'src/gameMechanics/commonTypes';
+import { coordToMatrixIndex, matrixInsertMany } from 'src/gameMechanics/util';
 import { Result } from 'ts-results';
 import { DEFAULT_MAHA_CONFIGURATOR, mahaPieceRegistry } from './config';
 import { MahaGameReconciliator } from './MahaGameReconciliator';
@@ -226,14 +221,13 @@ describe('submitAttacks', () => {
     expect(actual.boardState).toEqual(boardStateBeforeAttack);
     expect(actual.white).toEqual({
       canDraw: false,
-      attacks: whiteAttacks,
+      attacks: whiteAttacks
     });
     expect(actual.black).toEqual({
       canDraw: true,
       attacks: undefined
     });
   });
-
 
   test('both players submit attacks after first move phase - ok', () => {
     const reconciliator = new MahaGameReconciliator();
@@ -325,7 +319,7 @@ describe('submitAttacks', () => {
     const actual = blackAttackRes.val;
 
     // const expectedGameTurn = [
-      
+
     // ];
 
     const expectedGameTurn = [
@@ -341,11 +335,11 @@ describe('submitAttacks', () => {
       },
       {
         white: whiteAttacks.map((m, i) => ({
-          ...m,
+          ...m
           // piece: whiteAttackedPieces[i]?.state
         })),
         black: blackAttacks.map((m, i) => ({
-          ...m,
+          ...m
           // piece: blackMovedPieces[i]?.state
         }))
       }
@@ -359,10 +353,9 @@ describe('submitAttacks', () => {
 
     expect(actual.history).toHaveLength(1);
     expect(actual.history).toEqual([expectedGameTurn]);
-    
+
     // add me now
     // expect(actual.boardState).not.toEqual(boardStateBeforeAttack); // But how?
-
 
     // expect(actual.boardState).toEqual(boardStateBeforeAttack);
     // expect(actual.white).toEqual({

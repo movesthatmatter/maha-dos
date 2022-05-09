@@ -1,11 +1,9 @@
 import { MahaGame } from '../../MahaGame';
 import {
-  Attack,
   GameConfigurator,
-  GameHistory,
-  GameStateInMovePhase,
-  Move
+  GameStateInMovePhase
 } from '../../../gameMechanics/Game/types';
+import { Attack, GameHistory, Move } from 'src/gameMechanics/commonTypes';
 import { mahaPieceRegistry } from '../registry';
 import { Pawn } from '../Pawn';
 

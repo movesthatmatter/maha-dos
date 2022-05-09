@@ -1,5 +1,5 @@
 import { IdentifiablePieceState } from '../Piece/types';
-import { Color, Coord } from '../util/types';
+import { Coord } from '../util/types';
 import {
   flipMatrixHorizontally,
   getMatrixRowsLength,
@@ -8,6 +8,7 @@ import {
 } from '../util';
 import { BoardState } from './types';
 import { mahaPieceRegistry } from '../../mahaDosGame/config';
+import { Color } from '../commonTypes';
 
 // Returns the default color at the coord for any chess based games
 // TODO: Might need to make it game specific in the future if this is not enough
@@ -60,4 +61,3 @@ export const toPrintableBoard = (board: BoardState) => {
     return `${sqOrPiece.color[0]}${sqOrPiece.label[0]}`;
   });
 };
-

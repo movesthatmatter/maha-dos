@@ -1,12 +1,11 @@
 import { Game } from '../../../gameMechanics/Game/Game';
-import { Color } from '../../../gameMechanics/util/types';
+import { GameStateInProgress } from '../../../gameMechanics/Game/types';
 import {
-  Attack,
-  GameStateInProgress,
-  GameStateInMovePhase,
   Move,
+  Attack,
+  Color,
   AttackOutcome
-} from '../../../gameMechanics/Game/types';
+} from 'src/gameMechanics/commonTypes';
 import { Piece } from '../../../gameMechanics/Piece/Piece';
 import {
   IdentifiablePieceState,

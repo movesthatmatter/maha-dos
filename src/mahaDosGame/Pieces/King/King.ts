@@ -1,18 +1,19 @@
 import { Game } from '../../../gameMechanics/Game/Game';
-import { Color, Coord } from '../../../gameMechanics/util/types';
-import { Attack, Move, AttackOutcome } from '../../../gameMechanics/Game/types';
+import { Coord } from '../../../gameMechanics/util/types';
 import { Piece } from '../../../gameMechanics/Piece/Piece';
 import {
   IdentifiablePieceState,
   PieceDynamicProps
 } from '../../../gameMechanics/Piece/types';
-import {
-  evalEachDirectionForMove,
-  getAllAdjecentPiecesToPosition,
-  getPieceMoveThisTurn
-} from '../utils';
+import { evalEachDirectionForMove } from '../utils';
 import { Err, Ok, Result } from 'ts-results';
 import { AttackNotPossibleError } from '../../../gameMechanics/Game/errors/types';
+import {
+  Attack,
+  AttackOutcome,
+  Color,
+  Move
+} from 'src/gameMechanics/commonTypes';
 
 const pieceLabel = 'King';
 

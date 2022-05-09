@@ -1,4 +1,4 @@
-import { Coord } from '.';
+import { Coord } from './types';
 
 export const range = (length: number, startAt = 0) =>
   Array.from({ length }, (_, i) => i + startAt);

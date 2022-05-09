@@ -14,8 +14,15 @@ export default {
   }
 } as ComponentMeta<typeof MahaGame>;
 
+const startNewGame = (gameState?: GameState) => {
+  const game = new MahaGameReconciliator();
+  game.start();
+
+  return game;
+};
+
 export const PlayWithReconciliator = () => {
-  const reconciliator = useRef(new MahaGameReconciliator());
+  const reconciliator = useRef(startNewGame());
 
   const [reconciledGameState, setReconciledGameState] = useState<GameState>(
     reconciliator.current.state
@@ -38,6 +45,9 @@ export const PlayWithReconciliator = () => {
         <MahaGame
           color="white"
           gameState={reconciledGameState}
+          onSubmitAttacks={(gameState) => {
+            console.log('attacks submitted', gameState);
+          }}
           onSubmitMoves={(gameState) => {
             reconciliator.current
               .submitMoves({
@@ -59,6 +69,9 @@ export const PlayWithReconciliator = () => {
         <MahaGame
           color="black"
           gameState={reconciledGameState}
+          onSubmitAttacks={(gameState) => {
+            console.log('attacks submitted', gameState);
+          }}
           onSubmitMoves={(gameState) => {
             reconciliator.current
               .submitMoves({
