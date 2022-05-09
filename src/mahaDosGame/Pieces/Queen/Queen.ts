@@ -232,7 +232,7 @@ export class Queen extends Piece {
 
     return Ok({
       attack,
-      hasMoved: attack.type === 'melee',
+      willTake: attack.type === 'melee',
       damage: this.state.attackDamage + critDmg - defenseBonus - kingDefense
     });
   }

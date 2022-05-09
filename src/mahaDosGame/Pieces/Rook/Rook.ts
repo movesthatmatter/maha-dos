@@ -206,7 +206,7 @@ export class Rook extends Piece<PieceLabel> {
 
     return Ok({
       attack,
-      hasMoved: false,
+      willTake: false,
       damage: (movedDist > 1 ? 3 : 2) - kingDefense,
       ...(aoePieces.length > 0 && {
         aoe: aoePieces.map((p) => game.board.getPieceCoordById(p.id))

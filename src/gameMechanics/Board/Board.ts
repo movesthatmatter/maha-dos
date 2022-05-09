@@ -282,13 +282,13 @@ export class Board<PR extends PieceRegistry> implements IBoard<PR> {
           new Ok(outcomes),
           this.moveMultiple(
             outcomes
-              .filter((outcome) => outcome.hasMoved)
+              .filter((outcome) => outcome.willTake)
               .map((outcome) => outcome.attack)
           ).mapErr(() => getAttackNotPossibleError('DestinationNotValid'))
         )
       )
       .map(([outcomes]) => {
-        // The must refresh!
+        // The cache must refresh!
         this._cachedState = undefined;
 
         return outcomes;

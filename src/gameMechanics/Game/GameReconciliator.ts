@@ -190,35 +190,38 @@ export class GameReconciliator extends Game implements GameReconciliator {
       return new Err(getSubmitAttacksNotPossibleError('GameNotInAttackPhase'));
     }
 
-    const prevGame = this.state;
+    const prevGameState = this.state;
     const oppositeColor = toOppositeColor(color);
 
+    const prevGameInstance = new Game(this.pieceRegistry, this.configurator, this.gameProps);
+    prevGameInstance.load(prevGameState);
+
     if (
-      isGameInAttackPhaseWithPartialSubmission(prevGame) &&
-      prevGame[color].canDraw
+      isGameInAttackPhaseWithPartialSubmission(prevGameState) &&
+      prevGameState[color].canDraw
     ) {
       // TODO: This shouldn't have to be recasted as the canDraw check above should suffice
       //  but for some reason the compiler doesn't see it
-      const oppositeColorAttacks = prevGame[oppositeColor].attacks as ShortAttack[];
+      const oppositeColorAttacks = prevGameState[oppositeColor].attacks as ShortAttack[];
       const currentColorAttacks = attacks;
 
-      const oppositeColorAttacksRes = this.board.applyAttacks(this, oppositeColorAttacks);
+      const oppositeColorAttacksRes = this.board.applyAttacks(prevGameInstance, oppositeColorAttacks);
 
       if (!oppositeColorAttacksRes.ok) {
         return new Err(getSubmitAttacksNotPossibleError('InvalidAttacks'));
       }
 
       const currentColorAttacksRes =
-        this.board.applyAttacks(this, currentColorAttacks);
+        this.board.applyAttacks(prevGameInstance, currentColorAttacks);
 
       if (!currentColorAttacksRes.ok) {
         return new Err(getSubmitAttacksNotPossibleError('InvalidAttacks'));
       }
 
-      const prevPartialTurn: PartialGameTurn = prevGame.history.slice(-1)[0];
+      const prevPartialTurn: PartialGameTurn = prevGameState.history.slice(-1)[0];
 
       const nextGameTurn: FullGameTurn = [
-        ...prevPartialTurn as any,
+        ...prevPartialTurn,
         color === 'white'
           ? {
               white: currentColorAttacksRes.val,
@@ -230,10 +233,10 @@ export class GameReconciliator extends Game implements GameReconciliator {
             }
       ];
 
-      const prevHistoryWithoutPartial = prevGame.history.slice(0, -1);
+      const prevHistoryWithoutPartial = prevGameState.history.slice(0, -1);
 
       const nextState: GameStateInMovePhaseWithNoSubmission = {
-        ...prevGame,
+        ...prevGameState,
         phase: 'move',
         submissionStatus: 'none',
         history: [...prevHistoryWithoutPartial, nextGameTurn],
@@ -256,7 +259,7 @@ export class GameReconciliator extends Game implements GameReconciliator {
     }
 
     const nextState: GameStateInAttackPhaseWithPartialSubmission = {
-      ...prevGame,
+      ...prevGameState,
       state: 'inProgress',
       phase: 'attack',
       winner: undefined,

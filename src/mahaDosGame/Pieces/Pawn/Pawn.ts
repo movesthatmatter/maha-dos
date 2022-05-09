@@ -150,7 +150,7 @@ export class Pawn extends Piece {
 
     return Ok({
       attack,
-      hasMoved: true,
+      willTake: true,
       damage: (moved ? 2 : 1) - defenseBonus - kingDefense
     });
   }

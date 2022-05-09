@@ -185,7 +185,7 @@ export class Bishop extends Piece {
 
     return Ok({
       attack,
-      hasMoved: false,
+      willTake: false,
       damage: heal
         ? Math.ceil(targetPiece.state.hitPoints / 2) > 5
           ? -5

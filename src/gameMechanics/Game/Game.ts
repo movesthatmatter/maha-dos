@@ -63,12 +63,13 @@ export class Game<PR extends PieceRegistry = PieceRegistry> implements IGame {
   board: Board<PR>;
 
   constructor(
-    pieceRegistry: PR,
-    configurator: Pick<GameConfigurator<PR>, 'pieceLayout' | 'terrain' | 'pieceAssets'>,
-    gameProps?: GameProps
+    protected pieceRegistry: PR,
+    protected configurator: Pick<
+      GameConfigurator<PR>,
+      'pieceLayout' | 'terrain' | 'pieceAssets'
+    >,
+    protected gameProps?: GameProps
   ) {
-    // const
-
     this.board = new Board(pieceRegistry, configurator);
     this.partialState = this.calcPartialState(gameProps);
   }
@@ -378,6 +379,7 @@ export class Game<PR extends PieceRegistry = PieceRegistry> implements IGame {
 
     const preparingState: GameStateInAttackPhaseWithPreparingSubmission = {
       ...this.state,
+      history: [...this.state.history],
       state: 'inProgress',
       winner: undefined,
       submissionStatus: 'preparing',

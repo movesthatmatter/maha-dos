@@ -74,16 +74,17 @@ export type AttackOutcome = {
 // export type PartialGameTurn = [{ white: Move[]; black: Move[] }];
 
 // A Partial Game In Move Phase doesn't have the Attack Phase
-export type PartialGameTurnMovePhase = [{ [k in Color]: Move[] | undefined }];
+export type PartialGameTurnMovePhase = [{ [k in Color]: Move[] }];
 
 // A Partial Game in Attack Phase always has the Move Phase
-export type PartialGameTurnAttackPhase = [
-  { [k in Color]: Move[] },
-  { [k in Color]: AttackOutcome[] | undefined }
-];
+// TODO: Modify this a the Attacks shouldn't be part of the Partial GameTurn, only the moves!
+// export type PartialGameTurnAttackPhase = [
+//   { [k in Color]: Move[] },
+//   // { [k in Color]: AttackOutcome[] }
+// ];
 export type PartialGameTurn =
   | PartialGameTurnMovePhase
-  | PartialGameTurnAttackPhase;
+  // | PartialGameTurnAttackPhase;
 
 export type FullGameTurn = [
   { [k in Color]: Move[] },

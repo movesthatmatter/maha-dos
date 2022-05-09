@@ -124,7 +124,7 @@ export class King extends Piece {
 
     return Ok({
       attack,
-      hasMoved: true,
+      willTake: true,
       damage: this.state.attackDamage - defenseBonus
     });
   }

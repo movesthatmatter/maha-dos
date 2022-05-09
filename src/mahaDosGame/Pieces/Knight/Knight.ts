@@ -165,7 +165,7 @@ export class Knight extends Piece {
 
     return Ok({
       attack,
-      hasMoved: true,
+      willTake: true,
       damage:
         this.state.attackDamage +
         moveDamage +
