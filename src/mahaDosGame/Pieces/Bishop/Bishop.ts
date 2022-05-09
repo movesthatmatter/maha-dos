@@ -118,7 +118,10 @@ export class Bishop extends Piece {
         }
 
         if (r === 1) {
-          if (targetPiece.state.label === 'Rook') {
+          if (
+            targetPiece.state.label === 'Rook' &&
+            targetPiece.state.color === this.state.color
+          ) {
             attacks.push({
               from: pieceCoord,
               to: target,
@@ -183,6 +186,7 @@ export class Bishop extends Piece {
           : 0;
     }
 
+    //TODO - heal can only go to max hit points of the target piece
     const damage = heal
       ? Math.ceil(targetPiece.state.hitPoints / 2) > 5
         ? -5
