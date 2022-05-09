@@ -24,7 +24,7 @@ import { PieceRegistry } from '../Piece/types';
 import { GameConfigurator } from '../Game/types';
 import { AttackOutcome, Move, ShortAttack, ShortMove } from '../commonTypes';
 
-type PieceAndCoordMappedById = Record<
+type PieceMetaMappedById = Record<
   Piece['state']['id'],
   {
     piece: Piece;
@@ -34,7 +34,7 @@ type PieceAndCoordMappedById = Record<
 
 type PiecesState = {
   layoutMatrix: Matrix<Piece['state']['id'] | 0>;
-  pieceById: PieceAndCoordMappedById;
+  pieceById: PieceMetaMappedById;
 };
 
 export class Board<PR extends PieceRegistry> implements IBoard<PR> {
@@ -52,14 +52,14 @@ export class Board<PR extends PieceRegistry> implements IBoard<PR> {
 
     this.piecesState = matrixReduce(
       props.pieceLayout,
-      (prev, nextLabel, [row, col]) => {
-        if (nextLabel === 0) {
+      (prev, nextRef, [row, col]) => {
+        if (nextRef === 0) {
           return prev;
         }
 
         // The id gets created by the original Coord, but this is open to change!
-        const id = `${nextLabel}-${row}-${col}`;
-        const piece = pieceRegistry[nextLabel](id);
+        const id = `${nextRef}-${row}-${col}`;
+        const piece = pieceRegistry[nextRef](id);
 
         const nextLayoutMatrix = matrixInsert(
           prev.layoutMatrix,

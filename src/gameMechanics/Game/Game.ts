@@ -64,7 +64,7 @@ export class Game<PR extends PieceRegistry = PieceRegistry> implements IGame {
 
   constructor(
     pieceRegistry: PR,
-    configurator: Pick<GameConfigurator<PR>, 'pieceLayout' | 'terrain'>,
+    configurator: Pick<GameConfigurator<PR>, 'pieceLayout' | 'terrain' | 'pieceAssets'>,
     gameProps?: GameProps
   ) {
     // const

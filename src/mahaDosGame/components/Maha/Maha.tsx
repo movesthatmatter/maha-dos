@@ -13,6 +13,7 @@ import {
   isGameInAttackPhaseWithPreparingSubmission,
   isGameInMovePhaseWithPreparingSubmission
 } from '../../../gameMechanics/Game/helpers';
+import { mahaAssetPieceRegistry } from '../../../mahaDosGame/Pieces/registry';
 
 export type MahaProps = {
   onSubmitMoves: (
@@ -93,6 +94,8 @@ export const Maha: React.FC<MahaProps> = ({
           ...dest,
           style: destinationSquareStyle
         }))}
+        pieceAssets={mahaAssetPieceRegistry}
+        // pieceAssetsByPieceId={localGameRef.current.board.}
         playingColor={playingColor}
         onPieceTouched={(pieceState, coord) => {
           // console.log('on piece touched', pieceState, coord, workingGameState);

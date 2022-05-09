@@ -61,3 +61,12 @@ export const toPrintableBoard = (board: BoardState) => {
     return `${sqOrPiece.color[0]}${sqOrPiece.label[0]}`;
   });
 };
+
+export const toPieceId = (ref: string, { row, col }: Coord) =>
+  `${ref}-${row}-${col}`;
+
+export const getRefFromPieceId = (
+  id: string
+): {
+  ref: string;
+} => ({ ref: id.slice(0, id.indexOf('-')) });

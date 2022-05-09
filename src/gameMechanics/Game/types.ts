@@ -166,4 +166,7 @@ export type GameStateInAttackPhaseWithPartialSubmission = Extract<
 export type GameConfigurator<PR extends PieceRegistry> = {
   terrain: TerrainProps;
   pieceLayout: Matrix<keyof PR | 0>;
+
+  // TODO: Should this be here? Should it be required?
+  pieceAssets?: Record<keyof PR, string>;
 };

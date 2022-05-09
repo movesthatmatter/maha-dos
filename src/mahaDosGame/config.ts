@@ -1,5 +1,5 @@
 import { GameConfigurator } from '../gameMechanics/Game/types';
-import { mahaPieceRegistry } from './Pieces/registry';
+import { mahaAssetPieceRegistry, mahaPieceRegistry } from './Pieces/registry';
 
 export { mahaPieceRegistry };
 
@@ -16,7 +16,8 @@ export const DEFAULT_MAHA_CONFIGURATOR: GameConfigurator<
     [0, 0, 0, 0, 0, 0, 0, 0],
     ['wP', 'wP', 'wP', 'wP', 'wP', 'wP', 'wP', 'wP'],
     ['wR', 'wN', 'wB', 'wK', 'wQ', 'wB', 'wN', 'wR']
-  ]
+  ],
+  // pieceAssets: mahaAssetPieceRegistry
   // TODO: add this dynamic props going to be needed
   // pieceDynamicProps: []
 };

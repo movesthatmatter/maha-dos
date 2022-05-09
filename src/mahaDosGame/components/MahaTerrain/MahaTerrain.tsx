@@ -60,8 +60,6 @@ export const MahaChessTerrain: React.FC<MahaChessTerrainProps> = ({
     return [];
   }, [gameState]);
 
-  console.log('arrows', arrows);
-
   return (
     <ChessTerrain
       board={gameState.boardState}

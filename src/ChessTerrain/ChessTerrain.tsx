@@ -6,7 +6,9 @@ import React, {
   useMemo,
   useState
 } from 'react';
-import { toPrintableBoard } from '../gameMechanics/Board/util';
+import {
+  toPrintableBoard
+} from '../gameMechanics/Board/util';
 import { BoardState } from '../gameMechanics/Board/types';
 import { IdentifiablePieceState } from '../gameMechanics/Piece/types';
 import {
@@ -18,6 +20,7 @@ import {
 } from '../gameMechanics/util';
 import { SVGOverlay, Arrow } from './SVGOverlay';
 import { Color, Move } from '../gameMechanics/commonTypes';
+import { TerrainPiece } from './TerrainPiece';
 
 // type ArrowChessCoords = {
 //   from: Coord;
@@ -28,6 +31,7 @@ import { Color, Move } from '../gameMechanics/commonTypes';
 export type ChessTerrainProps = {
   sizePx: number;
   board: BoardState;
+  pieceAssets: Record<string, string>;
 
   playingColor: Color;
   arrows?: Arrow[];
@@ -49,6 +53,7 @@ const coordToArrow = (squareSize: number, val: number) =>
   val * squareSize + squareSize / 2;
 
 export const ChessTerrain: React.FC<ChessTerrainProps> = ({
+  pieceAssets,
   onPieceTouched = noop,
   onPieceDestinationSet = noop,
   onSquareTouched = noop,
@@ -164,6 +169,8 @@ export const ChessTerrain: React.FC<ChessTerrainProps> = ({
     ]
   );
 
+  // const pieceRef = useMemo(() => refFromPieceId(), []);
+
   return (
     <div
       className="chess-terrain--container"
@@ -215,31 +222,43 @@ export const ChessTerrain: React.FC<ChessTerrainProps> = ({
         }
 
         return (
-          <div
-            key={piece.id}
-            id={piece.id}
-            style={{
-              position: 'absolute',
-              color: piece.color,
-              width: squareSize,
-              height: squareSize,
-              left: coord.col * squareSize,
-              top: coord.row * squareSize,
-              zIndex: 9,
+          <TerrainPiece
+            piece={piece}
+            squareSize={squareSize}
+            coord={coord}
+            assetsMap={pieceAssets}
+          />
+          // <div
+          //   key={piece.id}
+          //   id={piece.id}
+          //   style={{
+          //     position: 'absolute',
+          //     color: piece.color,
+          //     width: squareSize,
+          //     height: squareSize,
+          //     left: coord.col * squareSize,
+          //     top: coord.row * squareSize,
+          //     zIndex: 9,
 
-              display: 'flex',
-              alignContent: 'center',
-              alignItems: 'center',
-              textAlign: 'center',
-              cursor: 'pointer',
+          //     display: 'flex',
+          //     flexDirection: 'column',
+          //     alignContent: 'center',
+          //     alignItems: 'center',
+          //     textAlign: 'center',
+          //     cursor: 'pointer',
 
-              transition: 'all 150ms linear'
-            }}
-          >
-            {piece.label}
-            <br />
-            {(piece.hitPoints / piece.maxHitPoints) * 100} HP
-          </div>
+          //     transition: 'all 150ms linear'
+          //   }}
+          // >
+          //   {/* <img
+          //     src={pieceAssets[getRefFromPieceId(piece.id).ref]}
+          //     alt={piece.label}
+          //     style={{ width: squareSize/1.2 }}
+          //   /> */}
+          //   {/* {getRefFromPieceId(piece.id).ref} */}
+          //   {/* {piece.label} */}
+          //   {(piece.hitPoints / piece.maxHitPoints) * 100} HP
+          // </div>
         );
       })}
       <div

@@ -204,6 +204,7 @@ export class GameReconciliator extends Game implements GameReconciliator {
       const currentColorAttacks = attacks;
 
       const oppositeColorAttacksRes =
+      // TODO: These are attacks not moves
         this.board.moveMultiple(oppositeColorAttacks);
 
       if (!oppositeColorAttacksRes.ok) {
