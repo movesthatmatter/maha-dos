@@ -183,14 +183,16 @@ export class Bishop extends Piece {
           : 0;
     }
 
+    const damage = heal
+      ? Math.ceil(targetPiece.state.hitPoints / 2) > 5
+        ? -5
+        : -Math.ceil(targetPiece.state.hitPoints / 2)
+      : this.state.attackDamage - kingDefense + attackBonus;
+
     return Ok({
       attack,
-      hasMoved: false,
-      damage: heal
-        ? Math.ceil(targetPiece.state.hitPoints / 2) > 5
-          ? -5
-          : -Math.ceil(targetPiece.state.hitPoints / 2)
-        : this.state.attackDamage - kingDefense
+      willTake: false,
+      damage
     });
   }
 }
