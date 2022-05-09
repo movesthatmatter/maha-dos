@@ -13,7 +13,7 @@ import {
   GameHistory,
   Move,
   PartialGameTurn
-} from 'src/gameMechanics/commonTypes';
+} from '../../../gameMechanics/commonTypes';
 
 test('eval moves', () => {
   const configuration: GameConfigurator<typeof mahaPieceRegistry> = {

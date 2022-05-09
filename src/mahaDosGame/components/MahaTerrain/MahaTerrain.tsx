@@ -1,10 +1,10 @@
 import { useMemo } from 'react';
-import { Arrow } from 'src/ChessTerrain/SVGOverlay';
+import { Arrow } from '../../../ChessTerrain/SVGOverlay';
 import {
   isGameInAttackPhaseWithPreparingSubmission,
   isGameInMovePhaseWithPreparingSubmission
-} from 'src/gameMechanics/Game/helpers';
-import { GameState } from 'src/gameMechanics/Game/types';
+} from '../../../gameMechanics/Game/helpers';
+import { GameState } from '../../../gameMechanics/Game/types';
 import { ChessTerrain, ChessTerrainProps } from '../../../ChessTerrain';
 
 export type MahaChessTerrainProps = Omit<

@@ -1,5 +1,5 @@
 import React, { CSSProperties } from 'react';
-import { LineVector } from 'src/gameMechanics/util';
+import { LineVector } from '../gameMechanics/util';
 
 const DEFAULT_ARROW_STROKE_COLOR = 'purple';
 

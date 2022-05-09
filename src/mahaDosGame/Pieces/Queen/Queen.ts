@@ -12,7 +12,7 @@ import {
 import { Err, Ok, Result } from 'ts-results';
 import { toDictIndexedBy } from '../../../gameMechanics/utils';
 import { AttackNotPossibleError } from '../../../gameMechanics/Game/errors/types';
-import { AttackOutcome, Move, Attack, Color } from 'src/gameMechanics/commonTypes';
+import { AttackOutcome, Move, Attack, Color } from '../../../gameMechanics/commonTypes';
 
 const pieceLabel = 'Queen';
 

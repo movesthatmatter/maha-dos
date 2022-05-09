@@ -4,8 +4,8 @@ import { Piece } from '../../gameMechanics/Piece/Piece';
 import { IdentifiablePieceState } from '../../gameMechanics/Piece/types';
 import { Coord, range } from '../../gameMechanics/util';
 import { toDictIndexedBy } from '../../gameMechanics/utils';
-import { PieceLayoutState } from 'src/gameMechanics/Board/types';
-import { Move } from 'src/gameMechanics/commonTypes';
+import { PieceLayoutState } from '../../gameMechanics/Board/types';
+import { Move } from '../../gameMechanics/commonTypes';
 
 const determineRange = (moves: Coord[], moveRange: number) => {
   return moves.reduce((totalRange, dir) => {

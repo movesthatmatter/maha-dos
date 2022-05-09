@@ -1,6 +1,6 @@
-import { Board } from 'src/gameMechanics/Board/Board';
-import { ShortAttack } from 'src/gameMechanics/commonTypes';
-import { coordToMatrixIndex, matrixInsertMany } from 'src/gameMechanics/util';
+import { Board } from '../gameMechanics/Board/Board';
+import { ShortAttack } from '../gameMechanics/commonTypes';
+import { coordToMatrixIndex, matrixInsertMany } from '../gameMechanics/util';
 import { Result } from 'ts-results';
 import { DEFAULT_MAHA_CONFIGURATOR, mahaPieceRegistry } from './config';
 import { MahaGameReconciliator } from './MahaGameReconciliator';

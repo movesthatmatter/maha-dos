@@ -13,7 +13,7 @@ import {
   AttackOutcome,
   Color,
   Move
-} from 'src/gameMechanics/commonTypes';
+} from '../../../gameMechanics/commonTypes';
 
 const pieceLabel = 'King';
 

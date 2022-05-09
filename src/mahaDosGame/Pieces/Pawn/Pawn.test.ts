@@ -4,7 +4,7 @@ import {
   GameStateInProgress,
   GameStateInMovePhase
 } from '../../../gameMechanics/Game/types';
-import { Move, Attack, GameHistory } from 'src/gameMechanics/commonTypes';
+import { Move, Attack, GameHistory } from '../../../gameMechanics/commonTypes';
 import { mahaPieceRegistry } from '../registry';
 
 describe('eval pawn moves', () => {

@@ -5,7 +5,7 @@ import {
   Attack,
   Color,
   AttackOutcome
-} from 'src/gameMechanics/commonTypes';
+} from '../../../gameMechanics/commonTypes';
 import { Piece } from '../../../gameMechanics/Piece/Piece';
 import {
   IdentifiablePieceState,

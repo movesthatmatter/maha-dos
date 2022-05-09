@@ -1,4 +1,4 @@
-import { Color } from 'src/gameMechanics/commonTypes';
+import { Color } from '../gameMechanics/commonTypes';
 import { PieceDynamicProps } from '../gameMechanics/Piece/types';
 
 export const generateDefaultRook = (

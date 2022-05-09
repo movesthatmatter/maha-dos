@@ -6,7 +6,7 @@ import {
 } from '../../../gameMechanics/Game/types';
 import { mahaPieceRegistry } from '../registry';
 import { generate } from '../../../mahaDosGame/helpers';
-import { Attack, GameHistory, Move, PartialGameTurn } from 'src/gameMechanics/commonTypes';
+import { Attack, GameHistory, Move, PartialGameTurn } from '../../../gameMechanics/commonTypes';
 
 describe('eval moves for rooks', () => {
   test('eval move', () => {

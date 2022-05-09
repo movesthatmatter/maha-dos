@@ -1,4 +1,4 @@
-import { Move, ShortMove } from 'src/gameMechanics/commonTypes';
+import { Move, ShortMove } from '../gameMechanics/commonTypes';
 import { Coord } from '../gameMechanics/util';
 
 const mahaChessSquares = {

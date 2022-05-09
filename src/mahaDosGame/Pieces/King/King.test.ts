@@ -3,7 +3,7 @@ import {
   GameConfigurator,
   GameStateInMovePhase
 } from '../../../gameMechanics/Game/types';
-import { Attack, GameHistory, Move } from 'src/gameMechanics/commonTypes';
+import { Attack, GameHistory, Move } from '../../../gameMechanics/commonTypes';
 import { mahaPieceRegistry } from '../registry';
 import { Pawn } from '../Pawn';
 

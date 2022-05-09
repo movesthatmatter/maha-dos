@@ -8,11 +8,11 @@ import { Coord, noop } from '../../../gameMechanics/util';
 import { MahaGame } from '../../..//mahaDosGame/MahaGame';
 import { MahaChessTerrain, MahaChessTerrainProps } from '../MahaTerrain';
 import { Button } from '../Button';
-import { Color } from 'src/gameMechanics/commonTypes';
+import { Color } from '../../../gameMechanics/commonTypes';
 import {
   isGameInAttackPhaseWithPreparingSubmission,
   isGameInMovePhaseWithPreparingSubmission
-} from 'src/gameMechanics/Game/helpers';
+} from '../../../gameMechanics/Game/helpers';
 
 export type MahaProps = {
   onSubmitMoves: (

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { PieceState } from '../../gameMechanics/Piece/types';
 import { PieceInfo } from '../../mahaDosGame/components/PieceInfo';
 import { Maha, MahaProps } from '../../mahaDosGame/components/Maha';
-import { Color } from 'src/gameMechanics/commonTypes';
+import { Color } from '../../gameMechanics/commonTypes';
 
 type Props = {
   color: Color;

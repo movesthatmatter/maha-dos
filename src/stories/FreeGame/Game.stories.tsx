@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { ComponentMeta } from '@storybook/react';
 import { MahaGame } from './Game';
 import { MahaGameReconciliator } from '../../mahaDosGame/MahaGameReconciliator';
-import { GameState } from 'src/gameMechanics/Game/types';
+import { GameState } from '../../gameMechanics/Game/types';
 
 // More on default export: https://storybook.js.org/docs/react/writing-stories/introduction#default-export
 export default {
@@ -46,7 +46,24 @@ export const PlayWithReconciliator = () => {
           color="white"
           gameState={reconciledGameState}
           onSubmitAttacks={(gameState) => {
-            console.log('attacks submitted', gameState);
+            reconciliator.current
+              .submitAttacks({
+                attacks: gameState.white.attacks,
+                color: 'white'
+              })
+              .mapErr((e) => {
+                console.log(
+                  'PlayWithReconciliator.White onSubmitAttack err',
+                  e
+                );
+              })
+              .map((nextState) => {
+                console.log(
+                  'PlayWithReconciliator.White onSubmitAttack ok',
+                  nextState
+                );
+                setReconciledGameState(nextState);
+              });
           }}
           onSubmitMoves={(gameState) => {
             reconciliator.current
@@ -70,7 +87,24 @@ export const PlayWithReconciliator = () => {
           color="black"
           gameState={reconciledGameState}
           onSubmitAttacks={(gameState) => {
-            console.log('attacks submitted', gameState);
+            reconciliator.current
+              .submitAttacks({
+                attacks: gameState.black.attacks,
+                color: 'black'
+              })
+              .mapErr((e) => {
+                console.log(
+                  'PlayWithReconciliator.Black onSubmitAttack err',
+                  e
+                );
+              })
+              .map((nextState) => {
+                console.log(
+                  'PlayWithReconciliator.Black onSubmitAttack ok',
+                  nextState
+                );
+                setReconciledGameState(nextState);
+              });
           }}
           onSubmitMoves={(gameState) => {
             reconciliator.current

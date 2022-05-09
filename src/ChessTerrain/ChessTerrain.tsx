@@ -17,7 +17,7 @@ import {
   noop
 } from '../gameMechanics/util';
 import { SVGOverlay, Arrow } from './SVGOverlay';
-import { Color, Move } from 'src/gameMechanics/commonTypes';
+import { Color, Move } from '../gameMechanics/commonTypes';
 
 // type ArrowChessCoords = {
 //   from: Coord;

@@ -1,10 +1,10 @@
-import { generatePieceLabel } from 'src/gameMechanics/Board/util';
-import { GameHistory, PartialGameTurn } from 'src/gameMechanics/commonTypes';
-import { Game } from 'src/gameMechanics/Game/Game';
+import { generatePieceLabel } from '../../gameMechanics/Board/util';
+import { GameHistory, PartialGameTurn } from '../../gameMechanics/commonTypes';
+import { Game } from '../../gameMechanics/Game/Game';
 import {
   GameConfigurator,
   GameStateInProgress
-} from 'src/gameMechanics/Game/types';
+} from '../../gameMechanics/Game/types';
 import { MahaGame } from '../MahaGame';
 import { Knight } from './Knight';
 import { Pawn } from './Pawn';

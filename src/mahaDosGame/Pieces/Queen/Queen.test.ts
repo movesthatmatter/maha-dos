@@ -1,4 +1,4 @@
-import { MahaGame } from 'src/mahaDosGame/MahaGame';
+import { MahaGame } from '../../../mahaDosGame/MahaGame';
 import { Queen } from './Queen';
 import {
   GameConfigurator,
@@ -10,7 +10,7 @@ import {
   Attack,
   GameHistory,
   PartialGameTurn
-} from 'src/gameMechanics/commonTypes';
+} from '../../../gameMechanics/commonTypes';
 import { mahaPieceRegistry } from '../registry';
 import { Pawn } from '../Pawn';
 
