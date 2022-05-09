@@ -260,9 +260,9 @@ export class Board<PR extends PieceRegistry> implements IBoard<PR> {
       )
     );
 
-    const absentVictimPiece = attackerPieces.find((p) => !p);
+    const absentVictimPiece = victimPieces.find((p) => !p);
 
-    if (!absentVictimPiece) {
+    if (absentVictimPiece) {
       return new Err(getAttackNotPossibleError('VictimPieceNotExistent'));
     }
 

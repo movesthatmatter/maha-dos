@@ -21,7 +21,7 @@ import {
   isGameInMovePhase,
   isGameInMovePhaseWithPartialSubmission
 } from './helpers';
-import { Attack, Color, Move, PartialGameTurn, ShortAttack, ShortMove } from '../commonTypes';
+import { Attack, Color, FullGameTurn, Move, PartialGameTurn, ShortAttack, ShortMove } from '../commonTypes';
 
 export interface GameReconciliator extends Game {
   submitMoves(p: {
@@ -199,45 +199,44 @@ export class GameReconciliator extends Game implements GameReconciliator {
     ) {
       // TODO: This shouldn't have to be recasted as the canDraw check above should suffice
       //  but for some reason the compiler doesn't see it
-      const oppositeColorAttacks = prevGame[oppositeColor]
-        .attacks as ShortMove[];
+      const oppositeColorAttacks = prevGame[oppositeColor].attacks as ShortAttack[];
       const currentColorAttacks = attacks;
 
-      const oppositeColorAttacksRes =
-      // TODO: These are attacks not moves
-        this.board.moveMultiple(oppositeColorAttacks);
+      const oppositeColorAttacksRes = this.board.applyAttacks(this, oppositeColorAttacks);
 
       if (!oppositeColorAttacksRes.ok) {
         return new Err(getSubmitAttacksNotPossibleError('InvalidAttacks'));
       }
 
       const currentColorAttacksRes =
-        this.board.moveMultiple(currentColorAttacks);
+        this.board.applyAttacks(this, currentColorAttacks);
 
       if (!currentColorAttacksRes.ok) {
         return new Err(getSubmitAttacksNotPossibleError('InvalidAttacks'));
       }
 
-      // const prevPartialTurn: PartialGameTurn = prevGame.history.slice(-1)[0];
+      const prevPartialTurn: PartialGameTurn = prevGame.history.slice(-1)[0];
 
-      // const nextGameTurn: FullGameTurn = [
-      //   ...prevPartialTurn,
-      //   color === 'white'
-      //     ? {
-      //         white: currentColorMovesRes.val,
-      //         black: oppositeColorMovesRes.val
-      //       }
-      //     : {
-      //         white: oppositeColorMovesRes.val,
-      //         black: currentColorMovesRes.val
-      //       }
-      // ];
+      const nextGameTurn: FullGameTurn = [
+        ...prevPartialTurn as any,
+        color === 'white'
+          ? {
+              white: currentColorAttacksRes.val,
+              black: oppositeColorAttacksRes.val
+            }
+          : {
+              white: oppositeColorAttacksRes.val,
+              black: currentColorAttacksRes.val
+            }
+      ];
+
+      const prevHistoryWithoutPartial = prevGame.history.slice(0, -1);
 
       const nextState: GameStateInMovePhaseWithNoSubmission = {
         ...prevGame,
         phase: 'move',
         submissionStatus: 'none',
-        history: [...prevGame.history],
+        history: [...prevHistoryWithoutPartial, nextGameTurn],
         white: {
           canDraw: true,
           moves: undefined

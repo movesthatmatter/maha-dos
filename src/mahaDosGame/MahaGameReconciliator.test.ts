@@ -1,10 +1,15 @@
 import { Board } from '../gameMechanics/Board/Board';
 import { ShortAttack } from '../gameMechanics/commonTypes';
-import { coordToMatrixIndex, matrixInsertMany } from '../gameMechanics/util';
+import {
+  coordToMatrixIndex,
+  matrixInsertMany,
+  printMatrix
+} from '../gameMechanics/util';
 import { Result } from 'ts-results';
 import { DEFAULT_MAHA_CONFIGURATOR, mahaPieceRegistry } from './config';
 import { MahaGameReconciliator } from './MahaGameReconciliator';
 import { mahaChessSquareToCoord } from './util';
+import { toPrintableBoard } from 'src/gameMechanics/Board/util';
 
 describe('submitMoves', () => {
   test('first player submitting from initial position - ok', () => {
@@ -300,8 +305,8 @@ describe('submitAttacks', () => {
 
     const blackAttacks: ShortAttack[] = [
       {
-        from: mahaChessSquareToCoord('d5'),
-        to: mahaChessSquareToCoord('e4'),
+        from: mahaChessSquareToCoord('e5'),
+        to: mahaChessSquareToCoord('d4'),
         type: 'melee'
       }
     ];
@@ -311,6 +316,8 @@ describe('submitAttacks', () => {
       attacks: blackAttacks
     });
 
+    printMatrix(toPrintableBoard(boardStateBeforeAttack));
+
     expect(blackAttackRes.ok).toBe(true);
     if (!blackAttackRes.ok) {
       return;
@@ -318,28 +325,24 @@ describe('submitAttacks', () => {
 
     const actual = blackAttackRes.val;
 
-    // const expectedGameTurn = [
-
-    // ];
-
     const expectedGameTurn = [
       {
-        white: whiteMoves.map((m, i) => ({
-          ...m,
+        white: whiteMoves.map((shortAttack, i) => ({
+          ...shortAttack,
           piece: whiteMovedPieces[i]?.state
         })),
-        black: blackMoves.map((m, i) => ({
-          ...m,
+        black: blackMoves.map((shortAttack, i) => ({
+          ...shortAttack,
           piece: blackMovedPieces[i]?.state
         }))
       },
       {
-        white: whiteAttacks.map((m, i) => ({
-          ...m
+        white: whiteAttacks.map((shortAttack, i) => ({
+          ...shortAttack
           // piece: whiteAttackedPieces[i]?.state
         })),
-        black: blackAttacks.map((m, i) => ({
-          ...m
+        black: blackAttacks.map((shortAttack, i) => ({
+          ...shortAttack
           // piece: blackMovedPieces[i]?.state
         }))
       }
