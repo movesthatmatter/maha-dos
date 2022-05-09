@@ -359,7 +359,7 @@ export class Game<PR extends PieceRegistry = PieceRegistry> implements IGame {
       return new Err(getAttackNotPossibleError('GameIsCompleted'));
     }
 
-    if (!(isGameInAttackPhase(this.state) || this.state.state === 'pending')) {
+    if (!isGameInAttackPhase(this.state)) {
       return new Err(getAttackNotPossibleError('GameNotInMovePhase'));
     }
 

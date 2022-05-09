@@ -1,15 +1,10 @@
 import { Board } from '../gameMechanics/Board/Board';
 import { ShortAttack } from '../gameMechanics/commonTypes';
-import {
-  coordToMatrixIndex,
-  matrixInsertMany,
-  printMatrix
-} from '../gameMechanics/util';
+import { coordToMatrixIndex, matrixInsertMany } from '../gameMechanics/util';
 import { Result } from 'ts-results';
 import { DEFAULT_MAHA_CONFIGURATOR, mahaPieceRegistry } from './config';
 import { MahaGameReconciliator } from './MahaGameReconciliator';
 import { mahaChessSquareToCoord } from './util';
-import { toPrintableBoard } from 'src/gameMechanics/Board/util';
 
 describe('submitMoves', () => {
   test('first player submitting from initial position - ok', () => {
@@ -316,8 +311,6 @@ describe('submitAttacks', () => {
       attacks: blackAttacks
     });
 
-    printMatrix(toPrintableBoard(boardStateBeforeAttack));
-
     expect(blackAttackRes.ok).toBe(true);
     if (!blackAttackRes.ok) {
       return;
@@ -338,17 +331,17 @@ describe('submitAttacks', () => {
       },
       {
         white: whiteAttacks.map((shortAttack, i) => ({
-          ...shortAttack
-          // piece: whiteAttackedPieces[i]?.state
+          attack: shortAttack,
+          damage: 2,
+          willTake: true
         })),
         black: blackAttacks.map((shortAttack, i) => ({
-          ...shortAttack
-          // piece: blackMovedPieces[i]?.state
+          attack: shortAttack,
+          damage: 2,
+          willTake: true
         }))
       }
     ];
-
-    // printMatrix(boardStateBeforeAttack.pieceLayoutState);
 
     expect(actual.state).toBe('inProgress');
     expect(actual.phase).toBe('move');
@@ -356,18 +349,6 @@ describe('submitAttacks', () => {
 
     expect(actual.history).toHaveLength(1);
     expect(actual.history).toEqual([expectedGameTurn]);
-
-    // add me now
-    // expect(actual.boardState).not.toEqual(boardStateBeforeAttack); // But how?
-
-    // expect(actual.boardState).toEqual(boardStateBeforeAttack);
-    // expect(actual.white).toEqual({
-    //   canDraw: false,
-    //   attacks: whiteAttacks,
-    // });
-    // expect(actual.black).toEqual({
-    //   canDraw: true,
-    //   attacks: undefined
-    // });
+    expect(actual.boardState).not.toEqual(boardStateBeforeAttack);
   });
 });

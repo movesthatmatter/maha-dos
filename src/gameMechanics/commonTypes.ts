@@ -57,34 +57,8 @@ export type AttackOutcome = {
   special?: SpecialAttacks;
 };
 
-// export type AttackOutcome = Attack & {
-//   attacker: PieceState<string>['label'];
-//   victim: PieceState<string>['label'];
-
-//   heal?: boolean;
-//   crit?: boolean;
-//   attackBonus?: boolean;
-//   defenseBonus?: boolean;
-//   defensePenalty?: boolean;
-//   movementAttackBonus?: boolean;
-//   aoe?: Coord[];
-// }
-
-// // A Partial Game In Move Phase doesn't have the Attack Phase
-// export type PartialGameTurn = [{ white: Move[]; black: Move[] }];
-
-// A Partial Game In Move Phase doesn't have the Attack Phase
 export type PartialGameTurnMovePhase = [{ [k in Color]: Move[] }];
-
-// A Partial Game in Attack Phase always has the Move Phase
-// TODO: Modify this a the Attacks shouldn't be part of the Partial GameTurn, only the moves!
-// export type PartialGameTurnAttackPhase = [
-//   { [k in Color]: Move[] },
-//   // { [k in Color]: AttackOutcome[] }
-// ];
-export type PartialGameTurn =
-  | PartialGameTurnMovePhase
-  // | PartialGameTurnAttackPhase;
+export type PartialGameTurn = PartialGameTurnMovePhase;
 
 export type FullGameTurn = [
   { [k in Color]: Move[] },

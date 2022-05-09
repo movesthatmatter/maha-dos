@@ -82,7 +82,7 @@ export type InProgressGameStatePhaseSlice =
     ))
   | ({
       phase: 'attack';
-      history: [...GameHistory, PartialGameTurnMovePhase];
+      history:  [...GameHistory, PartialGameTurnMovePhase];
     } & (
       | {
           submissionStatus: 'none';

@@ -2,11 +2,16 @@ import { MahaGame } from '../../MahaGame';
 import {
   GameConfigurator,
   GameStateInProgress,
-  GameStateInMovePhase,
+  GameStateInMovePhase
 } from '../../../gameMechanics/Game/types';
 import { mahaPieceRegistry } from '../registry';
 import { generate } from '../../../mahaDosGame/helpers';
-import { Attack, GameHistory, Move, PartialGameTurn } from '../../../gameMechanics/commonTypes';
+import {
+  Attack,
+  GameHistory,
+  Move,
+  PartialGameTurn
+} from '../../../gameMechanics/commonTypes';
 
 describe('eval moves for rooks', () => {
   test('eval move', () => {
@@ -125,10 +130,6 @@ describe('eval attacks for Rooks', () => {
             piece: generate.generateDefaultPawn('P-white', 'white')
           }
         ]
-      },
-      {
-        white: [],
-        black: []
       }
     ];
     const history: GameHistory = [[...turn]];
@@ -183,10 +184,6 @@ describe('eval attacks for Rooks', () => {
             piece: generate.generateDefaultPawn('P-white', 'white')
           }
         ]
-      },
-      {
-        white: [],
-        black: []
       }
     ];
     const history: GameHistory = [[...turn]];
@@ -262,10 +259,6 @@ describe('eval attacks for Rooks', () => {
             piece: generate.generateDefaultPawn('P-white', 'white')
           }
         ]
-      },
-      {
-        white: [],
-        black: []
       }
     ];
     const history: GameHistory = [[...turn]];
@@ -350,10 +343,6 @@ describe('eval attacks for Rooks', () => {
       {
         black: [] as Move[],
         white: [] as Move[]
-      },
-      {
-        white: [],
-        black: []
       }
     ];
     const history: GameHistory = [[...turn]];
@@ -481,10 +470,6 @@ describe('eval attacks for Rooks', () => {
       {
         black: [] as Move[],
         white: [] as Move[]
-      },
-      {
-        white: [],
-        black: []
       }
     ];
     const history: GameHistory = [[...turn]];
@@ -594,10 +579,6 @@ describe('eval attacks for Rooks', () => {
           }
         ]
       },
-      {
-        white: [],
-        black: []
-      }
     ];
     const history: GameHistory = [[...turn]];
 

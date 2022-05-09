@@ -161,10 +161,6 @@ describe('Eval attacks for Bishop', () => {
             piece: generate.generateDefaultPawn('P-white', 'white')
           }
         ]
-      },
-      {
-        white: [],
-        black: []
       }
     ];
     const history: GameHistory = [[...turn]];
@@ -209,10 +205,6 @@ describe('Eval attacks for Bishop', () => {
             piece: generate.generateDefaultPawn('P-white', 'white')
           }
         ]
-      },
-      {
-        white: [],
-        black: []
       }
     ];
     const history: GameHistory = [{ ...turn }];
