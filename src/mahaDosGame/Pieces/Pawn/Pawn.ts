@@ -148,10 +148,12 @@ export class Pawn extends Piece {
         ? 1
         : 0;
 
+    const damage = (moved ? 2 : 1) - defenseBonus - kingDefense;
+
     return Ok({
       attack,
-      hasMoved: true,
-      damage: (moved ? 2 : 1) - defenseBonus - kingDefense
+      willTake: targetPiece.state.hitPoints - damage > 0 ? false : true,
+      damage
     });
   }
 }

@@ -48,7 +48,7 @@ export type SpecialAttacks = {
 
 export type AttackOutcome = {
   attack: ShortAttack;
-  hasMoved: boolean;
+  willTake: boolean;
   damage: number;
 
   // TODO: Add the special/bonus here once we need it

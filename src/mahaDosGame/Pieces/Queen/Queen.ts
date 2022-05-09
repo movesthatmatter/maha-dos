@@ -12,7 +12,12 @@ import {
 import { Err, Ok, Result } from 'ts-results';
 import { toDictIndexedBy } from '../../../gameMechanics/utils';
 import { AttackNotPossibleError } from '../../../gameMechanics/Game/errors/types';
-import { AttackOutcome, Move, Attack, Color } from '../../../gameMechanics/commonTypes';
+import {
+  AttackOutcome,
+  Move,
+  Attack,
+  Color
+} from '../../../gameMechanics/commonTypes';
 
 const pieceLabel = 'Queen';
 
@@ -230,10 +235,15 @@ export class Queen extends Piece {
         ? 1
         : 0;
 
+    const damage =
+      this.state.attackDamage + critDmg - defenseBonus - kingDefense;
     return Ok({
       attack,
-      hasMoved: attack.type === 'melee',
-      damage: this.state.attackDamage + critDmg - defenseBonus - kingDefense
+      willTake:
+        attack.type === 'melee' && targetPiece.state.hitPoints - damage > 0
+          ? false
+          : true,
+      damage
     });
   }
 }

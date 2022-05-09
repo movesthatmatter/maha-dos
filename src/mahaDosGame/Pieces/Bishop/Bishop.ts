@@ -191,7 +191,10 @@ export class Bishop extends Piece {
 
     return Ok({
       attack,
-      willTake: false,
+      willTake:
+        attack.type === 'melee' && targetPiece.state.hitPoints - damage > 0
+          ? false
+          : true,
       damage
     });
   }

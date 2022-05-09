@@ -163,15 +163,17 @@ export class Knight extends Piece {
         ? 1
         : 0;
 
+    const damage =
+      this.state.attackDamage +
+      moveDamage +
+      bonusDamage -
+      defenseBonus -
+      kingDefense;
+
     return Ok({
       attack,
-      hasMoved: true,
-      damage:
-        this.state.attackDamage +
-        moveDamage +
-        bonusDamage -
-        defenseBonus -
-        kingDefense
+      willTake: targetPiece.state.hitPoints - damage > 0 ? false : true,
+      damage
     });
   }
 }
