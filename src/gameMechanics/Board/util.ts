@@ -9,6 +9,7 @@ import {
 import { BoardState } from './types';
 import { mahaPieceRegistry } from '../../mahaDosGame/config';
 import { Color } from '../commonTypes';
+import { table } from 'table';
 
 // Returns the default color at the coord for any chess based games
 // TODO: Might need to make it game specific in the future if this is not enough
@@ -67,12 +68,16 @@ export const toPrintableBoardWithState = (board: BoardState) => {
     if (sq === 0) {
       return 0;
     }
-    return JSON.stringify({
-      piece: `${sq.color} ${sq.label}`,
-      hitPoints: `${sq.hitPoints}/${sq.maxHitPoints}`,
-      position: `row:${index[0]}-col:${index[1]}`
-    });
+    return `${sq.color} ${sq.label}\n ${sq.hitPoints}/${sq.maxHitPoints}\n row:${index[0]}-col:${index[1]}`;
   });
+};
+
+export const printBoardAsTableWithState = (m: Matrix<0 | {}>) => {
+  console.log(
+    table(m, {
+      columnDefault: { width: 15, alignment: 'center' }
+    })
+  );
 };
 
 export const toPieceId = (ref: string, { row, col }: Coord) =>

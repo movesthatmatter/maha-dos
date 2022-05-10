@@ -106,7 +106,7 @@ export const Maha: React.FC<MahaProps> = ({
           const piece = localGameRef.current.board.getPieceById(p.piece.id);
 
           if (workingGameState.phase === 'move') {
-            const dests = piece?.evalMove(localGameRef.current);
+            const dests = piece?.evalMove(getGameFromState(workingGameState));
 
             if (dests) {
               setPossibleMoveSquares(dests.map((d) => d.to));
