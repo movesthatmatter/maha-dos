@@ -62,6 +62,19 @@ export const toPrintableBoard = (board: BoardState) => {
   });
 };
 
+export const toPrintableBoardWithState = (board: BoardState) => {
+  return matrixMap(board.pieceLayoutState, (sq, index) => {
+    if (sq === 0) {
+      return 0;
+    }
+    return JSON.stringify({
+      piece: `${sq.color} ${sq.label}`,
+      hitPoints: `${sq.hitPoints}/${sq.maxHitPoints}`,
+      position: `row:${index[0]}-col:${index[1]}`
+    });
+  });
+};
+
 export const toPieceId = (ref: string, { row, col }: Coord) =>
   `${ref}-${row}-${col}`;
 

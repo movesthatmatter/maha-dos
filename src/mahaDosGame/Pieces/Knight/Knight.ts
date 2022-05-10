@@ -159,7 +159,7 @@ export class Knight extends Piece {
 
     const defenseBonus =
       targetPiece.state.label === 'Bishop' ||
-      targetPiece.state.label === 'Knight'
+      targetPiece.state.label === 'NKnight'
         ? 1
         : 0;
 

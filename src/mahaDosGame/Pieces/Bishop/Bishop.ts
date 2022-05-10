@@ -119,7 +119,7 @@ export class Bishop extends Piece {
 
         if (r === 1) {
           if (
-            targetPiece.state.label === 'Rook' &&
+            targetPiece.state.label === 'Rook' ||
             targetPiece.state.color === this.state.color
           ) {
             attacks.push({
@@ -170,7 +170,7 @@ export class Bishop extends Piece {
       });
     }
 
-    const attackBonus = targetPiece.state.label === 'Knight' ? 1 : 0;
+    const attackBonus = targetPiece.state.label === 'NKnight' ? 1 : 0;
     const heal = targetPiece.state.color === this.state.color;
 
     let kingDefense = 0;

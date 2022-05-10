@@ -91,7 +91,7 @@ describe('test getAllAdjecentPiecesToPosition function', () => {
         canAttack: true,
         pieceHasMoved: false,
         color: 'black',
-        label: 'Knight',
+        label: 'NKnight',
         movesDirections: [
           { row: -2, col: 1 },
           { row: -1, col: 2 },
@@ -130,7 +130,7 @@ describe('test getAllAdjecentPiecesToPosition function', () => {
         canAttack: true,
         pieceHasMoved: false,
         color: 'black',
-        label: 'Knight',
+        label: 'NKnight',
         movesDirections: [
           { row: -2, col: 1 },
           { row: -1, col: 2 },

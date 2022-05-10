@@ -10,7 +10,10 @@ import { Result } from 'ts-results';
 import { DEFAULT_MAHA_CONFIGURATOR, mahaPieceRegistry } from './config';
 import { MahaGameReconciliator } from './MahaGameReconciliator';
 import { mahaChessSquareToCoord } from './util';
-import { toPrintableBoard } from 'src/gameMechanics/Board/util';
+import {
+  toPrintableBoard,
+  toPrintableBoardWithState
+} from 'src/gameMechanics/Board/util';
 import { Queen } from './Pieces/Queen';
 
 describe('submitMoves', () => {
@@ -547,7 +550,7 @@ describe('submitAttacks', () => {
 
     // console.log('actual', actual);
 
-    printMatrix(toPrintableBoard(reconciliator.board.state));
+    printMatrix(toPrintableBoardWithState(reconciliator.board.state));
 
     expect(actual.state).toBe('inProgress');
     expect(actual.phase).toBe('move');
@@ -562,7 +565,7 @@ describe('submitAttacks', () => {
         initialBoardState.pieceLayoutState,
         coordToMatrixIndex(mahaChessSquareToCoord('d1'))
       ),
-      hitPoints: 17,
+      hitPoints: 17
     };
     expect(actualWhiteQueenD1).toEqual(expectedWhiteQueenD1);
   });
