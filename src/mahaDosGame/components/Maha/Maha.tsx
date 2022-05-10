@@ -11,11 +11,8 @@ import { Button } from '../Button';
 import { Color } from '../../../gameMechanics/commonTypes';
 import {
   isGameInAttackPhase,
-  isGameInAttackPhaseWithPartialOrPreparingSubmission,
   isGameInAttackPhaseWithPreparingSubmission,
   isGameInMovePhase,
-  isGameInMovePhaseWithPartialOrPreparingSubmission,
-  isGameInMovePhaseWithPartialSubmission,
   isGameInMovePhaseWithPreparingSubmission
 } from '../../../gameMechanics/Game/helpers';
 
@@ -31,6 +28,7 @@ export type MahaProps = {
   gameState: GameState; // always receives a game state even if default/pending
   onPieceTouched?: MahaChessTerrainProps['onPieceTouched'];
   onEmptySquareTouched?: MahaChessTerrainProps['onEmptySquareTouched'];
+  orientation?: MahaChessTerrainProps['orientation'];
 };
 
 const getGameFromState = (gameState?: GameState) => {
@@ -48,6 +46,7 @@ const getGameFromState = (gameState?: GameState) => {
 export const Maha: React.FC<MahaProps> = ({
   gameState,
   playingColor,
+  orientation,
   onSubmitMoves,
   onSubmitAttacks,
   canInteract = false,
@@ -71,10 +70,6 @@ export const Maha: React.FC<MahaProps> = ({
       (localGameRef.current.state.state === 'inProgress' &&
         gameState.state === 'inProgress' &&
         localGameRef.current.state.phase !== gameState.phase)
-      // (localGameRef.current.state.state === 'inProgress' &&
-      //   gameState.state === 'inProgress' &&
-      //   localGameRef.current.state.submissionStatus !==
-      //     gameState.submissionStatus)
     ) {
       localGameRef.current.load(gameState);
 
@@ -83,14 +78,6 @@ export const Maha: React.FC<MahaProps> = ({
   }, [gameState]);
 
   const workingGameState = preparingGameState || gameState;
-
-  // useEffect(() => {
-  //   console.log('change in either game state!!!')
-  // }, [gameState, preparingGameState])
-
-  // useEffect(() => {
-  //   console.log('workingGameState updated', workingGameState);
-  // }, [workingGameState]);
 
   return (
     <>
@@ -101,6 +88,7 @@ export const Maha: React.FC<MahaProps> = ({
         possibleMoveSquares={possibleMoveSquares}
         playingColor={playingColor}
         canInteract={canInteract}
+        orientation={orientation}
         onPieceTouched={(p) => {
           if (!p) {
             setPossibleMoveSquares([]);

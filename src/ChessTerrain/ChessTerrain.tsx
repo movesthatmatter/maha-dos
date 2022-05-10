@@ -167,6 +167,9 @@ export const ChessTerrain: React.FC<ChessTerrainProps> = ({
         // fill="purple"
         width={sizePx}
         height={sizePx}
+        style={{
+          zIndex: 9999988,
+        }}
         arrows={arrows.map((arrow) => ({
           ...arrow,
           from: {

@@ -84,7 +84,7 @@ export const MahaChessTerrain: React.FC<MahaChessTerrainProps> = ({
           x: a.to.row,
           y: a.to.col
         },
-        strokeColor: 'purple'
+        strokeColor: 'rgba(114, 9, 183, .7)'
       }));
     }
 
