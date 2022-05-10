@@ -3,7 +3,9 @@ import { BoardState } from '../gameMechanics/Board/types';
 import { IdentifiablePieceState } from '../gameMechanics/Piece/types';
 import {
   Coord,
+  flipMatrixIndexHorizontally,
   matrixGet,
+  MatrixIndex,
   matrixIndexToCoord,
   matrixReduce,
   noop
@@ -21,6 +23,8 @@ export type ChessTerrainProps = {
   arrows?: Arrow[];
   styledCoords?: (Coord & { style?: CSSProperties })[];
   overlays?: { coord: Coord; component: React.ReactNode }[];
+
+  orientation?: Color;
 
   // This is always on TouchPiece
   onPieceTouched?: (
@@ -43,6 +47,7 @@ export const ChessTerrain: React.FC<ChessTerrainProps> = ({
   onCoordTouched = noop,
 
   playingColor,
+  orientation = playingColor,
   board,
   sizePx,
   arrows = [],
@@ -87,6 +92,8 @@ export const ChessTerrain: React.FC<ChessTerrainProps> = ({
     [sizePx, board.terrainState.length]
   );
 
+  const isFlipped = useMemo(() => orientation !== 'white', [orientation]);
+
   const onBoardClick = useCallback(
     (e: MouseEvent) => {
       e.stopPropagation();
@@ -95,22 +102,40 @@ export const ChessTerrain: React.FC<ChessTerrainProps> = ({
       const x = e.clientX - rect.left; //x position within the element.
       const y = e.clientY - rect.top; //y position within the element.
 
-      const coord = {
+      const absoluteCoords = {
         row: Math.floor(y / squareSize),
         col: Math.floor(x / squareSize)
       };
 
-      const piece = matrixGet(board.pieceLayoutState, [coord.row, coord.col]);
+      const absoluteMatrixIndex: MatrixIndex = [
+        absoluteCoords.row,
+        absoluteCoords.col
+      ];
+
+      const workingMatrixIndex = isFlipped
+        ? flipMatrixIndexHorizontally(
+            board.pieceLayoutState,
+            absoluteMatrixIndex
+          )
+        : absoluteMatrixIndex;
+
+      const workingCoords = {
+        row: workingMatrixIndex[0],
+        col: workingMatrixIndex[1]
+      };
+
+      const piece = matrixGet(board.pieceLayoutState, workingMatrixIndex);
 
       if (piece) {
-        onPieceTouched(piece, coord);
+        onPieceTouched(piece, workingCoords);
       } else {
-        onEmptySquareTouched(coord);
+        onEmptySquareTouched(workingCoords);
       }
 
-      onCoordTouched(coord);
+      onCoordTouched(workingCoords);
     },
     [
+      isFlipped,
       squareSize,
       board,
       playingColor,
@@ -130,7 +155,10 @@ export const ChessTerrain: React.FC<ChessTerrainProps> = ({
         backgroundRepeat: 'repeat',
         backgroundSize: (sizePx * 2) / board.terrainState.length,
         position: 'relative',
-        zIndex: 99
+        zIndex: 99,
+        ...(isFlipped && {
+          transform: 'scaleY(-1)'
+        })
         // Adjust the position if needed to match the bottomLeft corner
         // backgroundPosition: `0 ${props.sizePx * 2}`,
       }}
@@ -176,6 +204,11 @@ export const ChessTerrain: React.FC<ChessTerrainProps> = ({
             squareSize={squareSize}
             coord={coord}
             assetsMap={pieceAssets}
+            style={{
+              ...(isFlipped && {
+                transform: 'scaleY(-1)'
+              })
+            }}
           />
         );
       })}
@@ -195,7 +228,6 @@ export const ChessTerrain: React.FC<ChessTerrainProps> = ({
       ))}
       <div
         style={{
-          // background: 'rgba(255, 0, 0, .1)',
           position: 'absolute',
           left: 0,
           top: 0,

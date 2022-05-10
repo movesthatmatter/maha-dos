@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { CSSProperties, useMemo } from 'react';
 import { getRefFromPieceId } from '../gameMechanics/Board/util';
 import { IdentifiablePieceState } from '../gameMechanics/Piece/types';
 import { Coord } from '../gameMechanics/util';
@@ -8,13 +8,15 @@ type Props = {
   assetsMap: Record<string, string>;
   squareSize: number;
   coord: Coord;
+  style?: CSSProperties;
 };
 
 export const TerrainPiece: React.FC<Props> = ({
   piece,
   assetsMap,
   squareSize,
-  coord
+  coord,
+  style
 }) => {
   const asset = useMemo(
     () => assetsMap[getRefFromPieceId(piece.id).ref],
@@ -41,7 +43,9 @@ export const TerrainPiece: React.FC<Props> = ({
         textAlign: 'center',
         cursor: 'pointer',
 
-        transition: 'all 150ms linear'
+        transition: 'all 150ms linear',
+
+        ...style,
       }}
     >
       <img src={asset} alt={piece.label} style={{ width: squareSize / 1.4 }} />
