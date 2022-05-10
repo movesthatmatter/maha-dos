@@ -2,7 +2,8 @@ import { Game } from '../../../gameMechanics/Game/Game';
 import { Piece } from '../../../gameMechanics/Piece/Piece';
 import {
   IdentifiablePieceState,
-  PieceDynamicProps
+  PieceDynamicProps,
+  PieceState
 } from '../../../gameMechanics/Piece/types';
 import {
   evalEachDirectionForMove,
@@ -101,10 +102,13 @@ export class Rook extends Piece<PieceLabel> {
         }
 
         const targetPiece = game.board.getPieceByCoord(target);
+        if (!targetPiece) {
+          return;
+        }
 
         //special attack, can move before this
         if (r === 1) {
-          if (targetPiece && targetPiece.state.color !== this.state.color) {
+          if (targetPiece.state.color !== this.state.color) {
             attacks.push({
               from: pieceCoord,
               to: target,
@@ -112,21 +116,16 @@ export class Rook extends Piece<PieceLabel> {
             });
           }
         } else {
-          //if it moved if cannot attack normal range
-          if (
-            typeof game.state.history[length - 1][0][this.state.color] !==
-            'undefined'
-          ) {
-            const movesByPieceId = toDictIndexedBy(
-              game.state.history[length - 1][0][this.state.color] as Move[],
-              (move) => move.piece.id
-            );
+          const movesByPieceId = toDictIndexedBy(
+            game.state.history[length - 1][0][this.state.color] as Move[],
+            (move) => move.piece.id
+          );
 
-            if (this.state.id in movesByPieceId) {
-              return attacks;
-            }
+          if (this.state.id in movesByPieceId) {
+            return attacks;
           }
-          if (targetPiece && targetPiece.state.color !== this.state.color) {
+
+          if (targetPiece.state.color !== this.state.color) {
             const attack: Attack = {
               from: pieceCoord,
               to: target,
@@ -204,10 +203,12 @@ export class Rook extends Piece<PieceLabel> {
           : 0;
     }
 
+    const damage = (movedDist > 1 ? 3 : 2) - kingDefense;
+
     return Ok({
       attack,
       willTake: false,
-      damage: (movedDist > 1 ? 3 : 2) - kingDefense,
+      damage,
       ...(aoePieces.length > 0 && {
         aoe: aoePieces.map((p) => game.board.getPieceCoordById(p.id))
       })

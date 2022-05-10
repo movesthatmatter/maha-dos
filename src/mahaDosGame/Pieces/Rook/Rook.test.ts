@@ -98,11 +98,6 @@ describe('eval attacks for Rooks', () => {
       ]
     };
 
-    // const piece = new Rook(
-    //   'black',
-    //   generatePieceLabel('black', 'bR', { row: 2, col: 2 })
-    // );
-
     const game = new MahaGame(configuration);
     const state = game.state;
 
@@ -132,7 +127,7 @@ describe('eval attacks for Rooks', () => {
         ]
       }
     ];
-    const history: GameHistory = [[...turn]];
+    const history: GameHistory = [[...turn], [...turn]];
 
     game.load({
       ...state,
@@ -186,7 +181,7 @@ describe('eval attacks for Rooks', () => {
         ]
       }
     ];
-    const history: GameHistory = [[...turn]];
+    const history: GameHistory = [[...turn], [...turn]];
 
     const game = new MahaGame(configuration);
     const state = game.state;
@@ -261,7 +256,7 @@ describe('eval attacks for Rooks', () => {
         ]
       }
     ];
-    const history: GameHistory = [[...turn]];
+    const history: GameHistory = [[...turn], [...turn]];
 
     const game = new MahaGame(configuration);
     const state = game.state;
@@ -345,7 +340,7 @@ describe('eval attacks for Rooks', () => {
         white: [] as Move[]
       }
     ];
-    const history: GameHistory = [[...turn]];
+    const history: GameHistory = [[...turn], [...turn]];
 
     const game = new MahaGame(configuration);
     const state = game.state;
@@ -472,7 +467,7 @@ describe('eval attacks for Rooks', () => {
         white: [] as Move[]
       }
     ];
-    const history: GameHistory = [[...turn]];
+    const history: GameHistory = [[...turn], [...turn]];
 
     const game = new MahaGame(configuration);
     const state = game.state;
@@ -580,7 +575,7 @@ describe('eval attacks for Rooks', () => {
         ]
       },
     ];
-    const history: GameHistory = [[...turn]];
+    const history: GameHistory = [[...turn], [...turn]];
 
     const state = game.state;
     game.load({

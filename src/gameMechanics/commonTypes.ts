@@ -48,7 +48,6 @@ export type SpecialAttacks = {
 
 export type AttackOutcome = {
   attack: ShortAttack;
-  // This means that the attacker took the victim's position!
   willTake: boolean;
   damage: number;
 

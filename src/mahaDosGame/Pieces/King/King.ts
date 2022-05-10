@@ -122,10 +122,12 @@ export class King extends Piece {
         ? 1
         : 0;
 
+    const damage = this.state.attackDamage - defenseBonus;
+
     return Ok({
       attack,
-      willTake: true,
-      damage: this.state.attackDamage - defenseBonus
+      willTake: targetPiece.state.hitPoints - damage > 0 ? false : true,
+      damage
     });
   }
 }
