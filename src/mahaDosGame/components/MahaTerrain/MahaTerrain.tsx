@@ -1,24 +1,74 @@
-import { useMemo } from 'react';
+import { CSSProperties, useEffect, useMemo, useState } from 'react';
 import { Arrow } from '../../../ChessTerrain/SVGOverlay';
 import {
+  isGameInAttackPhase,
   isGameInAttackPhaseWithPreparingSubmission,
+  isGameInMovePhase,
   isGameInMovePhaseWithPreparingSubmission
 } from '../../../gameMechanics/Game/helpers';
 import { GameState } from '../../../gameMechanics/Game/types';
 import { ChessTerrain, ChessTerrainProps } from '../../../ChessTerrain';
+import { Coord, coordsAreEqual, noop } from '../../..//gameMechanics/util';
+import { mahaAssetPieceRegistry } from '../../../mahaDosGame/Pieces/registry';
+import { Button } from '../Button';
+import {
+  Color,
+  ShortAttack,
+  ShortMove
+} from '../../../gameMechanics/commonTypes';
+import { IdentifiablePieceState } from '../../../gameMechanics/Piece/types';
 
 export type MahaChessTerrainProps = Omit<
   ChessTerrainProps,
-  'board' | 'arrows'
+  | 'board'
+  | 'arrows'
+  | 'pieceAssets'
+  | 'overlays'
+  | 'onPieceDestinationSet'
+  | 'onPieceTouched'
 > & {
   gameState: GameState;
+  playingColor: Color;
+  canInteract?: boolean;
+  destinationSquares?: Coord[];
+
+  possibleMoveSquares: Coord[];
+  onMove: (m: ShortMove) => void;
+
+  possibleAttackSquares: Coord[];
+  onAttack: (a: ShortAttack) => void;
+
+  onPieceTouched?: (
+    p: { coord: Coord; piece: IdentifiablePieceState } | undefined
+  ) => void;
 };
 
-// This is an abstractuin that takes care of styling and other adaptions to Maha from Chess Terrain
-// Might not actually be needed by the end as everything can happen outside as well!
-// so as not to load an extra component + calculations here
+const possibleMoveSquareStyle: CSSProperties = {
+  background: 'rgba(0, 0, 150, .5)',
+  borderRadius: '8px'
+};
+
+const possibleAttackSquareStyle: CSSProperties = {
+  background: 'rgba(150, 0, 0, .5)',
+  borderRadius: '8px'
+};
+
+const touchedPieceSquareStyle: CSSProperties = {
+  background: 'rgba(0, 150, 150, .5)',
+  borderRadius: '8px'
+};
+
 export const MahaChessTerrain: React.FC<MahaChessTerrainProps> = ({
   gameState,
+  canInteract = false,
+  onPieceTouched = noop,
+  onEmptySquareTouched = noop,
+
+  possibleMoveSquares,
+  possibleAttackSquares,
+
+  onMove,
+  onAttack,
   ...chessTerrainProps
 }) => {
   const arrows: Arrow[] = useMemo(() => {
@@ -60,10 +110,103 @@ export const MahaChessTerrain: React.FC<MahaChessTerrainProps> = ({
     return [];
   }, [gameState]);
 
+  const [attackOverlays, setAttackOverlays] = useState<Coord[]>();
+
+  const [touchedPiece, setTouchedPiece] =
+    useState<{
+      coord: Coord;
+      piece: IdentifiablePieceState;
+    }>();
+
+  useEffect(() => {
+    onPieceTouched(touchedPiece);
+  }, [touchedPiece]);
+
   return (
     <ChessTerrain
       board={gameState.boardState}
       arrows={arrows}
+      pieceAssets={mahaAssetPieceRegistry}
+      styledCoords={[
+        ...possibleAttackSquares.map((dest) => ({
+          ...dest,
+          style: possibleAttackSquareStyle
+        })),
+        ...possibleMoveSquares.map((dest) => ({
+          ...dest,
+          style: possibleMoveSquareStyle
+        })),
+        ...(touchedPiece
+          ? [{ ...touchedPiece.coord, style: touchedPieceSquareStyle }]
+          : [])
+      ]}
+      overlays={attackOverlays?.map((coord) => {
+        return {
+          coord,
+          component: (
+            <div
+              style={{
+                background: 'rgba(0, 0, 0, .5)',
+                width: '100%',
+                height: '100%'
+              }}
+            >
+              <Button
+                label="Mellee"
+                onClick={() => {
+                  console.log('Mellee Attack', coord);
+                }}
+              />
+              <Button
+                label="Range"
+                onClick={() => {
+                  console.log('Range Attack', coord);
+                }}
+              />
+            </div>
+          )
+        };
+      })}
+      onPieceTouched={(pieceState, coord) => {
+        if (!canInteract) {
+          return;
+        }
+
+        // If same coords, means untouch
+        if (touchedPiece && coordsAreEqual(touchedPiece?.coord, coord)) {
+          setTouchedPiece(undefined);
+
+          return;
+        }
+
+        if (isGameInAttackPhase(gameState) && touchedPiece) {
+          onAttack({
+            from: touchedPiece.coord,
+            to: coord,
+
+            // TODO: Take the type out of the Short Attack
+            type: 'melee'
+          });
+
+          setTouchedPiece(undefined);
+
+          return;
+        }
+
+        if (chessTerrainProps.playingColor === pieceState.color) {
+          setTouchedPiece({ piece: pieceState, coord });
+        }
+      }}
+      onEmptySquareTouched={(coord) => {
+        if (isGameInMovePhase(gameState) && touchedPiece) {
+          onMove({
+            from: touchedPiece.coord,
+            to: coord
+          });
+        }
+
+        setTouchedPiece(undefined);
+      }}
       {...chessTerrainProps}
     />
   );

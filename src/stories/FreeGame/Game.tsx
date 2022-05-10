@@ -11,7 +11,6 @@ type Props = {
   gameState: MahaProps['gameState'];
 };
 
-
 export const MahaGame: React.FC<Props> = (props) => {
   const [pieceInfo, setPieceInfo] = useState<PieceState>();
   // const [preparingMoves, setMyMoves] = useState<Move[]>();
@@ -30,8 +29,8 @@ export const MahaGame: React.FC<Props> = (props) => {
           onSubmitMoves={props.onSubmitMoves}
           onSubmitAttacks={props.onSubmitAttacks}
           playingColor={props.color}
-          onPieceTouched={(piece) => setPieceInfo(piece)}
-          onSquareTouched={() => setPieceInfo(undefined)}
+          onPieceTouched={(p) => setPieceInfo(p?.piece)}
+          onEmptySquareTouched={() => setPieceInfo(undefined)}
         />
       </div>
       <div

@@ -44,7 +44,7 @@ export const TerrainPiece: React.FC<Props> = ({
         transition: 'all 150ms linear'
       }}
     >
-      <img src={asset} alt={piece.label} style={{ width: squareSize / 1.2 }} />
+      <img src={asset} alt={piece.label} style={{ width: squareSize / 1.4 }} />
       <div
         style={{
           width: '90%'

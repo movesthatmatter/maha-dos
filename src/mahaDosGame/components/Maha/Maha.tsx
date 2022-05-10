@@ -1,4 +1,4 @@
-import React, { CSSProperties, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   GameState,
   GameStateInAttackPhaseWithPreparingSubmission,
@@ -13,7 +13,6 @@ import {
   isGameInAttackPhaseWithPreparingSubmission,
   isGameInMovePhaseWithPreparingSubmission
 } from '../../../gameMechanics/Game/helpers';
-import { mahaAssetPieceRegistry } from '../../../mahaDosGame/Pieces/registry';
 
 export type MahaProps = {
   onSubmitMoves: (
@@ -26,9 +25,7 @@ export type MahaProps = {
   playingColor: Color;
   gameState: GameState; // always receives a game state even if default/pending
   onPieceTouched?: MahaChessTerrainProps['onPieceTouched'];
-  onSquareTouched?: MahaChessTerrainProps['onSquareTouched'];
-  // onMoveDrawn?: (p: { move: Move; gameState: GameState }) => void;
-  // onAttackDrawn?: (p: { attack: Attack, gameState: GameState})
+  onEmptySquareTouched?: MahaChessTerrainProps['onEmptySquareTouched'];
 };
 
 const getGameFromState = (gameState?: GameState) => {
@@ -43,11 +40,6 @@ const getGameFromState = (gameState?: GameState) => {
   return game;
 };
 
-const destinationSquareStyle: CSSProperties = {
-  background: 'rgba(0, 0, 150, .5)',
-  borderRadius: '8px'
-};
-
 export const Maha: React.FC<MahaProps> = ({
   gameState,
   playingColor,
@@ -55,11 +47,13 @@ export const Maha: React.FC<MahaProps> = ({
   onSubmitAttacks,
   canInteract = false,
   onPieceTouched = noop,
-  onSquareTouched = noop
-  // onMoveDrawn = noop
+  onEmptySquareTouched = noop
 }) => {
   const localGameRef = useRef(getGameFromState(gameState));
-  const [destinationSquares, setDestinationSquares] = useState<Coord[]>();
+  const [possibleMoveSquares, setPossibleMoveSquares] = useState<Coord[]>([]);
+  const [possibleAttackSquares, setPossibleAttackSquares] = useState<Coord[]>(
+    []
+  );
 
   const [preparingGameState, setPreparingGameState] = useState<GameState>();
 
@@ -80,32 +74,28 @@ export const Maha: React.FC<MahaProps> = ({
   }, [gameState]);
 
   const workingGameState = preparingGameState || gameState;
-
-  useEffect(() => {
-    console.log('workingGameState', workingGameState);
-  }, [workingGameState]);
-
   return (
     <>
       <MahaChessTerrain
         sizePx={500}
         gameState={workingGameState}
-        styledCoords={destinationSquares?.map((dest) => ({
-          ...dest,
-          style: destinationSquareStyle
-        }))}
-        pieceAssets={mahaAssetPieceRegistry}
-        // pieceAssetsByPieceId={localGameRef.current.board.}
+        possibleAttackSquares={possibleAttackSquares}
+        possibleMoveSquares={possibleMoveSquares}
         playingColor={playingColor}
-        onPieceTouched={(pieceState, coord) => {
-          // console.log('on piece touched', pieceState, coord, workingGameState);
-          console.log('on piece touched', pieceState, coord);
+        canInteract={canInteract}
+        onPieceTouched={(p) => {
+          if (!p) {
+            setPossibleMoveSquares([]);
+            setPossibleAttackSquares([]);
+
+            return;
+          }
 
           if (!canInteract) {
             return;
           }
 
-          if (playingColor !== pieceState.color) {
+          if (playingColor !== p.piece.color) {
             return;
           }
 
@@ -113,67 +103,45 @@ export const Maha: React.FC<MahaProps> = ({
             return;
           }
 
-          const piece = localGameRef.current.board.getPieceById(pieceState.id);
-          // const pieceCoord = localGameRef.current.board.getPieceCoordById(
-          //   pieceState.id
-          // );
-          // console.log('on touched piece coord', pieceCoord);
-          // console.dir(toPrintableBoard(localGameRef.current.board.state));
+          const piece = localGameRef.current.board.getPieceById(p.piece.id);
 
           if (workingGameState.phase === 'move') {
             const dests = piece?.evalMove(localGameRef.current);
 
             if (dests) {
-              setDestinationSquares(dests.map((d) => d.to));
+              setPossibleMoveSquares(dests.map((d) => d.to));
             }
           } else {
             const dests = piece?.evalAttack(localGameRef.current);
 
-            console.log('atack dests', dests);
-
             if (dests) {
-              setDestinationSquares(dests.map((d) => d.to));
+              setPossibleAttackSquares(dests.map((d) => d.to));
             }
           }
 
-          onPieceTouched(pieceState, coord);
+          onPieceTouched(p);
         }}
-        onSquareTouched={onSquareTouched}
-        onPieceDestinationSet={(move) => {
-          if (!canInteract) {
-            return;
-          }
+        onEmptySquareTouched={(coord) => {
+          onEmptySquareTouched(coord);
 
-          if (playingColor !== move.piece.color) {
-            return;
-          }
+          setPossibleMoveSquares([]);
+          setPossibleAttackSquares([]);
+        }}
+        onMove={(move) => {
+          localGameRef.current.drawMove(move.from, move.to).map((next) => {
+            setPreparingGameState(next.gameState);
+          });
 
-          if (workingGameState.state !== 'inProgress') {
-            return;
-          }
+          setPossibleMoveSquares([]);
+        }}
+        onAttack={(attack) => {
+          localGameRef.current
+            .drawAttack(attack.from, attack.to)
+            .map((next) => {
+              setPreparingGameState(next.gameState);
+            });
 
-          if (workingGameState.phase === 'move') {
-            localGameRef.current
-              .drawMove(move.from, move.to)
-              .mapErr((e) => {
-                // console.log('error move', e);
-              })
-              .map((next) => {
-                // onMoveDrawn(next);
-                setPreparingGameState(next.gameState);
-              });
-          } else {
-            localGameRef.current
-              .drawAttack(move.from, move.to)
-              .mapErr((e) => {
-                console.log('error attack', e);
-              })
-              .map((next) => {
-                console.log('successattack', next);
-                // onAttackDrawn(next);
-                setPreparingGameState(next.gameState);
-              });
-          }
+          setPossibleAttackSquares([]);
         }}
       />
       {preparingGameState && (
