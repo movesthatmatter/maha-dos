@@ -20,7 +20,7 @@ import {
 import { Err, Ok, Result } from 'ts-results';
 import { AttackNotPossibleError } from '../../../gameMechanics/Game/errors/types';
 
-const pieceLabel = 'Knight';
+const pieceLabel = 'NKnight'; // TODO: This is called NKnight to keep the N in sync with chess
 
 const DEFAULT_DYNAMIC_PROPS: PieceDynamicProps = {
   hitPoints: 12,

@@ -7,6 +7,7 @@ import { IGame } from '../Game/IGame';
 import { Piece } from '../Piece/Piece';
 import { Terrain } from '../Terrain';
 import {
+  coordToMatrixIndex,
   Matrix,
   matrixCreate,
   matrixGet,
@@ -15,7 +16,8 @@ import {
   matrixInsert,
   matrixInsertMany,
   matrixMap,
-  matrixReduce
+  matrixReduce,
+  objectKeys
 } from '../util';
 import { Coord } from '../util/types';
 import { BoardState } from './types';
@@ -23,6 +25,7 @@ import { IBoard } from './IBoard';
 import { PieceRegistry } from '../Piece/types';
 import { GameConfigurator } from '../Game/types';
 import { AttackOutcome, Move, ShortAttack, ShortMove } from '../commonTypes';
+import { toDictIndexedBy } from '../utils';
 
 type PieceMetaMappedById = Record<
   Piece['state']['id'],
@@ -274,21 +277,67 @@ export class Board<PR extends PieceRegistry> implements IBoard<PR> {
 
     return Result.all(
       ...attacksWithAtackerAndVictimPieces.map((zip) =>
-        zip.attacker.calculateAttackOutcome(game, zip.attack)
+        Result.all(
+          zip.attacker.calculateAttackOutcome(game, zip.attack),
+          new Ok(zip)
+        )
       )
     )
-      .andThen((outcomes) =>
+      .map((outcomesAndZip) =>
+        outcomesAndZip.map(([outcome, zip]) => ({
+          ...zip,
+          ...outcome
+        }))
+      )
+      .map((outcomes) => {
+        const victimStatesById = toDictIndexedBy(
+          outcomes.map(({ victim }) => victim.state),
+          (v) => v.id
+        );
+
+        const nextVictimStatesById = outcomes.reduce((accum, next) => {
+          const prev = accum[next.victim.state.id] || next.victim.state;
+
+          return {
+            ...accum,
+            [next.victim.state.id]: {
+              ...prev,
+              hitPoints: prev.hitPoints - next.damage
+            }
+          };
+        }, victimStatesById);
+
+        return {
+          nextVictimStatesById,
+          outcomes
+        };
+      })
+      .andThen(({ nextVictimStatesById, outcomes }) =>
         Result.all(
           new Ok(outcomes),
+          new Ok(
+            // TODO: This could be more functional or at least declerative!
+            Object.values(nextVictimStatesById).forEach(
+              ({ id, ...nextVictimState }) => {
+                const victimPiece = this.getPieceById(id);
+
+                victimPiece.state =
+                  victimPiece.calculateNextState(nextVictimState);
+              }
+            )
+          ),
           this.moveMultiple(
             outcomes
-              .filter((outcome) => outcome.hasMoved)
+              .filter(
+                (outcome) =>
+                  nextVictimStatesById[outcome.victim.state.id].hitPoints <= 0
+              )
               .map((outcome) => outcome.attack)
           ).mapErr(() => getAttackNotPossibleError('DestinationNotValid'))
         )
       )
       .map(([outcomes]) => {
-        // The must refresh!
+        // The cache must refresh!
         this._cachedState = undefined;
 
         return outcomes;

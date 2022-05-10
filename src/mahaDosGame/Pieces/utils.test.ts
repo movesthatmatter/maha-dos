@@ -1,10 +1,10 @@
-import { generatePieceLabel } from '../../gameMechanics/Board/util';
-import { GameHistory, PartialGameTurn } from '../../gameMechanics/commonTypes';
-import { Game } from '../../gameMechanics/Game/Game';
+import { generatePieceLabel } from 'src/gameMechanics/Board/util';
+import { GameHistory, PartialGameTurn } from 'src/gameMechanics/commonTypes';
+import { Game } from 'src/gameMechanics/Game/Game';
 import {
   GameConfigurator,
   GameStateInProgress
-} from '../../gameMechanics/Game/types';
+} from 'src/gameMechanics/Game/types';
 import { MahaGame } from '../MahaGame';
 import { Knight } from './Knight';
 import { Pawn } from './Pawn';
@@ -210,7 +210,6 @@ describe('test getPieceMovethisTurn function', () => {
     );
     expect(move).toBeUndefined();
   });
-
   test('with piece movement', () => {
     const configuration: GameConfigurator<typeof mahaPieceRegistry> = {
       terrain: { width: 5 },
@@ -245,10 +244,6 @@ describe('test getPieceMovethisTurn function', () => {
             piece: trackedPiece.state
           }
         ]
-      },
-      {
-        white: [],
-        black: []
       }
     ];
     const history: GameHistory = [[...turn]];
@@ -296,10 +291,6 @@ describe('test getPieceMovethisTurn function', () => {
             piece: new Pawn('white', 'wP').state
           }
         ]
-      },
-      {
-        white: [],
-        black: []
       }
     ];
     const history: GameHistory = [[...turn]];
@@ -344,10 +335,6 @@ describe('test getPieceMovethisTurn function', () => {
             piece: new Pawn('white', 'wP').state
           }
         ]
-      },
-      {
-        white: [],
-        black: []
       }
     ];
     const history: GameHistory = [

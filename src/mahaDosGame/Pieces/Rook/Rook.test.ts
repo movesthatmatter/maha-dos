@@ -125,10 +125,6 @@ describe('eval attacks for Rooks', () => {
             piece: generate.generateDefaultPawn('P-white', 'white')
           }
         ]
-      },
-      {
-        white: [],
-        black: []
       }
     ];
     const history: GameHistory = [[...turn], [...turn]];
@@ -183,10 +179,6 @@ describe('eval attacks for Rooks', () => {
             piece: generate.generateDefaultPawn('P-white', 'white')
           }
         ]
-      },
-      {
-        white: [],
-        black: []
       }
     ];
     const history: GameHistory = [[...turn], [...turn]];
@@ -262,10 +254,6 @@ describe('eval attacks for Rooks', () => {
             piece: generate.generateDefaultPawn('P-white', 'white')
           }
         ]
-      },
-      {
-        white: [],
-        black: []
       }
     ];
     const history: GameHistory = [[...turn], [...turn]];
@@ -350,10 +338,6 @@ describe('eval attacks for Rooks', () => {
       {
         black: [] as Move[],
         white: [] as Move[]
-      },
-      {
-        white: [],
-        black: []
       }
     ];
     const history: GameHistory = [[...turn], [...turn]];
@@ -481,10 +465,6 @@ describe('eval attacks for Rooks', () => {
       {
         black: [] as Move[],
         white: [] as Move[]
-      },
-      {
-        white: [],
-        black: []
       }
     ];
     const history: GameHistory = [[...turn], [...turn]];
@@ -594,10 +574,6 @@ describe('eval attacks for Rooks', () => {
           }
         ]
       },
-      {
-        white: [],
-        black: []
-      }
     ];
     const history: GameHistory = [[...turn], [...turn]];
 

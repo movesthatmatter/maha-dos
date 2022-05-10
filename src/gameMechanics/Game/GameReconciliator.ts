@@ -21,7 +21,15 @@ import {
   isGameInMovePhase,
   isGameInMovePhaseWithPartialSubmission
 } from './helpers';
-import { Attack, Color, FullGameTurn, Move, PartialGameTurn, ShortAttack, ShortMove } from '../commonTypes';
+import {
+  Attack,
+  Color,
+  GameHistory,
+  Move,
+  PartialGameTurn,
+  ShortAttack,
+  ShortMove
+} from '../commonTypes';
 
 export interface GameReconciliator extends Game {
   submitMoves(p: {
@@ -190,35 +198,49 @@ export class GameReconciliator extends Game implements GameReconciliator {
       return new Err(getSubmitAttacksNotPossibleError('GameNotInAttackPhase'));
     }
 
-    const prevGame = this.state;
+    const prevGameState = this.state;
     const oppositeColor = toOppositeColor(color);
 
+    const prevGameInstance = new Game(
+      this.pieceRegistry,
+      this.configurator,
+      this.gameProps
+    );
+    prevGameInstance.load(prevGameState);
+
     if (
-      isGameInAttackPhaseWithPartialSubmission(prevGame) &&
-      prevGame[color].canDraw
+      isGameInAttackPhaseWithPartialSubmission(prevGameState) &&
+      prevGameState[color].canDraw
     ) {
       // TODO: This shouldn't have to be recasted as the canDraw check above should suffice
       //  but for some reason the compiler doesn't see it
-      const oppositeColorAttacks = prevGame[oppositeColor].attacks as ShortAttack[];
+      const oppositeColorAttacks = prevGameState[oppositeColor]
+        .attacks as ShortAttack[];
       const currentColorAttacks = attacks;
 
-      const oppositeColorAttacksRes = this.board.applyAttacks(this, oppositeColorAttacks);
+      const oppositeColorAttacksRes = this.board.applyAttacks(
+        prevGameInstance,
+        oppositeColorAttacks
+      );
 
       if (!oppositeColorAttacksRes.ok) {
         return new Err(getSubmitAttacksNotPossibleError('InvalidAttacks'));
       }
 
-      const currentColorAttacksRes =
-        this.board.applyAttacks(this, currentColorAttacks);
+      const currentColorAttacksRes = this.board.applyAttacks(
+        prevGameInstance,
+        currentColorAttacks
+      );
 
       if (!currentColorAttacksRes.ok) {
         return new Err(getSubmitAttacksNotPossibleError('InvalidAttacks'));
       }
 
-      const prevPartialTurn: PartialGameTurn = prevGame.history.slice(-1)[0];
-
-      const nextGameTurn: FullGameTurn = [
-        ...prevPartialTurn as any,
+      const prevPartialTurn = prevGameState.history.slice(
+        -1
+      )[0] as PartialGameTurn;
+      const nextFullGameTurn = [
+        ...prevPartialTurn,
         color === 'white'
           ? {
               white: currentColorAttacksRes.val,
@@ -229,14 +251,18 @@ export class GameReconciliator extends Game implements GameReconciliator {
               black: currentColorAttacksRes.val
             }
       ];
-
-      const prevHistoryWithoutPartial = prevGame.history.slice(0, -1);
+      const prevHistoryWithoutPartial: GameHistory =
+        prevGameState.history.slice(0, -1);
+      const nextHistory: GameHistory = [
+        ...prevHistoryWithoutPartial,
+        nextFullGameTurn
+      ] as GameHistory;
 
       const nextState: GameStateInMovePhaseWithNoSubmission = {
-        ...prevGame,
+        ...prevGameState,
         phase: 'move',
         submissionStatus: 'none',
-        history: [...prevHistoryWithoutPartial, nextGameTurn],
+        history: nextHistory,
         white: {
           canDraw: true,
           moves: undefined
@@ -256,7 +282,7 @@ export class GameReconciliator extends Game implements GameReconciliator {
     }
 
     const nextState: GameStateInAttackPhaseWithPartialSubmission = {
-      ...prevGame,
+      ...prevGameState,
       state: 'inProgress',
       phase: 'attack',
       winner: undefined,

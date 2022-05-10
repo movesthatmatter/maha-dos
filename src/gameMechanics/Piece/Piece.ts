@@ -13,8 +13,17 @@ export abstract class Piece<L extends string = string> {
   }
 
   calculateNextState<P extends Partial<IdentifiablePieceState<L>>>(
-    nextState: P
+    getNextState:
+      | P
+      | ((
+          prev: IdentifiablePieceState<L>
+        ) => Partial<IdentifiablePieceState<L>>)
   ): IdentifiablePieceState<L> {
+    const nextState =
+      typeof getNextState === 'function'
+        ? getNextState(this.state)
+        : getNextState;
+
     return {
       ...this.state,
       ...nextState

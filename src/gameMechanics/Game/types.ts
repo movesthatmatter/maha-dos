@@ -1,4 +1,11 @@
-import { Color, GameHistory, ShortAttack, ShortMove } from '../commonTypes';
+import {
+  Color,
+  GameHistory,
+  GameTurn,
+  PartialGameTurnMovePhase,
+  ShortAttack,
+  ShortMove
+} from '../commonTypes';
 import { BoardState } from '../Board/types';
 import { PieceRegistry } from '../Piece/types';
 import { TerrainProps } from '../Terrain/Terrain';
@@ -26,6 +33,7 @@ export type GameStateCompleted = {
 export type InProgressGameStatePhaseSlice =
   | ({
       phase: 'move';
+      history: GameHistory;
     } & (
       | {
           submissionStatus: 'none';
@@ -74,6 +82,7 @@ export type InProgressGameStatePhaseSlice =
     ))
   | ({
       phase: 'attack';
+      history:  [...GameHistory, PartialGameTurnMovePhase];
     } & (
       | {
           submissionStatus: 'none';
@@ -125,7 +134,6 @@ export type GameStateInProgress = {
   boardState: BoardState;
   // TODO: This needs to change to stateStatus
   state: 'inProgress';
-  history: GameHistory;
   winner: undefined;
 } & InProgressGameStatePhaseSlice;
 

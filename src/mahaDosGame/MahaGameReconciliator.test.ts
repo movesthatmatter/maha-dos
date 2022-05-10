@@ -2,6 +2,7 @@ import { Board } from '../gameMechanics/Board/Board';
 import { ShortAttack } from '../gameMechanics/commonTypes';
 import {
   coordToMatrixIndex,
+  matrixGet,
   matrixInsertMany,
   printMatrix
 } from '../gameMechanics/util';
@@ -10,6 +11,7 @@ import { DEFAULT_MAHA_CONFIGURATOR, mahaPieceRegistry } from './config';
 import { MahaGameReconciliator } from './MahaGameReconciliator';
 import { mahaChessSquareToCoord } from './util';
 import { toPrintableBoard } from 'src/gameMechanics/Board/util';
+import { Queen } from './Pieces/Queen';
 
 describe('submitMoves', () => {
   test('first player submitting from initial position - ok', () => {
@@ -237,6 +239,8 @@ describe('submitAttacks', () => {
   test('both players submit attacks after first move phase - ok', () => {
     const reconciliator = new MahaGameReconciliator();
 
+    // printMatrix(toPrintableBoard(reconciliator.board.state))
+
     const whiteMoves = [
       {
         from: mahaChessSquareToCoord('e2'),
@@ -245,6 +249,14 @@ describe('submitAttacks', () => {
       {
         from: mahaChessSquareToCoord('d2'),
         to: mahaChessSquareToCoord('d4')
+      },
+      {
+        from: mahaChessSquareToCoord('b1'),
+        to: mahaChessSquareToCoord('c3')
+      },
+      {
+        from: mahaChessSquareToCoord('g1'),
+        to: mahaChessSquareToCoord('f3')
       }
     ];
 
@@ -256,6 +268,14 @@ describe('submitAttacks', () => {
       {
         from: mahaChessSquareToCoord('d7'),
         to: mahaChessSquareToCoord('d5')
+      },
+      {
+        from: mahaChessSquareToCoord('b8'),
+        to: mahaChessSquareToCoord('c6')
+      },
+      {
+        from: mahaChessSquareToCoord('g8'),
+        to: mahaChessSquareToCoord('f6')
       }
     ];
 
@@ -279,6 +299,8 @@ describe('submitAttacks', () => {
     );
 
     const boardStateBeforeAttack = reconciliator.board.state;
+
+    printMatrix(toPrintableBoard(boardStateBeforeAttack));
 
     expect(resMoveSubmission.ok).toBe(true);
     if (!resMoveSubmission.ok) {
@@ -316,8 +338,6 @@ describe('submitAttacks', () => {
       attacks: blackAttacks
     });
 
-    printMatrix(toPrintableBoard(boardStateBeforeAttack));
-
     expect(blackAttackRes.ok).toBe(true);
     if (!blackAttackRes.ok) {
       return;
@@ -338,17 +358,17 @@ describe('submitAttacks', () => {
       },
       {
         white: whiteAttacks.map((shortAttack, i) => ({
-          ...shortAttack
-          // piece: whiteAttackedPieces[i]?.state
+          attack: shortAttack,
+          damage: 2,
+          willTake: true
         })),
         black: blackAttacks.map((shortAttack, i) => ({
-          ...shortAttack
-          // piece: blackMovedPieces[i]?.state
+          attack: shortAttack,
+          damage: 2,
+          willTake: true
         }))
       }
     ];
-
-    // printMatrix(boardStateBeforeAttack.pieceLayoutState);
 
     expect(actual.state).toBe('inProgress');
     expect(actual.phase).toBe('move');
@@ -357,17 +377,193 @@ describe('submitAttacks', () => {
     expect(actual.history).toHaveLength(1);
     expect(actual.history).toEqual([expectedGameTurn]);
 
-    // add me now
-    // expect(actual.boardState).not.toEqual(boardStateBeforeAttack); // But how?
+    const actualD5 = matrixGet(
+      actual.boardState.pieceLayoutState,
+      coordToMatrixIndex(mahaChessSquareToCoord('d5'))
+    );
+    const expectedD5 = matrixGet(
+      boardStateBeforeAttack.pieceLayoutState,
+      coordToMatrixIndex(mahaChessSquareToCoord('e4'))
+    );
+    expect(actualD5).toEqual(expectedD5);
 
-    // expect(actual.boardState).toEqual(boardStateBeforeAttack);
-    // expect(actual.white).toEqual({
-    //   canDraw: false,
-    //   attacks: whiteAttacks,
-    // });
-    // expect(actual.black).toEqual({
-    //   canDraw: true,
-    //   attacks: undefined
-    // });
+    const actualD4 = matrixGet(
+      actual.boardState.pieceLayoutState,
+      coordToMatrixIndex(mahaChessSquareToCoord('d4'))
+    );
+    const expectedD4 = matrixGet(
+      boardStateBeforeAttack.pieceLayoutState,
+      coordToMatrixIndex(mahaChessSquareToCoord('e5'))
+    );
+    expect(actualD4).toEqual(expectedD4);
+  });
+
+  test.only('submit attack from advanced position - ok', () => {
+    const reconciliator = new MahaGameReconciliator();
+
+    const initialBoardState = reconciliator.board.state;
+
+    const resSubmission = Result.all(
+      reconciliator.submitMoves({
+        color: 'white',
+        moves: [
+          {
+            from: mahaChessSquareToCoord('e2'),
+            to: mahaChessSquareToCoord('e4')
+          },
+          {
+            from: mahaChessSquareToCoord('d2'),
+            to: mahaChessSquareToCoord('d4')
+          },
+          {
+            from: mahaChessSquareToCoord('b1'),
+            to: mahaChessSquareToCoord('c3')
+          },
+          {
+            from: mahaChessSquareToCoord('g1'),
+            to: mahaChessSquareToCoord('f3')
+          },
+          {
+            from: mahaChessSquareToCoord('c1'),
+            to: mahaChessSquareToCoord('g5')
+          },
+          {
+            from: mahaChessSquareToCoord('f1'),
+            to: mahaChessSquareToCoord('b5')
+          }
+        ]
+      }),
+      reconciliator.submitMoves({
+        color: 'black',
+        moves: [
+          {
+            from: mahaChessSquareToCoord('e7'),
+            to: mahaChessSquareToCoord('e5')
+          },
+          {
+            from: mahaChessSquareToCoord('d7'),
+            to: mahaChessSquareToCoord('d5')
+          },
+          {
+            from: mahaChessSquareToCoord('b8'),
+            to: mahaChessSquareToCoord('c6')
+          },
+          {
+            from: mahaChessSquareToCoord('g8'),
+            to: mahaChessSquareToCoord('f6')
+          },
+          {
+            from: mahaChessSquareToCoord('c8'),
+            to: mahaChessSquareToCoord('g4')
+          },
+          {
+            from: mahaChessSquareToCoord('f8'),
+            to: mahaChessSquareToCoord('b4')
+          }
+        ]
+      })
+    )
+      .andThen(() =>
+        Result.all(
+          reconciliator.submitAttacks({
+            color: 'white',
+            attacks: [
+              {
+                from: mahaChessSquareToCoord('e4'),
+                to: mahaChessSquareToCoord('d5'),
+                type: 'melee'
+              }
+            ]
+          }),
+          reconciliator.submitAttacks({
+            color: 'black',
+            attacks: [
+              {
+                from: mahaChessSquareToCoord('e5'),
+                to: mahaChessSquareToCoord('d4'),
+                type: 'melee'
+              }
+            ]
+          })
+        )
+      )
+      .andThen(() =>
+        Result.all(
+          reconciliator.submitMoves({
+            color: 'white',
+            moves: [
+              {
+                from: mahaChessSquareToCoord('f3'),
+                to: mahaChessSquareToCoord('h4')
+              }
+            ]
+          }),
+          reconciliator.submitMoves({
+            color: 'black',
+            moves: [
+              {
+                from: mahaChessSquareToCoord('f6'),
+                to: mahaChessSquareToCoord('h5')
+              }
+            ]
+          })
+        )
+      );
+
+    expect(resSubmission.ok).toBe(true);
+    if (!resSubmission.ok) {
+      return;
+    }
+
+    const actualAttackRes = Result.all(
+      reconciliator.submitAttacks({
+        color: 'white',
+        attacks: [
+          {
+            from: mahaChessSquareToCoord('g5'), // white bishop
+            to: mahaChessSquareToCoord('d8'), // black queen
+            type: 'melee'
+          }
+        ]
+      }),
+      reconciliator.submitAttacks({
+        color: 'black',
+        attacks: [
+          {
+            from: mahaChessSquareToCoord('g4'), // black bishop
+            to: mahaChessSquareToCoord('d1'), // white queen
+            type: 'melee'
+          }
+        ]
+      })
+    );
+
+    expect(actualAttackRes.ok).toBe(true);
+    if (!actualAttackRes.ok) {
+      return;
+    }
+
+    const actual = actualAttackRes.val[1];
+
+    // console.log('actual', actual);
+
+    printMatrix(toPrintableBoard(reconciliator.board.state));
+
+    expect(actual.state).toBe('inProgress');
+    expect(actual.phase).toBe('move');
+    expect(actual.submissionStatus).toBe('none');
+
+    const actualWhiteQueenD1 = matrixGet(
+      actual.boardState.pieceLayoutState,
+      coordToMatrixIndex(mahaChessSquareToCoord('d1'))
+    );
+    const expectedWhiteQueenD1 = {
+      ...matrixGet(
+        initialBoardState.pieceLayoutState,
+        coordToMatrixIndex(mahaChessSquareToCoord('d1'))
+      ),
+      hitPoints: 17,
+    };
+    expect(actualWhiteQueenD1).toEqual(expectedWhiteQueenD1);
   });
 });

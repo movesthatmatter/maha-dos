@@ -210,10 +210,6 @@ describe('eval attacks for Queen', () => {
             piece: piece.state
           }
         ]
-      },
-      {
-        white: [],
-        black: []
       }
     ];
     const history: GameHistory = [[...turn]];
@@ -326,10 +322,6 @@ describe('eval attacks for Queen', () => {
             piece: piece.state
           }
         ]
-      },
-      {
-        white: [],
-        black: []
       }
     ];
     const history: GameHistory = [[...turn]];
@@ -388,10 +380,6 @@ describe('eval attacks for Queen', () => {
             piece: piece.state
           }
         ]
-      },
-      {
-        white: [],
-        black: []
       }
     ];
     const history: GameHistory = [[...turn]];
@@ -443,10 +431,6 @@ describe('eval attacks for Queen', () => {
             piece: new Pawn('white', 'wP').state
           }
         ]
-      },
-      {
-        white: [],
-        black: []
       }
     ];
     const history: GameHistory = [[...turn]];
