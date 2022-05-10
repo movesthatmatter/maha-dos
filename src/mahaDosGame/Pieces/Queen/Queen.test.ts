@@ -199,7 +199,6 @@ describe('eval moves for Queen', () => {
         piece: piece.state
       }
     ];
-    console.log('moves', moves);
     expect(moves).toEqual(expectedMoves);
   });
 });

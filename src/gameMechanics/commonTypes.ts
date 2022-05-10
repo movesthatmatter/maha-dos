@@ -29,12 +29,16 @@ export type Move = ShortMove & {
 export type ShortAttack = {
   from: Coord;
   to: Coord;
-  type: 'range' | 'melee';
+
+  // @deprecate as it's not used
+  // type: 'range' | 'melee';
 };
 
 // TODO: This is actuall just the ShortAttack as the SpecialAttacks aren't needed here!
 // TODO: Take the SpecialAttacks out as they aren't needed in the Attack
-export type Attack = ShortAttack & SpecialAttacks;
+export type Attack = ShortAttack & SpecialAttacks & {
+  type: 'range' | 'melee';
+};
 
 export type SpecialAttacks = {
   // heal?: boolean;

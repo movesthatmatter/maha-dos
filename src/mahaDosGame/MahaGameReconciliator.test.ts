@@ -202,8 +202,7 @@ describe('submitAttacks', () => {
     const whiteAttacks: ShortAttack[] = [
       {
         from: mahaChessSquareToCoord('e4'),
-        to: mahaChessSquareToCoord('d5'),
-        type: 'melee'
+        to: mahaChessSquareToCoord('d5')
       }
     ];
 

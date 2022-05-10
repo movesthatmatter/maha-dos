@@ -2,10 +2,8 @@ import { CSSProperties, useEffect, useMemo, useState } from 'react';
 import { Arrow } from '../../../ChessTerrain/SVGOverlay';
 import {
   isGameInAttackPhase,
-  isGameInAttackPhaseWithPartialSubmission,
   isGameInAttackPhaseWithPreparingSubmission,
   isGameInMovePhase,
-  isGameInMovePhaseWithPartialSubmission,
   isGameInMovePhaseWithPreparingSubmission
 } from '../../../gameMechanics/Game/helpers';
 import { GameState } from '../../../gameMechanics/Game/types';
@@ -184,10 +182,7 @@ export const MahaChessTerrain: React.FC<MahaChessTerrainProps> = ({
         if (isGameInAttackPhase(gameState) && touchedPiece) {
           onAttack({
             from: touchedPiece.coord,
-            to: coord,
-
-            // TODO: Take the type out of the Short Attack
-            type: 'melee'
+            to: coord
           });
 
           setTouchedPiece(undefined);

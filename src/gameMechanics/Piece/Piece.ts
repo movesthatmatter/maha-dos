@@ -1,5 +1,5 @@
 import { Result } from 'ts-results';
-import { Attack, AttackOutcome, Move } from '../commonTypes';
+import { Attack, AttackOutcome, Move, ShortAttack } from '../commonTypes';
 import { AttackNotPossibleError } from '../Game/errors';
 import { IGame } from '../Game/IGame';
 import { IdentifiablePieceState, PieceState } from './types';
@@ -48,6 +48,6 @@ export abstract class Piece<L extends string = string> {
   // Here the attack gets processed on the current state
   abstract calculateAttackOutcome(
     game: IGame,
-    attack: Attack
+    attack: ShortAttack
   ): Result<AttackOutcome, AttackNotPossibleError>;
 }
