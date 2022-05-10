@@ -340,7 +340,13 @@ export class Board<PR extends PieceRegistry> implements IBoard<PR> {
         // The cache must refresh!
         this._cachedState = undefined;
 
-        return outcomes;
+        return outcomes.map(({ attack, damage, special }) => ({
+          attack,
+          damage,
+          ...(special && {
+            special
+          })
+        }));
       });
   }
 }
