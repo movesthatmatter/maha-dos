@@ -2,8 +2,10 @@ import { CSSProperties, useEffect, useMemo, useState } from 'react';
 import { Arrow } from '../../../ChessTerrain/SVGOverlay';
 import {
   isGameInAttackPhase,
+  isGameInAttackPhaseWithPartialSubmission,
   isGameInAttackPhaseWithPreparingSubmission,
   isGameInMovePhase,
+  isGameInMovePhaseWithPartialSubmission,
   isGameInMovePhaseWithPreparingSubmission
 } from '../../../gameMechanics/Game/helpers';
 import { GameState } from '../../../gameMechanics/Game/types';

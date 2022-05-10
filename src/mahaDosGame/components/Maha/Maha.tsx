@@ -10,7 +10,12 @@ import { MahaChessTerrain, MahaChessTerrainProps } from '../MahaTerrain';
 import { Button } from '../Button';
 import { Color } from '../../../gameMechanics/commonTypes';
 import {
+  isGameInAttackPhase,
+  isGameInAttackPhaseWithPartialOrPreparingSubmission,
   isGameInAttackPhaseWithPreparingSubmission,
+  isGameInMovePhase,
+  isGameInMovePhaseWithPartialOrPreparingSubmission,
+  isGameInMovePhaseWithPartialSubmission,
   isGameInMovePhaseWithPreparingSubmission
 } from '../../../gameMechanics/Game/helpers';
 
@@ -66,6 +71,10 @@ export const Maha: React.FC<MahaProps> = ({
       (localGameRef.current.state.state === 'inProgress' &&
         gameState.state === 'inProgress' &&
         localGameRef.current.state.phase !== gameState.phase)
+      // (localGameRef.current.state.state === 'inProgress' &&
+      //   gameState.state === 'inProgress' &&
+      //   localGameRef.current.state.submissionStatus !==
+      //     gameState.submissionStatus)
     ) {
       localGameRef.current.load(gameState);
 
@@ -74,6 +83,15 @@ export const Maha: React.FC<MahaProps> = ({
   }, [gameState]);
 
   const workingGameState = preparingGameState || gameState;
+
+  // useEffect(() => {
+  //   console.log('change in either game state!!!')
+  // }, [gameState, preparingGameState])
+
+  // useEffect(() => {
+  //   console.log('workingGameState updated', workingGameState);
+  // }, [workingGameState]);
+
   return (
     <>
       <MahaChessTerrain
@@ -144,29 +162,51 @@ export const Maha: React.FC<MahaProps> = ({
           setPossibleAttackSquares([]);
         }}
       />
-      {preparingGameState && (
-        <>
-          <br />
-          {isGameInMovePhaseWithPreparingSubmission(preparingGameState) && (
-            <Button
-              primary
-              label={`Submit Moves`}
-              onClick={() => {
+      <>
+        <br />
+        {isGameInMovePhase(gameState) && (
+          <Button
+            primary={gameState[playingColor].canDraw}
+            disabled={!gameState[playingColor].canDraw}
+            label={`Submit Moves`}
+            onClick={() => {
+              if (
+                preparingGameState &&
+                isGameInMovePhaseWithPreparingSubmission(preparingGameState) &&
+                preparingGameState[playingColor].canDraw
+              ) {
                 onSubmitMoves(preparingGameState);
-              }}
-            />
-          )}
-          {isGameInAttackPhaseWithPreparingSubmission(preparingGameState) && (
-            <Button
-              primary
-              label={`Submit Attacks`}
-              onClick={() => {
+              }
+            }}
+          />
+        )}
+        {isGameInAttackPhase(gameState) && (
+          <Button
+            primary={gameState[playingColor].canDraw}
+            disabled={!gameState[playingColor].canDraw}
+            label={`Submit Attacks`}
+            onClick={() => {
+              console.log('press attack');
+              if (
+                preparingGameState &&
+                isGameInAttackPhaseWithPreparingSubmission(
+                  preparingGameState
+                ) &&
+                preparingGameState[playingColor].canDraw
+              ) {
                 onSubmitAttacks(preparingGameState);
-              }}
-            />
-          )}
-        </>
-      )}
+              }
+            }}
+          />
+        )}
+      </>
+      {/* <div
+        style={{
+          width: '500px'
+        }}
+      >
+        <pre>{JSON.stringify(workingGameState, null, 2)}</pre>
+      </div> */}
     </>
   );
 };

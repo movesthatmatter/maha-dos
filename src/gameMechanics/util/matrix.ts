@@ -44,6 +44,24 @@ export const flipMatrixVertically = <T>(matrix: Matrix<T>) =>
     row.reduce((accum, nextColVal) => [nextColVal, ...accum], [] as T[])
   );
 
+export const flipMatrixIndexHorizontally = <T>(
+  matrix: Matrix<T>,
+  [row, col]: MatrixIndex
+): MatrixIndex => {
+  return [matrix.length - 1 - row, col];
+};
+
+export const flipMatrixIndexVertically = <T>(
+  matrix: Matrix<T>,
+  [row, col]: MatrixIndex
+): MatrixIndex => {
+  if (matrix.length === 0) {
+    return [0, 0];
+  }
+
+  return [row, matrix[0].length - 1 - col];
+};
+
 export const getMatrixRowsLength = (matrix: Matrix<unknown>) => matrix.length;
 export const getMatrixColsLength = (matrix: Matrix<unknown>) =>
   matrix[0]?.length || 0;
