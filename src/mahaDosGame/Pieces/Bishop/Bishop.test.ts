@@ -15,74 +15,149 @@ import {
   PartialGameTurn
 } from '../../../gameMechanics/commonTypes';
 
-test('eval moves', () => {
-  const configuration: GameConfigurator<typeof mahaPieceRegistry> = {
-    terrain: { width: 5 },
-    pieceLayout: [
-      [0, 0, 0, 0, 'bR'],
-      [0, 'bR', 0, 0, 0],
-      [0, 0, 'bB', 0, 0],
-      [0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0]
-    ]
-  };
-  const game = new MahaGame(configuration);
+describe('eval moves for Bishop', () => {
+  test('eval moves with freedom around', () => {
+    const configuration: GameConfigurator<typeof mahaPieceRegistry> = {
+      terrain: { width: 5 },
+      pieceLayout: [
+        [0, 0, 0, 0, 'bR'],
+        [0, 'bR', 0, 0, 0],
+        [0, 0, 'bB', 0, 0],
+        [0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0]
+      ]
+    };
+    const game = new MahaGame(configuration);
 
-  const piece = game.board.getPieceByCoord({ row: 2, col: 2 });
+    const piece = game.board.getPieceByCoord({ row: 2, col: 2 });
 
-  expect(piece).toBeDefined();
+    expect(piece).toBeDefined();
 
-  if (!piece) {
-    return;
-  }
-
-  const { state } = game;
-  game.load({
-    ...state,
-    state: 'inProgress',
-    history: [],
-    phase: 'move',
-    white: {
-      canDraw: true,
-      moves: []
-    },
-    black: {
-      canDraw: true,
-      moves: []
+    if (!piece) {
+      return;
     }
-  } as GameStateInMovePhase);
 
-  const moves = piece.evalMove(game);
+    const { state } = game;
+    game.load({
+      ...state,
+      state: 'inProgress',
+      history: [],
+      phase: 'move',
+      white: {
+        canDraw: true,
+        moves: []
+      },
+      black: {
+        canDraw: true,
+        moves: []
+      }
+    } as GameStateInMovePhase);
 
-  const expectedMoves: Move[] = [
-    {
-      from: { row: 2, col: 2 },
-      to: { row: 1, col: 3 },
-      piece: piece.state
-    },
-    {
-      from: { row: 2, col: 2 },
-      to: { row: 3, col: 3 },
-      piece: piece.state
-    },
-    {
-      from: { row: 2, col: 2 },
-      to: { row: 4, col: 4 },
-      piece: piece.state
-    },
-    {
-      from: { row: 2, col: 2 },
-      to: { row: 3, col: 1 },
-      piece: piece.state
-    },
-    {
-      from: { row: 2, col: 2 },
-      to: { row: 4, col: 0 },
-      piece: piece.state
+    const moves = piece.evalMove(game);
+
+    const expectedMoves: Move[] = [
+      {
+        from: { row: 2, col: 2 },
+        to: { row: 1, col: 3 },
+        piece: piece.state
+      },
+      {
+        from: { row: 2, col: 2 },
+        to: { row: 3, col: 3 },
+        piece: piece.state
+      },
+      {
+        from: { row: 2, col: 2 },
+        to: { row: 4, col: 4 },
+        piece: piece.state
+      },
+      {
+        from: { row: 2, col: 2 },
+        to: { row: 3, col: 1 },
+        piece: piece.state
+      },
+      {
+        from: { row: 2, col: 2 },
+        to: { row: 4, col: 0 },
+        piece: piece.state
+      }
+    ];
+
+    expect(moves).toEqual(expectedMoves);
+  });
+  test('eval moves with bishop blocked but prev moves clearing space', () => {
+    const configuration: GameConfigurator<typeof mahaPieceRegistry> = {
+      terrain: { width: 5 },
+      pieceLayout: [
+        [0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0],
+        ['wP', 'wP', 'wP', 'wP', 'wP'],
+        [0, 0, 'wB', 0, 0]
+      ]
+    };
+    const game = new MahaGame(configuration);
+
+    const piece = game.board.getPieceByCoord({ row: 4, col: 2 });
+
+    expect(piece).toBeDefined();
+
+    if (!piece) {
+      return;
     }
-  ];
 
-  expect(moves).toEqual(expectedMoves);
+    const { state } = game;
+    game.load({
+      ...state,
+      state: 'inProgress',
+      history: [],
+      phase: 'move',
+      white: {
+        canDraw: true,
+        moves: [
+          {
+            from: { row: 3, col: 1 },
+            to: { row: 2, col: 1 }
+          },
+          {
+            from: { row: 3, col: 3 },
+            to: { row: 2, col: 3 }
+          }
+        ]
+      },
+      black: {
+        canDraw: true,
+        moves: []
+      }
+    } as GameStateInMovePhase);
+
+    const moves = piece.evalMove(game);
+
+    const expectedMoves: Move[] = [
+      {
+        from: { row: 4, col: 2 },
+        to: { row: 3, col: 3 },
+        piece: piece.state
+      },
+      {
+        from: { row: 4, col: 2 },
+        to: { row: 2, col: 4 },
+        piece: piece.state
+      },
+      {
+        from: { row: 4, col: 2 },
+        to: { row: 3, col: 1 },
+        piece: piece.state
+      },
+      {
+        from: { row: 4, col: 2 },
+        to: { row: 2, col: 0 },
+        piece: piece.state
+      }
+    ];
+
+    expect(moves).toEqual(expectedMoves);
+  });
 });
 
 describe('Eval attacks for Bishop', () => {

@@ -107,6 +107,101 @@ describe('eval moves for Queen', () => {
 
     expect(moves).toEqual(expectedMoves);
   });
+
+  test('eval moves with Queen blocked but prev moves clearing space', () => {
+    const configuration: GameConfigurator<typeof mahaPieceRegistry> = {
+      terrain: { width: 5 },
+      pieceLayout: [
+        [0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0],
+        ['wP', 'wP', 'wP', 'wP', 'wP'],
+        [0, 0, 'wQ', 0, 'wK']
+      ]
+    };
+    const game = new MahaGame(configuration);
+
+    const piece = game.board.getPieceByCoord({ row: 4, col: 2 });
+
+    expect(piece).toBeDefined();
+
+    if (!piece) {
+      return;
+    }
+
+    const { state } = game;
+    game.load({
+      ...state,
+      state: 'inProgress',
+      history: [],
+      phase: 'move',
+      white: {
+        canDraw: true,
+        moves: [
+          {
+            from: { row: 3, col: 1 },
+            to: { row: 2, col: 1 }
+          },
+          {
+            from: { row: 3, col: 3 },
+            to: { row: 2, col: 3 }
+          },
+          { from: { row: 3, col: 2 }, to: { row: 2, col: 2 } }
+        ]
+      },
+      black: {
+        canDraw: true,
+        moves: []
+      }
+    } as GameStateInMovePhase);
+
+    const moves = piece.evalMove(game);
+
+    const expectedMoves: Move[] = [
+      {
+        from: { row: 4, col: 2 },
+        to: { row: 3, col: 2 },
+        piece: piece.state
+      },
+      {
+        from: { row: 4, col: 2 },
+        to: { row: 3, col: 3 },
+        piece: piece.state
+      },
+      {
+        from: { row: 4, col: 2 },
+        to: { row: 2, col: 4 },
+        piece: piece.state
+      },
+      {
+        from: { row: 4, col: 2 },
+        to: { row: 4, col: 3 },
+        piece: piece.state
+      },
+      {
+        from: { row: 4, col: 2 },
+        to: { row: 4, col: 1 },
+        piece: piece.state
+      },
+      {
+        from: { row: 4, col: 2 },
+        to: { row: 4, col: 0 },
+        piece: piece.state
+      },
+      {
+        from: { row: 4, col: 2 },
+        to: { row: 3, col: 1 },
+        piece: piece.state
+      },
+      {
+        from: { row: 4, col: 2 },
+        to: { row: 2, col: 0 },
+        piece: piece.state
+      }
+    ];
+    console.log('moves', moves);
+    expect(moves).toEqual(expectedMoves);
+  });
 });
 
 describe('eval attacks for Queen', () => {

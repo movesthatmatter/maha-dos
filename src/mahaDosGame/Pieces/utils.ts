@@ -2,10 +2,17 @@ import { Game } from '../../gameMechanics/Game/Game';
 import { GameStateInMovePhase } from '../../gameMechanics/Game/types';
 import { Piece } from '../../gameMechanics/Piece/Piece';
 import { IdentifiablePieceState } from '../../gameMechanics/Piece/types';
-import { Coord, range } from '../../gameMechanics/util';
+import {
+  Coord,
+  range,
+  matrixInsertMany,
+  MatrixIndex,
+  matrixGet
+} from '../../gameMechanics/util';
 import { toDictIndexedBy } from '../../gameMechanics/utils';
 import { PieceLayoutState } from '../../gameMechanics/Board/types';
 import { Move } from '../../gameMechanics/commonTypes';
+import { isGameInMovePhase } from '../../gameMechanics/Game/helpers';
 
 const determineRange = (moves: Coord[], moveRange: number) => {
   return moves.reduce((totalRange, dir) => {
@@ -42,6 +49,40 @@ export function evalEachDirectionForMove(
   piece: Piece,
   game: Game
 ): Move[] {
+  const drawnMoves = isGameInMovePhase(game.state)
+    ? game.state[piece.state.color].moves || []
+    : [];
+
+  const tempBoard = matrixInsertMany(
+    game.state.boardState.pieceLayoutState,
+    drawnMoves.reduce(
+      (total, move) => {
+        const pieceFromMatrix = matrixGet(
+          game.state.boardState.pieceLayoutState,
+          [move.from.row, move.from.col]
+        );
+        if (!pieceFromMatrix) {
+          return total;
+        }
+        return [
+          ...total,
+          {
+            index: [move.to.row, move.to.col],
+            nextVal: pieceFromMatrix
+          },
+          {
+            index: [move.from.row, move.from.col],
+            nextVal: 0 as const
+          }
+        ];
+      },
+      [] as {
+        index: MatrixIndex;
+        nextVal: 0 | IdentifiablePieceState<string>;
+      }[]
+    )
+  );
+
   const totalMoves = piece.state.movesDirections.reduce((moves, dir) => {
     let hitObstacle = false;
     const mm = range(piece.state.moveRange, 1)
@@ -54,16 +95,14 @@ export function evalEachDirectionForMove(
           col: from.col + dir.col * r
         };
         if (
-          targetSq.row >= game.board.state.pieceLayoutState.length ||
-          targetSq.col >= game.board.state.pieceLayoutState[0].length ||
+          targetSq.row >= tempBoard.length ||
+          targetSq.col >= tempBoard[0].length ||
           targetSq.row < 0 ||
           targetSq.col < 0
         ) {
           return undefined;
         }
-        if (
-          game.board.state.pieceLayoutState[targetSq.row][targetSq.col] === 0
-        ) {
+        if (tempBoard[targetSq.row][targetSq.col] === 0) {
           const move: Move = {
             from,
             to: targetSq,
@@ -79,9 +118,9 @@ export function evalEachDirectionForMove(
 
     return [...moves, ...mm];
   }, [] as Move[]);
-  const otherMovesByDestination = toDictIndexedBy(
-    (game.state as GameStateInMovePhase)[piece.state.color].moves || [],
-    (move) => stringifyCoord(move.to)
+
+  const otherMovesByDestination = toDictIndexedBy(drawnMoves, (move) =>
+    stringifyCoord(move.to)
   );
 
   return totalMoves.filter((move) => {

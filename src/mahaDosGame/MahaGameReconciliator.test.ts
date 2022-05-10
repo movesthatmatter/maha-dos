@@ -3,18 +3,12 @@ import { ShortAttack } from '../gameMechanics/commonTypes';
 import {
   coordToMatrixIndex,
   matrixGet,
-  matrixInsertMany,
-  printMatrix
+  matrixInsertMany
 } from '../gameMechanics/util';
 import { Result } from 'ts-results';
 import { DEFAULT_MAHA_CONFIGURATOR, mahaPieceRegistry } from './config';
 import { MahaGameReconciliator } from './MahaGameReconciliator';
 import { mahaChessSquareToCoord } from './util';
-import {
-  toPrintableBoard,
-  toPrintableBoardWithState
-} from 'src/gameMechanics/Board/util';
-import { Queen } from './Pieces/Queen';
 
 describe('submitMoves', () => {
   test('first player submitting from initial position - ok', () => {

@@ -4,7 +4,6 @@ import { MahaGame } from './Game';
 import { MahaGameReconciliator } from '../../mahaDosGame/MahaGameReconciliator';
 import { GameState } from '../../gameMechanics/Game/types';
 import { Button } from '../../mahaDosGame/components/Button';
-import { GameReconciliator } from 'src/gameMechanics/Game/GameReconciliator';
 
 // More on default export: https://storybook.js.org/docs/react/writing-stories/introduction#default-export
 export default {

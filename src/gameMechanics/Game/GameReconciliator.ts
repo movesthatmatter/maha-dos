@@ -30,6 +30,10 @@ import {
   ShortAttack,
   ShortMove
 } from '../commonTypes';
+import {
+  printBoardAsTableWithState,
+  toPrintableBoardWithState
+} from '../Board/util';
 
 export interface GameReconciliator extends Game {
   submitMoves(p: {

@@ -105,7 +105,14 @@ export const printMatrix = <T>(matrix: Matrix<T>) => {
   let res = '';
 
   matrix.forEach((row) => {
-    const r = row.map((s) => String(s)).map((s) => range(2 - s.length).map(() => ' ').join('') + s);
+    const r = row
+      .map((s) => String(s))
+      .map(
+        (s) =>
+          range(4 - s.length)
+            .map(() => ' ')
+            .join('') + s
+      );
 
     res += `${r.join(' | ')}\n`;
   });

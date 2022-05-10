@@ -195,7 +195,7 @@ export const ChessTerrain: React.FC<ChessTerrainProps> = ({
       ))}
       <div
         style={{
-          background: 'rgba(255, 0, 0, .1)',
+          // background: 'rgba(255, 0, 0, .1)',
           position: 'absolute',
           left: 0,
           top: 0,
