@@ -4,6 +4,11 @@ import { MahaGame } from './Game';
 import { MahaGameReconciliator } from '../../mahaDosGame/MahaGameReconciliator';
 import { GameState } from '../../gameMechanics/Game/types';
 import { Button } from '../../mahaDosGame/components/Button';
+import { Color } from '../../gameMechanics/commonTypes';
+import {
+  isGameInAttackPhase,
+  isGameInAttackPhaseWithNoSubmission
+} from '../../gameMechanics/Game/helpers';
 
 // More on default export: https://storybook.js.org/docs/react/writing-stories/introduction#default-export
 export default {
@@ -46,31 +51,54 @@ export const PlayWithReconciliator = () => {
     reconciledGameState.state === 'inProgress' && reconciledGameState.phase
   ]);
 
+  function defaultSubmitIfNoAttacksAvailable(color: Color) {
+    if (!reconciliator.current.evalIfPossibleAttacks(color)) {
+      reconciliator.current
+        .submitAttacks({
+          attacks: [],
+          color
+        })
+        .mapErr((e) => {
+          console.log('PlayWithReconciliator.White onSubmitAttack err', e);
+        })
+        .map((nextState) => {
+          console.log(
+            'PlayWithReconciliator.White onSubmitAttack ok',
+            nextState
+          );
+          setReconciledGameState(nextState);
+        });
+    }
+  }
+
   useEffect(() => {
     console.log(
       'PlayWithReconciliator: Reconciliator Game State Updated',
       reconciledGameState
     );
+
+    if (isGameInAttackPhaseWithNoSubmission(reconciledGameState)) {
+      ['white', 'black'].forEach((color) => {
+        defaultSubmitIfNoAttacksAvailable(color as Color);
+      });
+    }
   }, [reconciledGameState]);
 
-  const workingGameState = useMemo(
-    () => {
-      // if last return the reconciled game
-      if (currentSnapshotIndex === gameSnapshots.length - 1) {
-        return reconciledGameState;
-      }
+  const workingGameState = useMemo(() => {
+    // if last return the reconciled game
+    if (currentSnapshotIndex === gameSnapshots.length - 1) {
+      return reconciledGameState;
+    }
 
-      const prev = gameSnapshots[currentSnapshotIndex];
+    const prev = gameSnapshots[currentSnapshotIndex];
 
-      // if not existent return the reconciled game
-      if (!prev) {
-        return reconciledGameState;
-      }
+    // if not existent return the reconciled game
+    if (!prev) {
+      return reconciledGameState;
+    }
 
-      return prev;
-    },
-    [gameSnapshots, currentSnapshotIndex, reconciledGameState]
-  );
+    return prev;
+  }, [gameSnapshots, currentSnapshotIndex, reconciledGameState]);
 
   return (
     <div>

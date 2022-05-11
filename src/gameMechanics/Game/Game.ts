@@ -18,7 +18,7 @@ import {
   getAttackNotPossibleError
 } from './errors/helpers';
 import { Board } from '../Board/Board';
-import { coordsAreEqual } from '../util';
+import { coordsAreEqual, matrixForEach } from '../util';
 import { AttackNotPossibleError, MoveNotPossibleError } from './errors';
 import {
   isGameInAttackPhase,
@@ -27,7 +27,7 @@ import {
   isGameInMovePhaseWithPreparingSubmission
 } from './helpers';
 import { IGame } from './IGame';
-import { Attack, GameHistory, Move } from '../commonTypes';
+import { Attack, Color, GameHistory, Move } from '../commonTypes';
 import { PieceRegistry } from '../Piece/types';
 
 type GameProps = {
@@ -466,6 +466,22 @@ export class Game<PR extends PieceRegistry = PieceRegistry> implements IGame {
       attack,
       gameState: this.state
     });
+  }
+
+  evalIfPossibleAttacks(color: Color): boolean {
+    return this.state.boardState.pieceLayoutState.some((row, rowIndex) =>
+      row.some((col, colIndex) => {
+        const piece = this.board.getPieceByCoord({
+          row: rowIndex,
+          col: colIndex
+        });
+        if (!piece || piece.state.color !== color) {
+          return false;
+        }
+
+        return piece.evalAttack(this).length > 0;
+      })
+    );
   }
 
   get state(): GameState {
