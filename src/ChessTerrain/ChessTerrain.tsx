@@ -168,17 +168,18 @@ export const ChessTerrain: React.FC<ChessTerrainProps> = ({
         width={sizePx}
         height={sizePx}
         style={{
-          zIndex: 9999988,
+          zIndex: 9999988
         }}
         arrows={arrows.map((arrow) => ({
           ...arrow,
+          width: squareSize / 9,
           from: {
-            x: coordToArrow(squareSize, arrow.from.y),
-            y: coordToArrow(squareSize, arrow.from.x)
+            x: coordToArrow(squareSize, arrow.from.x),
+            y: coordToArrow(squareSize, arrow.from.y)
           },
           to: {
-            x: coordToArrow(squareSize, arrow.to.y),
-            y: coordToArrow(squareSize, arrow.to.x)
+            x: coordToArrow(squareSize, arrow.to.x),
+            y: coordToArrow(squareSize, arrow.to.y)
           }
         }))}
       />

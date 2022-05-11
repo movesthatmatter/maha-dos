@@ -5,6 +5,7 @@ const DEFAULT_ARROW_STROKE_COLOR = 'purple';
 
 export type Arrow = LineVector & {
   strokeColor?: string;
+  width: number;
 };
 
 type Props = {
@@ -16,6 +17,9 @@ type Props = {
 
   arrows?: Arrow[];
 };
+
+const toArrowId = (arrow: Arrow) =>
+  `${arrow.from.x},${arrow.from.y}-${arrow.to.x},${arrow.to.y}`;
 
 export const SVGOverlay: React.FC<Props> = ({
   width,
@@ -30,7 +34,7 @@ export const SVGOverlay: React.FC<Props> = ({
       style={{
         width,
         height,
-        zIndex: 99999,
+        zIndex: 99999
       }}
     >
       <svg
@@ -42,31 +46,31 @@ export const SVGOverlay: React.FC<Props> = ({
         xmlns="http://www.w3.org/2000/svg"
         xmlnsXlink="http://www.w3.org/1999/xlink"
       >
-        {arrows?.map(({ from, to, strokeColor }, i) => (
+        {arrows?.map((arrow) => (
           <>
             <defs>
               <marker
-                id={`arrowhead-${i}`}
+                id={`arrowhead-${toArrowId(arrow)}`}
                 markerWidth={4}
                 markerHeight={4}
-                refX={1}
+                refX={0}
                 refY={2}
                 orient="auto"
               >
                 <polygon
                   points="0 4, 3 2, 0 0"
-                  fill={strokeColor || DEFAULT_ARROW_STROKE_COLOR}
+                  fill={arrow.strokeColor || DEFAULT_ARROW_STROKE_COLOR}
                 />
               </marker>
             </defs>
             <line
-              strokeWidth={10}
-              x1={from.x}
-              y1={from.y}
-              x2={to.x}
-              y2={to.y}
-              stroke={strokeColor || DEFAULT_ARROW_STROKE_COLOR}
-              markerEnd={`url(#arrowhead-${i})`}
+              strokeWidth={arrow.width}
+              x1={arrow.from.x}
+              y1={arrow.from.y}
+              x2={arrow.to.x}
+              y2={arrow.to.y}
+              stroke={arrow.strokeColor || DEFAULT_ARROW_STROKE_COLOR}
+              markerEnd={`url(#arrowhead-${toArrowId(arrow)})`}
             />
           </>
         ))}

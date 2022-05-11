@@ -77,13 +77,14 @@ export const MahaChessTerrain: React.FC<MahaChessTerrainProps> = ({
   const arrows: Arrow[] = useMemo(() => {
     if (isGameInMovePhaseWithPreparingSubmission(gameState)) {
       return [...gameState.white.moves, ...gameState.black.moves].map((a) => ({
+        width: 1,
         from: {
-          x: a.from.row,
-          y: a.from.col
+          x: a.from.col,
+          y: a.from.row
         },
         to: {
-          x: a.to.row,
-          y: a.to.col
+          x: a.to.col,
+          y: a.to.row
         },
         strokeColor: 'rgba(114, 9, 183, .7)'
       }));
@@ -92,15 +93,16 @@ export const MahaChessTerrain: React.FC<MahaChessTerrainProps> = ({
     if (isGameInAttackPhaseWithPreparingSubmission(gameState)) {
       return [...gameState.white.attacks, ...gameState.black.attacks].map(
         (a) => ({
+          width: 1,
           from: {
-            x: a.from.row,
-            y: a.from.col
+            x: a.from.col,
+            y: a.from.row
           },
           to: {
-            x: a.to.row,
-            y: a.to.col
+            x: a.to.col,
+            y: a.to.row
           },
-          strokeColor: 'red'
+          strokeColor: 'rgba(255, 0, 110, .7)'
         })
       );
     } else {
@@ -194,7 +196,7 @@ export const MahaChessTerrain: React.FC<MahaChessTerrainProps> = ({
           });
 
           // If the move was valid, stop here
-          // otherwise go on with the logic
+          // otherwise go on with the logic 
           if (res.ok) {
             setTouchedPiece(undefined);
             return;
