@@ -4,7 +4,9 @@ import {
   GameConfigurator,
   GameState,
   GameStateCompleted,
+  GameStateInAttackPhase,
   GameStateInAttackPhaseWithPreparingSubmission,
+  GameStateInMovePhase,
   GameStateInMovePhaseWithPreparingSubmission,
   GameStateInProgress,
   GameStatePending,
@@ -263,6 +265,22 @@ export class Game<PR extends PieceRegistry = PieceRegistry> implements IGame {
       return new Err(getMoveNotPossibleError('DestinationNotValid'));
     }
 
+    const indexOfAPreviousMoveByPiece = (
+      (this.state as GameStateInMovePhase)[piece.state.color].moves || []
+    ).findIndex((m) => coordsAreEqual(m.from, from));
+
+    if (indexOfAPreviousMoveByPiece !== -1) {
+      this.partialState = {
+        ...this.state,
+        [piece.state.color]: {
+          ...(this.state as GameStateInMovePhase)[piece.state.color],
+          moves: (
+            (this.state as GameStateInMovePhase)[piece.state.color].moves || []
+          ).slice(0, indexOfAPreviousMoveByPiece)
+        }
+      };
+    }
+
     // TODO: Add usecase for when a piece has already moved, but add it as TDD later
     //  PieceAlreadyMoved Error
 
@@ -375,6 +393,31 @@ export class Game<PR extends PieceRegistry = PieceRegistry> implements IGame {
     // Attack is Valid
     if (!attackIsPartOfDests) {
       return new Err(getAttackNotPossibleError('DestinationNotValid'));
+    }
+
+    console.log(
+      'this color attacks : ',
+      (this.state as GameStateInAttackPhase)[piece.state.color].attacks
+    );
+
+    const indexOfAPreviousAttackByPiece = (
+      (this.state as GameStateInAttackPhase)[piece.state.color].attacks || []
+    ).findIndex((a) => coordsAreEqual(a.from, from));
+
+    console.log('index of prev attack', indexOfAPreviousAttackByPiece);
+
+    if (indexOfAPreviousAttackByPiece !== -1) {
+      this.partialState = {
+        ...this.state,
+        [piece.state.color]: {
+          ...(this.state as GameStateInAttackPhase)[piece.state.color],
+          attacks: (
+            (this.state as GameStateInAttackPhase)[piece.state.color].attacks ||
+            []
+          ).slice(0, indexOfAPreviousAttackByPiece)
+        }
+      };
+      console.log('new state ', this.partialState);
     }
 
     const preparingState: GameStateInAttackPhaseWithPreparingSubmission = {

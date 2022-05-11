@@ -9,6 +9,7 @@ import {
   MatrixIndex,
   matrixGet
 } from '../../gameMechanics/util';
+import { coordsAreEqual } from '../../gameMechanics/util/misc';
 import { toDictIndexedBy } from '../../gameMechanics/utils';
 import { PieceLayoutState } from '../../gameMechanics/Board/types';
 import { Move } from '../../gameMechanics/commonTypes';
@@ -62,6 +63,9 @@ export function evalEachDirectionForMove(
           [move.from.row, move.from.col]
         );
         if (!pieceFromMatrix) {
+          return total;
+        }
+        if (coordsAreEqual(move.to, from) || coordsAreEqual(move.from, from)) {
           return total;
         }
         return [
