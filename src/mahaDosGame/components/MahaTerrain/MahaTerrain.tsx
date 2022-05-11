@@ -196,7 +196,7 @@ export const MahaChessTerrain: React.FC<MahaChessTerrainProps> = ({
           });
 
           // If the move was valid, stop here
-          // otherwise go on with the logic 
+          // otherwise go on with the logic
           if (res.ok) {
             setTouchedPiece(undefined);
             return;
@@ -204,14 +204,22 @@ export const MahaChessTerrain: React.FC<MahaChessTerrainProps> = ({
         }
 
         if (isGameInAttackPhase(gameState) && touchedPiece) {
-          onAttack({
+          const res = onAttack({
             from: touchedPiece.coord,
             to: coord
           });
 
-          setTouchedPiece(undefined);
-
-          return;
+          // If the attack was valid, stop here!
+          // otherwise go further with the logic
+          // This check ensures that touching another own piece
+          //  the touched piece just changes to that
+          // In case of the bishop, pressing own piece can result in a healing (if valid)
+          //  but this solves for that as well b/c it only applies it if possible
+          //  otherwise it switches to the other own piece!
+          if (res.ok) {
+            setTouchedPiece(undefined);
+            return;
+          }
         }
 
         if (chessTerrainProps.playingColor === pieceState.color) {
