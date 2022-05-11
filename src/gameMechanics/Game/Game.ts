@@ -395,16 +395,9 @@ export class Game<PR extends PieceRegistry = PieceRegistry> implements IGame {
       return new Err(getAttackNotPossibleError('DestinationNotValid'));
     }
 
-    console.log(
-      'this color attacks : ',
-      (this.state as GameStateInAttackPhase)[piece.state.color].attacks
-    );
-
     const indexOfAPreviousAttackByPiece = (
       (this.state as GameStateInAttackPhase)[piece.state.color].attacks || []
     ).findIndex((a) => coordsAreEqual(a.from, from));
-
-    console.log('index of prev attack', indexOfAPreviousAttackByPiece);
 
     if (indexOfAPreviousAttackByPiece !== -1) {
       this.partialState = {
@@ -417,7 +410,6 @@ export class Game<PR extends PieceRegistry = PieceRegistry> implements IGame {
           ).slice(0, indexOfAPreviousAttackByPiece)
         }
       };
-      console.log('new state ', this.partialState);
     }
 
     const preparingState: GameStateInAttackPhaseWithPreparingSubmission = {
