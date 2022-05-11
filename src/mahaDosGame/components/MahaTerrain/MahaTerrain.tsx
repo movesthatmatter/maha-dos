@@ -12,11 +12,14 @@ import { Coord, coordsAreEqual, noop } from '../../..//gameMechanics/util';
 import { mahaAssetPieceRegistry } from '../../../mahaDosGame/Pieces/registry';
 import { Button } from '../Button';
 import {
+  Attack,
   Color,
+  Move,
   ShortAttack,
   ShortMove
 } from '../../../gameMechanics/commonTypes';
 import { IdentifiablePieceState } from '../../../gameMechanics/Piece/types';
+import { Result } from 'ts-results';
 
 export type MahaChessTerrainProps = Omit<
   ChessTerrainProps,
@@ -33,10 +36,10 @@ export type MahaChessTerrainProps = Omit<
   destinationSquares?: Coord[];
 
   possibleMoveSquares: Coord[];
-  onMove: (m: ShortMove) => void;
+  onMove: (m: ShortMove) => Result<Move, unknown>;
 
   possibleAttackSquares: Coord[];
-  onAttack: (a: ShortAttack) => void;
+  onAttack: (a: ShortAttack) => Result<Attack, unknown>;
 
   onPieceTouched?: (
     p: { coord: Coord; piece: IdentifiablePieceState } | undefined
@@ -177,6 +180,25 @@ export const MahaChessTerrain: React.FC<MahaChessTerrainProps> = ({
           setTouchedPiece(undefined);
 
           return;
+        }
+
+        // If the next touched piece is also mine maybe this piece wants to move there
+        if (
+          isGameInMovePhase(gameState) &&
+          touchedPiece &&
+          touchedPiece.piece.color === pieceState.color
+        ) {
+          const res = onMove({
+            from: touchedPiece.coord,
+            to: coord
+          });
+
+          // If the move was valid, stop here
+          // otherwise go on with the logic
+          if (res.ok) {
+            setTouchedPiece(undefined);
+            return;
+          }
         }
 
         if (isGameInAttackPhase(gameState) && touchedPiece) {

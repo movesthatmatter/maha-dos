@@ -134,20 +134,26 @@ export const Maha: React.FC<MahaProps> = ({
           setPossibleAttackSquares([]);
         }}
         onMove={(move) => {
-          localGameRef.current.drawMove(move.from, move.to).map((next) => {
-            setPreparingGameState(next.gameState);
-          });
-
           setPossibleMoveSquares([]);
+
+          return localGameRef.current
+            .drawMove(move.from, move.to)
+            .map((next) => {
+              setPreparingGameState(next.gameState);
+
+              return next.move;
+            });
         }}
         onAttack={(attack) => {
-          localGameRef.current
+          setPossibleAttackSquares([]);
+
+          return localGameRef.current
             .drawAttack(attack.from, attack.to)
             .map((next) => {
               setPreparingGameState(next.gameState);
-            });
 
-          setPossibleAttackSquares([]);
+              return next.attack;
+            });
         }}
       />
       <>
