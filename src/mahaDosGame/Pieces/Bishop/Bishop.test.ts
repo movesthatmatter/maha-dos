@@ -10,6 +10,8 @@ import { generatePieceLabel } from '../../../gameMechanics/Board/util';
 import { generate } from '../../..//mahaDosGame/helpers';
 import {
   Attack,
+  AttackOutcome,
+  FullGameTurn,
   GameHistory,
   Move,
   PartialGameTurn
@@ -175,6 +177,13 @@ describe('Eval attacks for Bishop', () => {
     const game = new MahaGame(configuration);
 
     const piece = game.board.getPieceByCoord({ row: 2, col: 2 });
+    const knight = game.board.getPieceByCoord({ row: 0, col: 4 });
+
+    expect(knight).toBeDefined();
+    if (!knight) {
+      return;
+    }
+    knight.state.hitPoints = 3;
 
     expect(piece).toBeDefined();
 
@@ -256,7 +265,7 @@ describe('Eval attacks for Bishop', () => {
     const configuration: GameConfigurator<typeof mahaPieceRegistry> = {
       terrain: { width: 5 },
       pieceLayout: [
-        ['bN', 0, 'bK', 0, 'bB'],
+        ['bN', 0, 'bK', 0, 0],
         [0, 'bR', 0, 0, 0],
         [0, 0, 'bB', 0, 0],
         ['wP', 0, 0, 0, 0],
@@ -299,14 +308,18 @@ describe('Eval attacks for Bishop', () => {
       return;
     }
 
+    const rook = game.board.getPieceByCoord({ row: 1, col: 1 });
+
+    expect(rook).toBeDefined();
+    if (!rook) {
+      return;
+    }
+
+    rook.state.hitPoints = 3;
+
     const attacks = piece.evalAttack(game);
 
     const expected: Attack[] = [
-      {
-        from: { row: 2, col: 2 },
-        to: { row: 0, col: 4 },
-        type: 'range'
-      },
       {
         from: { row: 2, col: 2 },
         to: { row: 4, col: 4 },
@@ -348,6 +361,22 @@ describe('Eval attacks for Bishop', () => {
       return;
     }
 
+    const rook = game.board.getPieceByCoord({ row: 4, col: 1 });
+    const queen = game.board.getPieceByCoord({ row: 7, col: 4 });
+    const queen2 = game.board.getPieceByCoord({ row: 7, col: 0 });
+
+    expect(rook).toBeDefined();
+    expect(queen).toBeDefined();
+    expect(queen2).toBeDefined();
+
+    if (!rook || !queen || !queen2) {
+      return;
+    }
+
+    rook.state.hitPoints = 2;
+    queen.state.hitPoints = 2;
+    queen2.state.hitPoints = 2;
+
     const attacks = piece.evalAttack(game);
 
     const expected: Attack[] = [
@@ -364,6 +393,102 @@ describe('Eval attacks for Bishop', () => {
       {
         from: { row: 5, col: 2 },
         to: { row: 4, col: 1 },
+        type: 'range'
+      }
+    ];
+
+    expect(attacks).toEqual(expected);
+  });
+
+  test('test real life scenario from storybook board - should heal the rook', () => {
+    const configuration: GameConfigurator<typeof mahaPieceRegistry> = {
+      terrain: { width: 8 },
+      pieceLayout: [
+        [0, 0, 0, 0, 0, 0, 'bN', 'bR'],
+        [0, 0, 0, 0, 0, 0, 'bP', 'wR'],
+        [0, 0, 0, 0, 'bP', 0, 0, 0],
+        [0, 0, 0, 0, 0, 'wB', 0, 0],
+        [0, 0, 0, 0, 0, 0, 'wP', 0],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0]
+      ]
+    };
+
+    const game = new MahaGame(configuration);
+    const state = game.state;
+
+    const piece = game.board.getPieceByCoord({ row: 3, col: 5 });
+
+    expect(piece).toBeDefined();
+
+    if (!piece) {
+      return;
+    }
+
+    const rook = game.board.getPieceByCoord({ row: 1, col: 7 });
+
+    expect(rook).toBeDefined();
+
+    if (!rook) {
+      return;
+    }
+
+    rook.state.hitPoints = 11;
+
+    const turn: PartialGameTurn = [
+      {
+        white: [
+          {
+            from: { row: 4, col: 1 },
+            to: { row: 3, col: 1 },
+            piece: generate.generateDefaultPawn('P-white', 'white')
+          }
+        ],
+        black: [
+          {
+            from: { row: 4, col: 0 },
+            to: { row: 3, col: 0 },
+            piece: generate.generateDefaultPawn('P-white', 'white')
+          }
+        ]
+      }
+    ];
+    const prevTurn: FullGameTurn = [
+      {
+        white: [
+          {
+            from: { row: 5, col: 2 },
+            to: { row: 3, col: 5 },
+            piece: piece.state
+          }
+        ],
+        black: [
+          {
+            from: { row: 4, col: 0 },
+            to: { row: 3, col: 0 },
+            piece: generate.generateDefaultPawn('P-white', 'white')
+          }
+        ]
+      },
+      {
+        white: [] as AttackOutcome[],
+        black: [] as AttackOutcome[]
+      }
+    ];
+    const history: GameHistory = [{ ...prevTurn }, { ...turn }];
+
+    game.load({
+      ...state,
+      history
+    } as GameStateInProgress);
+
+    const attacks = piece.evalAttack(game);
+
+    const expected: Attack[] = [
+      {
+        from: { row: 3, col: 5 },
+        to: { row: 1, col: 7 },
         type: 'range'
       }
     ];

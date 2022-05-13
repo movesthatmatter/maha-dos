@@ -120,15 +120,14 @@ export class Bishop extends Piece {
         if (r === 1) {
           if (
             targetPiece.state.label === 'Rook' ||
-            targetPiece.state.color === this.state.color
+            (targetPiece.state.color === this.state.color &&
+              targetPiece.state.hitPoints < targetPiece.state.maxHitPoints)
           ) {
             attacks.push({
               from: pieceCoord,
               to: target,
               type: 'range'
             });
-            hitObstacle = true;
-            return;
           }
         } else {
           if (targetPiece.state.color !== this.state.color) {
@@ -138,7 +137,10 @@ export class Bishop extends Piece {
               type: 'range'
             });
           } else {
-            if (r < 4) {
+            if (
+              r < 4 &&
+              targetPiece.state.hitPoints < targetPiece.state.maxHitPoints
+            ) {
               attacks.push({
                 from: pieceCoord,
                 to: target,
@@ -146,9 +148,9 @@ export class Bishop extends Piece {
               });
             }
           }
-          hitObstacle = true;
-          return;
         }
+        hitObstacle = true;
+        return;
       });
     });
 
@@ -186,11 +188,11 @@ export class Bishop extends Piece {
           : 0;
     }
 
-    //TODO - heal can only go to max hit points of the target piece
     const damage = heal
-      ? Math.ceil(targetPiece.state.hitPoints / 2) > 5
-        ? -5
-        : -Math.ceil(targetPiece.state.hitPoints / 2)
+      ? this.determineHealAmount(
+          targetPiece.state.hitPoints,
+          targetPiece.state.maxHitPoints
+        )
       : this.state.attackDamage - kingDefense + attackBonus;
 
     return Ok({
@@ -201,5 +203,10 @@ export class Bishop extends Piece {
           : true,
       damage
     });
+  }
+
+  private determineHealAmount(hP: number, maxHP: number) {
+    const healAmount = Math.ceil(hP / 2) > 5 ? 5 : Math.ceil(hP / 2);
+    return hP + healAmount <= maxHP ? healAmount : maxHP - hP;
   }
 }
