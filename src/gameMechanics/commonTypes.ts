@@ -19,6 +19,7 @@ export type ShortMove = {
   from: Coord;
   to: Coord;
   promotion?: PieceState<string>['label'];
+  castle?: ShortMove; // Rook Move
 };
 
 // TODO: Rename this MoveOutcome so it uses the same standard as Attack
@@ -36,9 +37,10 @@ export type ShortAttack = {
 
 // TODO: This is actuall just the ShortAttack as the SpecialAttacks aren't needed here!
 // TODO: Take the SpecialAttacks out as they aren't needed in the Attack
-export type Attack = ShortAttack & SpecialAttacks & {
-  type: 'range' | 'melee';
-};
+export type Attack = ShortAttack &
+  SpecialAttacks & {
+    type: 'range' | 'melee';
+  };
 
 export type SpecialAttacks = {
   // heal?: boolean;

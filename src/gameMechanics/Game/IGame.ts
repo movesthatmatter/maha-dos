@@ -15,10 +15,7 @@ export interface IGame<PR extends PieceRegistry = PieceRegistry> {
   load(state: GameState): void;
 
   // When a Move is Succesfully Drawn it gets appended to the nextMoves List of the "move" phase
-  drawMove(
-    from: Coord,
-    to: Coord
-  ): Result<
+  drawMove(move: Move): Result<
     {
       move: Move;
       gameState: GameState;

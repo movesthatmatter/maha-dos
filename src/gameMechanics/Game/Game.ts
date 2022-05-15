@@ -27,7 +27,7 @@ import {
   isGameInMovePhaseWithPreparingSubmission
 } from './helpers';
 import { IGame } from './IGame';
-import { Attack, Color, GameHistory, Move } from '../commonTypes';
+import { Attack, Color, GameHistory, Move, ShortMove } from '../commonTypes';
 import { PieceRegistry } from '../Piece/types';
 
 type GameProps = {
@@ -230,18 +230,13 @@ export class Game<PR extends PieceRegistry = PieceRegistry> implements IGame {
 
   // When a Move is Succesfully Drawn it gets appended to the nextMoves List of the "move" phase
   // TODO: TEST!
-  drawMove(
-    from: Coord,
-    to: Coord
-  ): Result<
+  drawMove(move: ShortMove): Result<
     {
       move: Move;
       gameState: GameState;
     },
     MoveNotPossibleError
   > {
-    // console.log('about to move', this.state);
-
     // Can't make a move when game is completed
     if (this.partialState.state === 'completed') {
       return new Err(getMoveNotPossibleError('GameIsCompleted'));
@@ -251,14 +246,14 @@ export class Game<PR extends PieceRegistry = PieceRegistry> implements IGame {
       return new Err(getMoveNotPossibleError('GameNotInMovePhase'));
     }
 
-    const piece = this.board.getPieceByCoord(from);
+    const piece = this.board.getPieceByCoord(move.from);
 
     if (!piece) {
       return new Err(getMoveNotPossibleError('PieceNotExistent'));
     }
 
     const dests = piece.evalMove(this);
-    const moveIsPartOfDests = dests.find((d) => coordsAreEqual(d.to, to));
+    const moveIsPartOfDests = dests.find((d) => coordsAreEqual(d.to, move.to));
 
     // Move is Valid
     if (!moveIsPartOfDests) {
@@ -267,7 +262,7 @@ export class Game<PR extends PieceRegistry = PieceRegistry> implements IGame {
 
     const indexOfAPreviousMoveByPiece = (
       (this.state as GameStateInMovePhase)[piece.state.color].moves || []
-    ).findIndex((m) => coordsAreEqual(m.from, from));
+    ).findIndex((m) => coordsAreEqual(m.from, move.from));
 
     if (indexOfAPreviousMoveByPiece !== -1) {
       this.partialState = {
@@ -327,35 +322,31 @@ export class Game<PR extends PieceRegistry = PieceRegistry> implements IGame {
           })
     };
 
-    const move: Move = {
-      from,
-      to,
+    const nextMove: Move = {
+      ...move,
       piece: piece.state
-
       // TODO: Add promotion
     };
-
     // TODO: Update the board and all the other state derivates
     this.partialState = {
       ...preparingState,
       ...(isGameInMovePhaseWithPreparingSubmission(preparingState) && {
         white: {
           ...preparingState.white,
-          ...(move.piece.color === 'white' && {
-            moves: [...preparingState.white.moves, move]
+          ...(nextMove.piece.color === 'white' && {
+            moves: [...preparingState.white.moves, nextMove]
           })
         },
         black: {
           ...preparingState.black,
-          ...(move.piece.color === 'black' && {
-            moves: [...preparingState.black.moves, move]
+          ...(nextMove.piece.color === 'black' && {
+            moves: [...preparingState.black.moves, nextMove]
           })
         }
       })
     };
-
     return new Ok({
-      move,
+      move: nextMove,
       gameState: this.state
     });
   }

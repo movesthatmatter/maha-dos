@@ -199,8 +199,6 @@ export const PlayWithReconciliator = () => {
         label="Prev"
         disabled={!(currentSnapshotIndex > 0)}
         onClick={() => {
-          console.log('prev');
-
           if (currentSnapshotIndex > 0) {
             setCurrentSnapshotIndex((prev) => prev - 1);
           }
@@ -210,7 +208,6 @@ export const PlayWithReconciliator = () => {
         label="Next"
         disabled={!(gameSnapshots.length > currentSnapshotIndex + 1)}
         onClick={() => {
-          console.log('next');
           if (gameSnapshots.length > currentSnapshotIndex + 1) {
             setCurrentSnapshotIndex((prev) => prev + 1);
           }

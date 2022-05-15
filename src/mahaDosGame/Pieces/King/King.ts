@@ -5,7 +5,11 @@ import {
   IdentifiablePieceState,
   PieceDynamicProps
 } from '../../../gameMechanics/Piece/types';
-import { evalEachDirectionForMove } from '../utils';
+import {
+  calculateDistanceBetween2Coords,
+  checkForRookOnDeterminedDirection,
+  evalEachDirectionForMove
+} from '../utils';
 import { Err, Ok, Result } from 'ts-results';
 import { AttackNotPossibleError } from '../../../gameMechanics/Game/errors/types';
 import {
@@ -14,6 +18,7 @@ import {
   Color,
   Move
 } from '../../../gameMechanics/commonTypes';
+import { coordsAreEqual, range } from 'src/gameMechanics/util';
 
 const pieceLabel = 'King';
 
@@ -67,7 +72,53 @@ export class King extends Piece {
       return [];
     }
 
-    return evalEachDirectionForMove(pieceCoord, this, game);
+    return [
+      ...evalEachDirectionForMove(pieceCoord, this, game),
+      ...(!this.state.pieceHasMoved
+        ? [...this.checkCastlingOption(game, pieceCoord)]
+        : [])
+    ];
+  }
+
+  private checkCastlingOption(game: Game, pieceCoord: Coord): Move[] {
+    return [
+      { row: 0, col: 1 },
+      { row: 0, col: -1 }
+    ].reduce((moves, dir) => {
+      const rookCoords = checkForRookOnDeterminedDirection(
+        game.board.state.pieceLayoutState,
+        pieceCoord,
+        dir,
+        this.state.color
+      );
+      if (rookCoords && game.board.getPieceByCoord(rookCoords)) {
+        const distance = calculateDistanceBetween2Coords(
+          pieceCoord,
+          rookCoords
+        );
+        const kingMove: Move = {
+          from: pieceCoord,
+          to: {
+            row: pieceCoord.row,
+            col: pieceCoord.col + Math.ceil(distance / 2) * dir.col
+          },
+          piece: this.state,
+          castle: {
+            from: rookCoords,
+            to: {
+              row: rookCoords.row,
+              col:
+                rookCoords.col -
+                (distance % 2 === 0
+                  ? Math.floor(distance / 2 + 1) * dir.col
+                  : Math.ceil(distance / 2) * dir.col)
+            }
+          }
+        };
+        return [...moves, kingMove];
+      }
+      return moves;
+    }, [] as Move[]);
   }
 
   evalAttack(game: Game): Attack[] {
@@ -89,6 +140,7 @@ export class King extends Piece {
       ) {
         return attacks;
       }
+
       const targetPiece = game.board.getPieceByCoord(target);
       if (targetPiece && targetPiece.state.color !== this.state.color) {
         const attack: Attack = {

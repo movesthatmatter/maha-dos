@@ -119,7 +119,8 @@ export class Bishop extends Piece {
 
         if (r === 1) {
           if (
-            targetPiece.state.label === 'Rook' ||
+            (targetPiece.state.label === 'Rook' &&
+              targetPiece.state.color !== this.state.color) ||
             (targetPiece.state.color === this.state.color &&
               targetPiece.state.hitPoints < targetPiece.state.maxHitPoints)
           ) {
