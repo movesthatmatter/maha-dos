@@ -12,8 +12,8 @@ export class Terrain {
   constructor(props: TerrainProps) {
     const height = props.height || props.width;
 
-    this.state = range(props.width).map((row) =>
-      range(height).map((col) => ((row + col) % 2 ? 'b' : 'w'))
+    this.state = range(height).map((row) =>
+      range(props.width).map((col) => ((row + col) % 2 ? 'b' : 'w'))
     );
   }
 }

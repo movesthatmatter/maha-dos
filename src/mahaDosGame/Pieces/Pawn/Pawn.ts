@@ -1,16 +1,23 @@
-import { Game } from 'src/gameMechanics/Game/Game';
-import { Color } from 'src/gameMechanics/util/types';
-import { Attack, Move } from 'src/gameMechanics/Game/types';
-import { Piece } from 'src/gameMechanics/Piece/Piece';
+import { Game } from '../../../gameMechanics/Game/Game';
+import { Coord } from '../../../gameMechanics/util/types';
+import {
+  Move,
+  Attack,
+  AttackOutcome,
+  Color
+} from '../../../gameMechanics/commonTypes';
+import { Piece } from '../../../gameMechanics/Piece/Piece';
 import {
   IdentifiablePieceState,
   PieceDynamicProps
-} from 'src/gameMechanics/Piece/types';
-import { range, Coord } from 'src/gameMechanics/util';
-import { evalEachDirectionForMove } from '../utils';
+} from '../../../gameMechanics/Piece/types';
+import {
+  evalEachDirectionForMove,
+  getAllAdjecentPiecesToPosition,
+  getPieceMoveThisTurn
+} from '../utils';
 import { Err, Ok, Result } from 'ts-results';
-import { PieceLayoutState } from 'src/gameMechanics/Board/types';
-import { AttackTargetPieceUndefined } from 'src/gameMechanics/engine';
+import { AttackNotPossibleError } from '../../../gameMechanics/Game/errors/types';
 
 const pieceLabel = 'Pawn';
 
@@ -61,29 +68,92 @@ export class Pawn extends Piece {
 
     // returns all the possible moves;
 
-    const pieceCoord = game.board.pieceCoordsByPieceId[this.state.id];
+    const pieceCoord = game.board.getPieceCoordById(this.state.id);
+
+    if (!pieceCoord) {
+      return [];
+    }
 
     return evalEachDirectionForMove(pieceCoord, this, game);
   }
 
   evalAttack(game: Game): Attack[] {
-    const pieceCoord = game.board.pieceCoordsByPieceId[this.state.id];
-    //take into account the attack direction!!
-    return [];
+    const pieceCoord = game.board.getPieceCoordById(this.state.id);
+    if (!pieceCoord) {
+      return [];
+    }
+    if (!this.state.attackDirection) {
+      return [];
+    }
+
+    return this.state.attackDirection.reduce((attacks, dir) => {
+      const target: Coord = {
+        row: pieceCoord.row + dir.row,
+        col: pieceCoord.col + dir.col
+      };
+      if (
+        target.row >= game.board.state.pieceLayoutState.length ||
+        target.col >= game.board.state.pieceLayoutState[0].length ||
+        target.row < 0 ||
+        target.col < 0
+      ) {
+        return attacks;
+      }
+      const targetPiece = game.board.getPieceByCoord(target);
+      if (targetPiece && targetPiece.state.color !== this.state.color) {
+        const attack: Attack = {
+          from: pieceCoord,
+          to: target,
+          type: 'melee'
+        };
+        return [...attacks, attack];
+      }
+      return attacks;
+    }, [] as Attack[]);
   }
 
-  executeAttack(
+  calculateAttackOutcome(
     game: Game,
     attack: Attack
-  ): Result<PieceLayoutState, AttackTargetPieceUndefined> {
-    const targetPiece = game.board.pieceLayout[attack.to.row][attack.to.col];
+  ): Result<AttackOutcome, AttackNotPossibleError> {
+    const targetPiece = game.board.getPieceByCoord(attack.to);
+
     //TODO: Better typecheck. Deal with error handling
-    if (targetPiece === 0) {
+    if (!targetPiece) {
       return new Err({
-        type: 'TargetPieceIsUndefined',
-        content: undefined
+        type: 'AttackNotPossible',
+        content: {
+          reason: 'AttackerPieceNotExistent'
+        }
       });
     }
-    return Ok({} as PieceLayoutState);
+    const moved = getPieceMoveThisTurn(this, game);
+
+    let kingDefense = 0;
+    if (targetPiece.state.label === 'King') {
+      kingDefense =
+        getAllAdjecentPiecesToPosition(
+          attack.to,
+          game.board.state.pieceLayoutState
+        ).filter(
+          (p) => p.label === 'Rook' && p.color === targetPiece.state.color
+        ).length > 0
+          ? 1
+          : 0;
+    }
+
+    const defenseBonus =
+      targetPiece.state.label === 'Bishop' ||
+      targetPiece.state.label === 'NKnight'
+        ? 1
+        : 0;
+
+    const damage = (moved ? 2 : 1) - defenseBonus - kingDefense;
+
+    return Ok({
+      attack,
+      willTake: targetPiece.state.hitPoints - damage > 0 ? false : true,
+      damage
+    });
   }
 }

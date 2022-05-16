@@ -1,32 +1,60 @@
-import { Result } from 'ts-results';
-import { Color } from '../util/types';
+import { Err, Ok, Result } from 'ts-results';
 import { Game } from './Game';
 import {
   GameStateNotInMovePhaseError,
-  GameStateNotInAttackPhaseError
-} from './errorTypes';
+  SubmitMovesNotPossibleError,
+  SubmitAttacksNotPossibleError,
+  getSubmitMovesNotPossibleError,
+  getSubmitAttacksNotPossibleError
+} from './errors';
 import {
-  Attack,
   GameStateCompleted,
   GameStateInAttackPhaseWithPartialSubmission,
   GameStateInAtttackPhaseWithNoSubmission,
   GameStateInMovePhaseWithNoSubmission,
-  GameStateInMovePhaseWithPartialSubmission,
-  Move
+  GameStateInMovePhaseWithPartialSubmission
 } from './types';
+import { toOppositeColor } from '../util/game';
+import {
+  isGameInAttackPhase,
+  isGameInAttackPhaseWithPartialSubmission,
+  isGameInMovePhase,
+  isGameInMovePhaseWithPartialSubmission
+} from './helpers';
+import {
+  Attack,
+  Color,
+  GameHistory,
+  Move,
+  PartialGameTurn,
+  ShortAttack,
+  ShortMove
+} from '../commonTypes';
+import {
+  printBoardAsTableWithState,
+  toPrintableBoardWithState
+} from '../Board/util';
 
 export interface GameReconciliator extends Game {
-  submitMoves(p: { color: Color; moves: Move[] }): Result<
+  submitMoves(p: {
+    color: Color;
+    moves: Move[];
+  }): Result<
     | GameStateInMovePhaseWithPartialSubmission
     | GameStateInAtttackPhaseWithNoSubmission,
-    GameStateNotInMovePhaseError // TODO: add any other possible error such as Moves Already Submitted for Color
+    SubmitMovesNotPossibleError
   >;
 
-  submitAttacks(p: { color: Color; attacks: Attack[] }): Result<
+  submitAttacks(p: {
+    color: Color;
+    attacks: Attack[];
+  }): Result<
     | GameStateInAttackPhaseWithPartialSubmission
     | GameStateInMovePhaseWithNoSubmission,
-    GameStateNotInAttackPhaseError // TODO: add any other possible error such as Attacks Already Submitted for Color
+    SubmitAttacksNotPossibleError
   >;
+
+  // TODO: These aren't needed anymore b/c the submit takes care of the reconciliation
 
   reconcileMoves(
     whiteMoves: Move[],
@@ -42,6 +70,254 @@ export interface GameReconciliator extends Game {
     blackAttack: Attack[]
   ): Result<
     GameStateInMovePhaseWithNoSubmission | GameStateCompleted,
-    GameStateNotInAttackPhaseError
+    SubmitAttacksNotPossibleError
   >;
+}
+
+export class GameReconciliator extends Game implements GameReconciliator {
+  submitMoves({
+    color,
+    moves
+  }: {
+    color: Color;
+    moves: ShortMove[];
+  }): Result<
+    | GameStateInMovePhaseWithPartialSubmission
+    | GameStateInAtttackPhaseWithNoSubmission,
+    SubmitMovesNotPossibleError
+  > {
+    if (!(this.state.state === 'pending' || isGameInMovePhase(this.state))) {
+      return new Err(getSubmitMovesNotPossibleError('GameNotInMovePhase'));
+    }
+
+    const prevGame = this.state;
+    const oppositeColor = toOppositeColor(color);
+
+    if (
+      isGameInMovePhaseWithPartialSubmission(prevGame) &&
+      prevGame[color].canDraw
+    ) {
+      // TODO: This shouldn't have to be recasted as the canDraw check above should suffice
+      //  but for some reason the compiler doesn't see it
+      const oppositeColorMoves = prevGame[oppositeColor].moves as ShortMove[];
+
+      const currentColorMoves = moves;
+
+      const oppositeColorMovesRes = this.board.moveMultiple(oppositeColorMoves);
+
+      if (!oppositeColorMovesRes.ok) {
+        return new Err(getSubmitMovesNotPossibleError('InvalidMoves'));
+      }
+
+      const currentColorMovesRes = this.board.moveMultiple(currentColorMoves);
+
+      if (!currentColorMovesRes.ok) {
+        return new Err(getSubmitMovesNotPossibleError('InvalidMoves'));
+      }
+
+      const nextGameTurn: PartialGameTurn = [
+        color === 'white'
+          ? {
+              white: currentColorMovesRes.val,
+              black: oppositeColorMovesRes.val
+            }
+          : {
+              white: oppositeColorMovesRes.val,
+              black: currentColorMovesRes.val
+            }
+      ];
+
+      const nextState: GameStateInAtttackPhaseWithNoSubmission = {
+        ...prevGame,
+        phase: 'attack',
+        submissionStatus: 'none',
+        history: [...prevGame.history, nextGameTurn],
+        white: {
+          canDraw: true,
+          attacks: undefined
+        },
+        black: {
+          canDraw: true,
+          attacks: undefined
+        },
+        boardState: this.board.state
+      };
+
+      const { boardState, ...nextPartialState } = nextState;
+
+      this.partialState = nextPartialState;
+
+      return new Ok(nextState);
+    }
+
+    const nextState: GameStateInMovePhaseWithPartialSubmission = {
+      ...prevGame,
+      state: 'inProgress',
+      phase: 'move',
+      winner: undefined,
+      submissionStatus: 'partial',
+      ...(color === 'white'
+        ? {
+            white: {
+              canDraw: false,
+              moves
+            },
+            black: {
+              canDraw: true,
+              moves: undefined
+            }
+          }
+        : {
+            white: {
+              canDraw: true,
+              moves: undefined
+            },
+            black: {
+              canDraw: false,
+              moves
+            }
+          })
+    };
+
+    const { boardState, ...nextPartialState } = nextState;
+
+    this.partialState = nextPartialState;
+
+    return new Ok(nextState);
+  }
+
+  // TODO: Test
+  submitAttacks({
+    color,
+    attacks
+  }: {
+    color: Color;
+    attacks: ShortAttack[];
+  }): Result<
+    | GameStateInAttackPhaseWithPartialSubmission
+    | GameStateInMovePhaseWithNoSubmission,
+    SubmitAttacksNotPossibleError
+  > {
+    if (!isGameInAttackPhase(this.state)) {
+      return new Err(getSubmitAttacksNotPossibleError('GameNotInAttackPhase'));
+    }
+
+    const prevGameState = this.state;
+    const oppositeColor = toOppositeColor(color);
+
+    const prevGameInstance = new Game(
+      this.pieceRegistry,
+      this.configurator,
+      this.gameProps
+    );
+    prevGameInstance.load(prevGameState);
+
+    if (
+      isGameInAttackPhaseWithPartialSubmission(prevGameState) &&
+      prevGameState[color].canDraw
+    ) {
+      // TODO: This shouldn't have to be recasted as the canDraw check above should suffice
+      //  but for some reason the compiler doesn't see it
+      const oppositeColorAttacks = prevGameState[oppositeColor]
+        .attacks as ShortAttack[];
+      const currentColorAttacks = attacks;
+
+      const oppositeColorAttacksRes = this.board.applyAttacks(
+        prevGameInstance,
+        oppositeColorAttacks
+      );
+
+      if (!oppositeColorAttacksRes.ok) {
+        return new Err(getSubmitAttacksNotPossibleError('InvalidAttacks'));
+      }
+
+      const currentColorAttacksRes = this.board.applyAttacks(
+        prevGameInstance,
+        currentColorAttacks
+      );
+
+      if (!currentColorAttacksRes.ok) {
+        return new Err(getSubmitAttacksNotPossibleError('InvalidAttacks'));
+      }
+
+      const prevPartialTurn = prevGameState.history.slice(
+        -1
+      )[0] as PartialGameTurn;
+      const nextFullGameTurn = [
+        ...prevPartialTurn,
+        color === 'white'
+          ? {
+              white: currentColorAttacksRes.val,
+              black: oppositeColorAttacksRes.val
+            }
+          : {
+              white: oppositeColorAttacksRes.val,
+              black: currentColorAttacksRes.val
+            }
+      ];
+      const prevHistoryWithoutPartial: GameHistory =
+        prevGameState.history.slice(0, -1);
+      const nextHistory: GameHistory = [
+        ...prevHistoryWithoutPartial,
+        nextFullGameTurn
+      ] as GameHistory;
+
+      const nextState: GameStateInMovePhaseWithNoSubmission = {
+        ...prevGameState,
+        phase: 'move',
+        submissionStatus: 'none',
+        history: nextHistory,
+        white: {
+          canDraw: true,
+          moves: undefined
+        },
+        black: {
+          canDraw: true,
+          moves: undefined
+        },
+        boardState: this.board.state
+      };
+
+      const { boardState, ...nextPartialState } = nextState;
+
+      this.partialState = nextPartialState;
+
+      return new Ok(nextState);
+    }
+
+    const nextState: GameStateInAttackPhaseWithPartialSubmission = {
+      ...prevGameState,
+      state: 'inProgress',
+      phase: 'attack',
+      winner: undefined,
+      submissionStatus: 'partial',
+      ...(color === 'white'
+        ? {
+            white: {
+              canDraw: false,
+              attacks
+            },
+            black: {
+              canDraw: true,
+              attacks: undefined
+            }
+          }
+        : {
+            white: {
+              canDraw: true,
+              attacks: undefined
+            },
+            black: {
+              canDraw: false,
+              attacks
+            }
+          })
+    };
+
+    const { boardState, ...nextPartialState } = nextState;
+
+    this.partialState = nextPartialState;
+
+    return new Ok(nextState);
+  }
 }

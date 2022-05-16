@@ -1,17 +1,17 @@
-import { MahaGame } from 'src/mahaDosGame/MahaGame';
-import { Rook } from './Rook';
+import { MahaGame } from '../../MahaGame';
 import {
-  Attack,
   GameConfigurator,
-  GameHistory,
   GameStateInProgress,
-  Move,
-  PartialGameTurn
+  GameStateInMovePhase
 } from '../../../gameMechanics/Game/types';
 import { mahaPieceRegistry } from '../registry';
-import { generatePieceLabel } from 'src/gameMechanics/Board/util';
-import { generate } from 'src/mahaDosGame/helpers';
-import { Pawn } from '../Pawn';
+import { generate } from '../../../mahaDosGame/helpers';
+import {
+  Attack,
+  GameHistory,
+  Move,
+  PartialGameTurn
+} from '../../../gameMechanics/commonTypes';
 
 describe('eval moves for rooks', () => {
   test('eval move', () => {
@@ -27,10 +27,29 @@ describe('eval moves for rooks', () => {
     };
     const game = new MahaGame(configuration);
 
-    const piece = new Rook(
-      'black',
-      generatePieceLabel('black', 'bR', { row: 2, col: 2 })
-    );
+    const piece = game.board.getPieceByCoord({ row: 2, col: 2 });
+
+    expect(piece).toBeDefined();
+
+    if (!piece) {
+      return;
+    }
+
+    const { state } = game;
+    game.load({
+      ...state,
+      state: 'inProgress',
+      history: [],
+      phase: 'move',
+      white: {
+        canDraw: true,
+        moves: []
+      },
+      black: {
+        canDraw: true,
+        moves: []
+      }
+    } as GameStateInMovePhase);
 
     const moves = piece.evalMove(game);
 
@@ -79,10 +98,16 @@ describe('eval attacks for Rooks', () => {
       ]
     };
 
-    const piece = new Rook(
-      'black',
-      generatePieceLabel('black', 'bR', { row: 2, col: 2 })
-    );
+    const game = new MahaGame(configuration);
+    const state = game.state;
+
+    const piece = game.board.getPieceByCoord({ row: 2, col: 2 });
+
+    expect(piece).toBeDefined();
+
+    if (!piece) {
+      return;
+    }
 
     const turn: PartialGameTurn = [
       {
@@ -100,28 +125,9 @@ describe('eval attacks for Rooks', () => {
             piece: generate.generateDefaultPawn('P-white', 'white')
           }
         ]
-      },
-      {
-        white: [],
-        black: []
       }
     ];
-    const history: GameHistory = [
-      [
-        {
-          white: [] as Move[],
-          black: [] as Move[]
-        },
-        {
-          white: [] as Attack[],
-          black: [] as Attack[]
-        }
-      ],
-      [...turn]
-    ];
-
-    const game = new MahaGame(configuration);
-    const state = game.state;
+    const history: GameHistory = [[...turn], [...turn]];
 
     game.load({
       ...state,
@@ -157,10 +163,6 @@ describe('eval attacks for Rooks', () => {
       ]
     };
 
-    const piece = new Rook(
-      'black',
-      generatePieceLabel('black', 'bR', { row: 2, col: 2 })
-    );
     const turn: PartialGameTurn = [
       {
         black: [
@@ -177,25 +179,9 @@ describe('eval attacks for Rooks', () => {
             piece: generate.generateDefaultPawn('P-white', 'white')
           }
         ]
-      },
-      {
-        white: [],
-        black: []
       }
     ];
-    const history: GameHistory = [
-      [
-        {
-          white: [] as Move[],
-          black: [] as Move[]
-        },
-        {
-          white: [] as Attack[],
-          black: [] as Attack[]
-        }
-      ],
-      [...turn]
-    ];
+    const history: GameHistory = [[...turn], [...turn]];
 
     const game = new MahaGame(configuration);
     const state = game.state;
@@ -203,6 +189,14 @@ describe('eval attacks for Rooks', () => {
       ...state,
       history
     } as GameStateInProgress);
+
+    const piece = game.board.getPieceByCoord({ row: 2, col: 2 });
+
+    expect(piece).toBeDefined();
+
+    if (!piece) {
+      return;
+    }
 
     const attacks = piece.evalAttack(game);
 
@@ -244,10 +238,6 @@ describe('eval attacks for Rooks', () => {
       ]
     };
 
-    const piece = new Rook(
-      'black',
-      generatePieceLabel('black', 'bR', { row: 1, col: 0 })
-    );
     const turn: PartialGameTurn = [
       {
         black: [
@@ -264,25 +254,9 @@ describe('eval attacks for Rooks', () => {
             piece: generate.generateDefaultPawn('P-white', 'white')
           }
         ]
-      },
-      {
-        white: [],
-        black: []
       }
     ];
-    const history: GameHistory = [
-      [
-        {
-          white: [] as Move[],
-          black: [] as Move[]
-        },
-        {
-          white: [] as Attack[],
-          black: [] as Attack[]
-        }
-      ],
-      [...turn]
-    ];
+    const history: GameHistory = [[...turn], [...turn]];
 
     const game = new MahaGame(configuration);
     const state = game.state;
@@ -290,6 +264,14 @@ describe('eval attacks for Rooks', () => {
       ...state,
       history
     } as GameStateInProgress);
+
+    const piece = game.board.getPieceByCoord({ row: 1, col: 0 });
+
+    expect(piece).toBeDefined();
+
+    if (!piece) {
+      return;
+    }
 
     const attacks = piece.evalAttack(game);
 
@@ -337,6 +319,7 @@ describe('eval attacks for Rooks', () => {
     ];
     expect(attacks).toEqual(expected);
   });
+
   test('test with multiple rooks and lots of AOE - fucking crazy shit', () => {
     const configuration: GameConfigurator<typeof mahaPieceRegistry> = {
       terrain: { width: 6, height: 7 },
@@ -351,46 +334,13 @@ describe('eval attacks for Rooks', () => {
       ]
     };
 
-    const rook1 = new Rook(
-      'black',
-      generatePieceLabel('black', 'bR', { row: 4, col: 1 })
-    );
-    const rook2 = new Rook(
-      'black',
-      generatePieceLabel('black', 'bR', { row: 4, col: 3 })
-    );
-    const rook3 = new Rook(
-      'black',
-      generatePieceLabel('black', 'bR', { row: 5, col: 4 })
-    );
-    const rook4 = new Rook(
-      'white',
-      generatePieceLabel('white', 'wR', { row: 1, col: 3 })
-    );
-
     const turn: PartialGameTurn = [
       {
         black: [] as Move[],
         white: [] as Move[]
-      },
-      {
-        white: [],
-        black: []
       }
     ];
-    const history: GameHistory = [
-      [
-        {
-          white: [] as Move[],
-          black: [] as Move[]
-        },
-        {
-          white: [] as Attack[],
-          black: [] as Attack[]
-        }
-      ],
-      [...turn]
-    ];
+    const history: GameHistory = [[...turn], [...turn]];
 
     const game = new MahaGame(configuration);
     const state = game.state;
@@ -398,6 +348,20 @@ describe('eval attacks for Rooks', () => {
       ...state,
       history
     } as GameStateInProgress);
+
+    const rook1 = game.board.getPieceByCoord({ row: 4, col: 1 });
+    const rook2 = game.board.getPieceByCoord({ row: 4, col: 3 });
+    const rook3 = game.board.getPieceByCoord({ row: 5, col: 4 });
+    const rook4 = game.board.getPieceByCoord({ row: 1, col: 3 });
+
+    expect(rook1).toBeDefined();
+    expect(rook2).toBeDefined();
+    expect(rook3).toBeDefined();
+    expect(rook4).toBeDefined();
+
+    if (!(rook1 && rook2 && rook3 && rook4)) {
+      return;
+    }
 
     const attacks1 = rook1.evalAttack(game);
     const attacks2 = rook2.evalAttack(game);
@@ -497,34 +461,13 @@ describe('eval attacks for Rooks', () => {
       ]
     };
 
-    const piece = new Rook(
-      'black',
-      generatePieceLabel('black', 'bR', { row: 2, col: 0 })
-    );
-
     const turn: PartialGameTurn = [
       {
         black: [] as Move[],
         white: [] as Move[]
-      },
-      {
-        white: [],
-        black: []
       }
     ];
-    const history: GameHistory = [
-      [
-        {
-          white: [] as Move[],
-          black: [] as Move[]
-        },
-        {
-          white: [] as Attack[],
-          black: [] as Attack[]
-        }
-      ],
-      [...turn]
-    ];
+    const history: GameHistory = [[...turn], [...turn]];
 
     const game = new MahaGame(configuration);
     const state = game.state;
@@ -532,6 +475,19 @@ describe('eval attacks for Rooks', () => {
       ...state,
       history
     } as GameStateInProgress);
+
+    // const piece = new Rook(
+    //   'black',
+    //   generatePieceLabel('black', 'bR', { row: 2, col: 0 })
+    // );
+
+    const piece = game.board.getPieceByCoord({ row: 2, col: 0 });
+
+    expect(piece).toBeDefined();
+
+    if (!piece) {
+      return;
+    }
 
     const attacks = piece.evalAttack(game);
 
@@ -572,6 +528,7 @@ describe('eval attacks for Rooks', () => {
 
     expect(attacks).toEqual(expected);
   });
+
   test('test with movement prior to attack, should ignore AOE', () => {
     const configuration: GameConfigurator<typeof mahaPieceRegistry> = {
       terrain: { width: 6 },
@@ -585,10 +542,20 @@ describe('eval attacks for Rooks', () => {
       ]
     };
 
-    const piece = new Rook(
-      'black',
-      generatePieceLabel('black', 'bR', { row: 2, col: 0 })
-    );
+    // const piece = new Rook(
+    //   'black',
+    //   generatePieceLabel('black', 'bR', { row: 2, col: 0 })
+    // );
+
+    const game = new MahaGame(configuration);
+
+    const piece = game.board.getPieceByCoord({ row: 2, col: 0 });
+
+    expect(piece).toBeDefined();
+
+    if (!piece) {
+      return;
+    }
 
     const turn: PartialGameTurn = [
       {
@@ -607,26 +574,9 @@ describe('eval attacks for Rooks', () => {
           }
         ]
       },
-      {
-        white: [],
-        black: []
-      }
     ];
-    const history: GameHistory = [
-      [
-        {
-          white: [] as Move[],
-          black: [] as Move[]
-        },
-        {
-          white: [] as Attack[],
-          black: [] as Attack[]
-        }
-      ],
-      [...turn]
-    ];
+    const history: GameHistory = [[...turn], [...turn]];
 
-    const game = new MahaGame(configuration);
     const state = game.state;
     game.load({
       ...state,

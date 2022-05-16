@@ -1,174 +1,247 @@
-import React, {
-  MouseEvent,
-  SyntheticEvent,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState
-} from 'react';
-import { BoardState } from 'src/gameMechanics/Board/types';
-import { boardMap } from 'src/gameMechanics/Board/util';
-import { Move } from 'src/gameMechanics/Game/types';
+import React, { CSSProperties, MouseEvent, useCallback, useMemo } from 'react';
+import { BoardState } from '../gameMechanics/Board/types';
+import { IdentifiablePieceState } from '../gameMechanics/Piece/types';
 import {
-  IdentifiablePieceState,
-  PieceState
-} from 'src/gameMechanics/Piece/types';
-import { Coord, noop } from 'src/gameMechanics/util';
-import Arrow, { ArrowCoords } from './ArrowSVG';
+  Coord,
+  flipMatrixIndexHorizontally,
+  matrixGet,
+  MatrixIndex,
+  matrixIndexToCoord,
+  matrixReduce,
+  noop
+} from '../gameMechanics/util';
+import { SVGOverlay, Arrow } from './SVGOverlay';
+import { Color } from '../gameMechanics/commonTypes';
+import { TerrainPiece } from './TerrainPiece';
 
-type ArrowChessCoords = {
-  from: Coord;
-  to: Coord;
-};
-
-type Props = {
+export type ChessTerrainProps = {
   sizePx: number;
   board: BoardState;
-  arrows?: ArrowChessCoords[];
+  pieceAssets: Record<string, string>;
 
-  onTouch?: (coord: Coord, piece?: IdentifiablePieceState<string>) => void;
-  onMove?: (move: Move) => void;
+  playingColor: Color;
+  arrows?: Arrow[];
+  styledCoords?: (Coord & { style?: CSSProperties })[];
+  overlays?: { coord: Coord; component: React.ReactNode }[];
+
+  orientation?: Color;
+
+  // This is always on TouchPiece
+  onPieceTouched?: (
+    piece: IdentifiablePieceState<string>,
+    coord: Coord
+  ) => void;
+  onEmptySquareTouched?: (coord: Coord) => void;
+
+  // Called both on onPieceTouched or onEmptySquareTouched
+  onCoordTouched?: (coord: Coord) => void;
 };
 
-// const coordToArrow = ()
 const coordToArrow = (squareSize: number, val: number) =>
   val * squareSize + squareSize / 2;
 
-export const ChessTerrain: React.FC<Props> = ({
-  onTouch = noop,
-  onMove = noop,
+export const ChessTerrain: React.FC<ChessTerrainProps> = ({
+  pieceAssets,
+  onPieceTouched = noop,
+  onEmptySquareTouched = noop,
+  onCoordTouched = noop,
+
+  playingColor,
+  orientation = playingColor,
   board,
   sizePx,
-  arrows = []
+  arrows = [],
+  styledCoords = [],
+  overlays = []
 }) => {
+  // This is super important in order to not reorder the pieces,
+  //  thus breaking any animation!
+  // TODO: Look into optimizing it even more!
+  const pieceCoordsAndIdSortedById = useMemo(() => {
+    return matrixReduce(
+      board.pieceLayoutState,
+      (accum, next, index) => {
+        if (next === 0) {
+          return accum;
+        }
+
+        return [
+          ...accum,
+          {
+            id: next.id,
+            coord: matrixIndexToCoord(index)
+          }
+        ];
+      },
+      [] as { id: string; coord: Coord }[]
+    ).sort((a, b) => {
+      if (a.id < b.id) {
+        return -1;
+      }
+
+      if (a.id > b.id) {
+        return 1;
+      }
+
+      return 0;
+    });
+  }, [board.pieceLayoutState]);
+
   const squareSize = useMemo(
     () => sizePx / board.terrainState.length,
     [sizePx, board.terrainState.length]
   );
 
-  const [touchedPiece, setTouchedPiece] = useState<{
-    coord: Coord;
-    piece: IdentifiablePieceState<string>;
-  }>();
+  const isFlipped = useMemo(() => orientation !== 'white', [orientation]);
 
-  useEffect(() => {
-    if (touchedPiece) {
-      onTouch(touchedPiece.coord, touchedPiece.piece);
-    }
-  }, [touchedPiece]);
-
-  const onSquareClick = useCallback(
+  const onBoardClick = useCallback(
     (e: MouseEvent) => {
+      e.stopPropagation();
+
       const rect = (e.target as any).getBoundingClientRect();
       const x = e.clientX - rect.left; //x position within the element.
       const y = e.clientY - rect.top; //y position within the element.
 
-      const coord = {
+      const absoluteCoords = {
         row: Math.floor(y / squareSize),
         col: Math.floor(x / squareSize)
       };
 
-      // console.log('actual', { x, y }, 'coord', coord);
+      const absoluteMatrixIndex: MatrixIndex = [
+        absoluteCoords.row,
+        absoluteCoords.col
+      ];
 
-      if (touchedPiece) {
-        onMove({
-          from: touchedPiece.coord,
-          to: coord,
-          piece: touchedPiece.piece
-        });
-        setTouchedPiece(undefined);
+      const workingMatrixIndex = isFlipped
+        ? flipMatrixIndexHorizontally(
+            board.pieceLayoutState,
+            absoluteMatrixIndex
+          )
+        : absoluteMatrixIndex;
+
+      const workingCoords = {
+        row: workingMatrixIndex[0],
+        col: workingMatrixIndex[1]
+      };
+
+      const piece = matrixGet(board.pieceLayoutState, workingMatrixIndex);
+
+      if (piece) {
+        onPieceTouched(piece, workingCoords);
+      } else {
+        onEmptySquareTouched(workingCoords);
       }
+
+      onCoordTouched(workingCoords);
     },
-    [squareSize, touchedPiece]
+    [
+      isFlipped,
+      squareSize,
+      board,
+      playingColor,
+      onCoordTouched,
+      onEmptySquareTouched,
+      onPieceTouched
+    ]
   );
-
-  // const onPieceClick = useCallback((e: MouseEvent) => {
-
-  // }, [squareSize])
 
   return (
     <div
+      className="chess-terrain--container"
       style={{
         width: sizePx,
         height: sizePx,
-        background: 'green',
         backgroundImage: 'url("tiles_dark.png")',
-        backgroundSize: (sizePx * 2) / board.terrainState.length,
         backgroundRepeat: 'repeat',
-
+        backgroundSize: (sizePx * 2) / board.terrainState.length,
         position: 'relative',
         zIndex: 99,
-        cursor: 'pointer'
+        ...(isFlipped && {
+          transform: 'scaleY(-1)'
+        })
         // Adjust the position if needed to match the bottomLeft corner
         // backgroundPosition: `0 ${props.sizePx * 2}`,
       }}
-      onClick={onSquareClick}
     >
-      <Arrow
-        fill="purple"
+      <SVGOverlay
+        // fill="purple"
         width={sizePx}
         height={sizePx}
-        arrows={arrows.map(({ from, to }) => ({
+        style={{
+          zIndex: 9999988
+        }}
+        arrows={arrows.map((arrow) => ({
+          ...arrow,
+          width: squareSize / 9,
           from: {
-            x: coordToArrow(squareSize, from.col),
-            y: coordToArrow(squareSize, from.row)
+            x: coordToArrow(squareSize, arrow.from.x),
+            y: coordToArrow(squareSize, arrow.from.y)
           },
           to: {
-            x: coordToArrow(squareSize, to.col),
-            y: coordToArrow(squareSize, to.row)
+            x: coordToArrow(squareSize, arrow.to.x),
+            y: coordToArrow(squareSize, arrow.to.y)
           }
         }))}
       />
-      {boardMap(board, (coord, piece) => {
-        // TODO: Optimize by only iterating over the pieces!
+      {styledCoords.map(({ style, ...coord }) => (
+        <div
+          style={{
+            ...style,
+            position: 'absolute',
+            width: squareSize,
+            height: squareSize,
+            left: coord.col * squareSize,
+            top: coord.row * squareSize
+          }}
+        />
+      ))}
+      {pieceCoordsAndIdSortedById.map(({ coord }) => {
+        const piece = (board.pieceLayoutState[coord.row] || [])[coord.col];
+
         if (!piece) {
           return null;
         }
 
         return (
-          <div
+          <TerrainPiece
+            piece={piece}
+            squareSize={squareSize}
+            coord={coord}
+            assetsMap={pieceAssets}
             style={{
-              position: 'absolute',
-              background: 'rgba(255, 0, 0, .2)',
-              color: piece.color,
-              width: squareSize,
-              height: squareSize,
-              left: coord.col * squareSize,
-              top: coord.row * squareSize,
-              zIndex: 9,
-
-              display: 'flex',
-              // flex: 1,
-              alignContent: 'center',
-              alignItems: 'center',
-              textAlign: 'center',
-              cursor: 'pointer'
-              // alignSelf: 'center',
+              ...(isFlipped && {
+                transform: 'scaleY(-1)'
+              })
             }}
-            onClick={(e) => {
-              setTouchedPiece({
-                coord,
-                piece
-              });
-
-              e.stopPropagation();
-            }}
-            // onClick={() => {
-            //   // setTouchedPiece()
-            //   onTouch(coord, piece);
-            // }}
-            // onMouseDown={(e) => {
-            //   e.preventDefault();
-
-            //   console.log('works', e);
-            // }}
-          >
-            {piece.label}
-            <br />
-            {(piece.hitPoints / piece.maxHitPoints) * 100} HP
-          </div>
+          />
         );
       })}
+      {overlays.map(({ coord, component }) => (
+        <div
+          style={{
+            position: 'absolute',
+            width: squareSize,
+            height: squareSize,
+            left: coord.col * squareSize,
+            top: coord.row * squareSize,
+            zIndex: 9999
+          }}
+        >
+          {component}
+        </div>
+      ))}
+      <div
+        style={{
+          position: 'absolute',
+          left: 0,
+          top: 0,
+          right: 0,
+          bottom: 0,
+          cursor: 'pointer',
+          zIndex: 9998
+        }}
+        onClick={onBoardClick}
+      />
     </div>
   );
 };

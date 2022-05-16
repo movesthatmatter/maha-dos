@@ -1,10 +1,11 @@
-import { getPieceFactory } from 'src/gameMechanics/Piece/util';
+import { getPieceFactory } from '../../gameMechanics/Piece/util';
 import { Bishop } from './Bishop';
 import { King } from './King';
 import { Knight } from './Knight';
 import { Pawn } from './Pawn';
 import { Queen } from './Queen';
 import { Rook } from './Rook';
+import { dark } from './assets';
 
 export const mahaPieceRegistry = {
   wR: getPieceFactory((...args) => new Rook('white', ...args)),
@@ -22,4 +23,20 @@ export const mahaPieceRegistry = {
   bP: getPieceFactory((...args) => new Pawn('black', ...args))
   // Add others if needed
   // BsrKing: BeserkKing maybe
+};
+
+export const mahaAssetPieceRegistry = {
+  wR: dark.wR,
+  wN: dark.wN,
+  wB: dark.wB,
+  wQ: dark.wQ,
+  wK: dark.wK,
+  wP: dark.wP,
+
+  bR: dark.bR,
+  bN: dark.bN,
+  bB: dark.bB,
+  bQ: dark.bQ,
+  bK: dark.bK,
+  bP: dark.bP
 };

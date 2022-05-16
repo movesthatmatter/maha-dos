@@ -1,16 +1,24 @@
-import { Game } from 'src/gameMechanics/Game/Game';
-import { Color } from 'src/gameMechanics/util/types';
-import { Attack, Move } from 'src/gameMechanics/Game/types';
-import { Piece } from 'src/gameMechanics/Piece/Piece';
+import { Game } from '../../../gameMechanics/Game/Game';
+import { Coord } from '../../../gameMechanics/util/types';
+import { Piece } from '../../../gameMechanics/Piece/Piece';
 import {
   IdentifiablePieceState,
   PieceDynamicProps
-} from 'src/gameMechanics/Piece/types';
-import { range, Coord } from 'src/gameMechanics/util';
-import { evalEachDirectionForMove } from '../utils';
+} from '../../../gameMechanics/Piece/types';
+import {
+  calculateDistanceBetween2Coords,
+  checkForRookOnDeterminedDirection,
+  evalEachDirectionForMove
+} from '../utils';
 import { Err, Ok, Result } from 'ts-results';
-import { PieceLayoutState } from 'src/gameMechanics/Board/types';
-import { AttackTargetPieceUndefined } from 'src/gameMechanics/engine';
+import { AttackNotPossibleError } from '../../../gameMechanics/Game/errors/types';
+import {
+  Attack,
+  AttackOutcome,
+  Color,
+  Move
+} from '../../../gameMechanics/commonTypes';
+import { coordsAreEqual, range } from 'src/gameMechanics/util';
 
 const pieceLabel = 'King';
 
@@ -58,29 +66,120 @@ export class King extends Piece {
 
     // returns all the possible moves;
 
-    const pieceCoord = game.board.pieceCoordsByPieceId[this.state.id];
+    const pieceCoord = game.board.getPieceCoordById(this.state.id);
 
-    return evalEachDirectionForMove(pieceCoord, this, game);
+    if (!pieceCoord) {
+      return [];
+    }
+
+    return [
+      ...evalEachDirectionForMove(pieceCoord, this, game),
+      ...(!this.state.pieceHasMoved
+        ? [...this.checkCastlingOption(game, pieceCoord)]
+        : [])
+    ];
+  }
+
+  private checkCastlingOption(game: Game, pieceCoord: Coord): Move[] {
+    return [
+      { row: 0, col: 1 },
+      { row: 0, col: -1 }
+    ].reduce((moves, dir) => {
+      const rookCoords = checkForRookOnDeterminedDirection(
+        game.board.state.pieceLayoutState,
+        pieceCoord,
+        dir,
+        this.state.color
+      );
+      if (rookCoords && game.board.getPieceByCoord(rookCoords)) {
+        const distance = calculateDistanceBetween2Coords(
+          pieceCoord,
+          rookCoords
+        );
+        const kingMove: Move = {
+          from: pieceCoord,
+          to: {
+            row: pieceCoord.row,
+            col: pieceCoord.col + Math.ceil(distance / 2) * dir.col
+          },
+          piece: this.state,
+          castle: {
+            from: rookCoords,
+            to: {
+              row: rookCoords.row,
+              col:
+                rookCoords.col -
+                (distance % 2 === 0
+                  ? Math.floor(distance / 2 + 1) * dir.col
+                  : Math.ceil(distance / 2) * dir.col)
+            }
+          }
+        };
+        return [...moves, kingMove];
+      }
+      return moves;
+    }, [] as Move[]);
   }
 
   evalAttack(game: Game): Attack[] {
-    const pieceCoord = game.board.pieceCoordsByPieceId[this.state.id];
+    const pieceCoord = game.board.getPieceCoordById(this.state.id);
+    if (!pieceCoord) {
+      return [];
+    }
 
-    return [];
+    return this.state.movesDirections.reduce((attacks, dir) => {
+      const target: Coord = {
+        row: pieceCoord.row + dir.row,
+        col: pieceCoord.col + dir.col
+      };
+      if (
+        target.row >= game.board.state.pieceLayoutState.length ||
+        target.col >= game.board.state.pieceLayoutState[0].length ||
+        target.row < 0 ||
+        target.col < 0
+      ) {
+        return attacks;
+      }
+
+      const targetPiece = game.board.getPieceByCoord(target);
+      if (targetPiece && targetPiece.state.color !== this.state.color) {
+        const attack: Attack = {
+          from: pieceCoord,
+          to: target,
+          type: 'melee'
+        };
+        return [...attacks, attack];
+      }
+      return attacks;
+    }, [] as Attack[]);
   }
 
-  executeAttack(
+  calculateAttackOutcome(
     game: Game,
     attack: Attack
-  ): Result<PieceLayoutState, AttackTargetPieceUndefined> {
-    const targetPiece = game.board.pieceLayout[attack.to.row][attack.to.col];
-    //TODO: Better typecheck. Deal with error handling
-    if (targetPiece === 0) {
+  ): Result<AttackOutcome, AttackNotPossibleError> {
+    const targetPiece = game.board.getPieceByCoord(attack.to);
+
+    if (!targetPiece) {
       return new Err({
-        type: 'TargetPieceIsUndefined',
-        content: undefined
+        type: 'AttackNotPossible',
+        content: {
+          reason: 'AttackerPieceNotExistent'
+        }
       });
     }
-    return Ok({} as PieceLayoutState);
+    const defenseBonus =
+      targetPiece.state.label === 'Bishop' ||
+      targetPiece.state.label === 'NKnight'
+        ? 1
+        : 0;
+
+    const damage = this.state.attackDamage - defenseBonus;
+
+    return Ok({
+      attack,
+      willTake: targetPiece.state.hitPoints - damage > 0 ? false : true,
+      damage
+    });
   }
 }

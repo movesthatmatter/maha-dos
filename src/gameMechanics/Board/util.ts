@@ -1,5 +1,5 @@
 import { IdentifiablePieceState } from '../Piece/types';
-import { Color, Coord } from '../util/types';
+import { Coord } from '../util/types';
 import {
   flipMatrixHorizontally,
   getMatrixRowsLength,
@@ -8,6 +8,8 @@ import {
 } from '../util';
 import { BoardState } from './types';
 import { mahaPieceRegistry } from '../../mahaDosGame/config';
+import { Color } from '../commonTypes';
+import { table } from 'table';
 
 // Returns the default color at the coord for any chess based games
 // TODO: Might need to make it game specific in the future if this is not enough
@@ -50,3 +52,39 @@ export const generatePieceLabel = (
 ): string => {
   return `${color}-${label}-${coord.row}-${coord.col}`;
 };
+
+export const toPrintableBoard = (board: BoardState) => {
+  return matrixMap(board.pieceLayoutState, (sqOrPiece) => {
+    if (sqOrPiece === 0) {
+      return 0;
+    }
+
+    return `${sqOrPiece.color[0]}${sqOrPiece.label[0]}`;
+  });
+};
+
+export const toPrintableBoardWithState = (board: BoardState) => {
+  return matrixMap(board.pieceLayoutState, (sq, index) => {
+    if (sq === 0) {
+      return 0;
+    }
+    return `${sq.color} ${sq.label}\n ${sq.hitPoints}/${sq.maxHitPoints}\n row:${index[0]}-col:${index[1]}`;
+  });
+};
+
+export const printBoardAsTableWithState = (m: Matrix<0 | {}>) => {
+  console.log(
+    table(m, {
+      columnDefault: { width: 15, alignment: 'center' }
+    })
+  );
+};
+
+export const toPieceId = (ref: string, { row, col }: Coord) =>
+  `${ref}-${row}-${col}`;
+
+export const getRefFromPieceId = (
+  id: string
+): {
+  ref: string;
+} => ({ ref: id.slice(0, id.indexOf('-')) });
