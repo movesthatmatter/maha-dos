@@ -1,5 +1,5 @@
+import { ShortBlackColor, ShortWhiteColor } from '../commonTypes';
 import { Matrix } from '../util';
-import { ShortBlackColor, ShortWhiteColor } from '../util/types';
 
 export type TerrainSquareType =
   | 'x' // hole

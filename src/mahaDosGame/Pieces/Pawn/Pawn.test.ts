@@ -1,15 +1,11 @@
 import { MahaGame } from '../../MahaGame';
-import { Pawn } from './Pawn';
 import {
-  Attack,
   GameConfigurator,
-  GameHistory,
   GameStateInProgress,
-  GameStateInMovePhase,
-  Move
+  GameStateInMovePhase
 } from '../../../gameMechanics/Game/types';
+import { Move, Attack, GameHistory } from '../../../gameMechanics/commonTypes';
 import { mahaPieceRegistry } from '../registry';
-import { generatePieceLabel } from '../../../gameMechanics/Board/util';
 
 describe('eval pawn moves', () => {
   test('eval move after first moved', () => {
@@ -246,14 +242,12 @@ describe('eval attacks', () => {
       {
         from: { row: 6, col: 2 },
         to: { row: 5, col: 3 },
-        type: 'melee',
-        movementAttackBonus: true
+        type: 'melee'
       },
       {
         from: { row: 6, col: 2 },
         to: { row: 5, col: 1 },
-        type: 'melee',
-        movementAttackBonus: true
+        type: 'melee'
       }
     ];
 
@@ -261,14 +255,12 @@ describe('eval attacks', () => {
       {
         from: { row: 2, col: 1 },
         to: { row: 3, col: 0 },
-        type: 'melee',
-        movementAttackBonus: true
+        type: 'melee'
       },
       {
         from: { row: 2, col: 1 },
         to: { row: 3, col: 2 },
-        type: 'melee',
-        movementAttackBonus: true
+        type: 'melee'
       }
     ];
 

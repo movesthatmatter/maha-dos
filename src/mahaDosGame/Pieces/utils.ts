@@ -1,10 +1,21 @@
 import { Game } from '../../gameMechanics/Game/Game';
-import { GameStateInMovePhase, Move } from '../../gameMechanics/Game/types';
+import { GameStateInMovePhase } from '../../gameMechanics/Game/types';
 import { Piece } from '../../gameMechanics/Piece/Piece';
 import { IdentifiablePieceState } from '../../gameMechanics/Piece/types';
-import { Coord, range } from '../../gameMechanics/util';
+import {
+  Coord,
+  range,
+  matrixInsertMany,
+  MatrixIndex,
+  matrixGet,
+  Matrix
+} from '../../gameMechanics/util';
+import { coordsAreEqual } from '../../gameMechanics/util/misc';
 import { toDictIndexedBy } from '../../gameMechanics/utils';
-import { PieceLayoutState } from 'src/gameMechanics/Board/types';
+import { PieceLayoutState } from '../../gameMechanics/Board/types';
+import { Color, Move } from '../../gameMechanics/commonTypes';
+import { isGameInMovePhase } from '../../gameMechanics/Game/helpers';
+import { Err, Ok, Result } from 'ts-results';
 
 const determineRange = (moves: Coord[], moveRange: number) => {
   return moves.reduce((totalRange, dir) => {
@@ -26,11 +37,58 @@ export function stringifyCoord(c: Coord): string {
   return `row:${c.row}-col:${c.col}`;
 }
 
+export function calculateDistanceBetween2Coords(
+  dest: Coord,
+  target: Coord
+): number {
+  return Math.max(
+    Math.abs(dest.row - target.row),
+    Math.abs(dest.col - target.col)
+  );
+}
+
 export function evalEachDirectionForMove(
   from: Coord,
   piece: Piece,
   game: Game
 ): Move[] {
+  const drawnMoves = isGameInMovePhase(game.state)
+    ? game.state[piece.state.color].moves || []
+    : [];
+
+  const tempBoard = matrixInsertMany(
+    game.state.boardState.pieceLayoutState,
+    drawnMoves.reduce(
+      (total, move) => {
+        const pieceFromMatrix = matrixGet(
+          game.state.boardState.pieceLayoutState,
+          [move.from.row, move.from.col]
+        );
+        if (!pieceFromMatrix) {
+          return total;
+        }
+        if (coordsAreEqual(move.to, from) || coordsAreEqual(move.from, from)) {
+          return total;
+        }
+        return [
+          ...total,
+          {
+            index: [move.to.row, move.to.col],
+            nextVal: pieceFromMatrix
+          },
+          {
+            index: [move.from.row, move.from.col],
+            nextVal: 0 as const
+          }
+        ];
+      },
+      [] as {
+        index: MatrixIndex;
+        nextVal: 0 | IdentifiablePieceState<string>;
+      }[]
+    )
+  );
+
   const totalMoves = piece.state.movesDirections.reduce((moves, dir) => {
     let hitObstacle = false;
     const mm = range(piece.state.moveRange, 1)
@@ -43,16 +101,14 @@ export function evalEachDirectionForMove(
           col: from.col + dir.col * r
         };
         if (
-          targetSq.row >= game.board.state.pieceLayoutState.length ||
-          targetSq.col >= game.board.state.pieceLayoutState[0].length ||
+          targetSq.row >= tempBoard.length ||
+          targetSq.col >= tempBoard[0].length ||
           targetSq.row < 0 ||
           targetSq.col < 0
         ) {
           return undefined;
         }
-        if (
-          game.board.state.pieceLayoutState[targetSq.row][targetSq.col] === 0
-        ) {
+        if (tempBoard[targetSq.row][targetSq.col] === 0) {
           const move: Move = {
             from,
             to: targetSq,
@@ -68,9 +124,9 @@ export function evalEachDirectionForMove(
 
     return [...moves, ...mm];
   }, [] as Move[]);
-  const otherMovesByDestination = toDictIndexedBy(
-    (game.state as GameStateInMovePhase)[piece.state.color].moves || [],
-    (move) => stringifyCoord(move.to)
+
+  const otherMovesByDestination = toDictIndexedBy(drawnMoves, (move) =>
+    stringifyCoord(move.to)
   );
 
   return totalMoves.filter((move) => {
@@ -138,4 +194,41 @@ export function getPieceMoveThisTurn(
   }
 
   return undefined;
+}
+
+export function checkForRookOnDeterminedDirection(
+  matrix: Matrix<0 | IdentifiablePieceState<string>>,
+  from: Coord,
+  dir: Coord,
+  color: Color
+): Coord | undefined {
+  let skip = false;
+  const check = range(matrix[0].length, 1).reduce((result, nextSquareIndex) => {
+    if (skip) {
+      return result;
+    }
+    const targetSq: Coord = {
+      row: from.row + dir.row * nextSquareIndex,
+      col: from.col + dir.col * nextSquareIndex
+    };
+    if (targetSq.col < matrix[0].length && targetSq.col > -1) {
+      const checkForPiece = matrixGet(matrix, [targetSq.row, targetSq.col]);
+
+      if (checkForPiece) {
+        if (
+          checkForPiece.label === 'Rook' &&
+          checkForPiece.color === color &&
+          !checkForPiece.pieceHasMoved
+        ) {
+          skip = true;
+          return [...result, targetSq];
+        }
+        skip = true;
+        return result;
+      }
+      return result;
+    }
+    return result;
+  }, [] as Coord[]);
+  return check.length === 0 ? undefined : check[0];
 }

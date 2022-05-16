@@ -1,10 +1,11 @@
 import { Game } from '../../../gameMechanics/Game/Game';
-import { Color } from '../../../gameMechanics/util/types';
+import { GameStateInProgress } from '../../../gameMechanics/Game/types';
 import {
+  Move,
   Attack,
-  GameStateInProgress,
-  Move
-} from '../../../gameMechanics/Game/types';
+  Color,
+  AttackOutcome
+} from '../../../gameMechanics/commonTypes';
 import { Piece } from '../../../gameMechanics/Piece/Piece';
 import {
   IdentifiablePieceState,
@@ -16,11 +17,10 @@ import {
   getAllAdjecentPiecesToPosition,
   getPieceMoveThisTurn
 } from '../utils';
-import { PieceLayoutState } from '../../../gameMechanics/Board/types';
 import { Err, Ok, Result } from 'ts-results';
-import { AttackTargetPieceUndefined } from '../../../gameMechanics/Game/errors';
+import { AttackNotPossibleError } from '../../../gameMechanics/Game/errors/types';
 
-const pieceLabel = 'Knight';
+const pieceLabel = 'NKnight'; // TODO: This is called NKnight to keep the N in sync with chess
 
 const DEFAULT_DYNAMIC_PROPS: PieceDynamicProps = {
   hitPoints: 12,
@@ -86,12 +86,7 @@ export class Knight extends Piece {
 
     const attacks: Attack[] = [];
     const moved = getPieceMoveThisTurn(this, game);
-    const attackBonus =
-      getAllAdjecentPiecesToPosition(
-        pieceCoord,
-        game.board.state.pieceLayoutState
-      ).filter((p) => p.label === 'Queen' && p.color === this.state.color)
-        .length > 0;
+
     this.state.movesDirections.map((dir) => {
       const target: Coord = {
         row: pieceCoord.row + dir.row,
@@ -114,9 +109,7 @@ export class Knight extends Piece {
         attacks.push({
           from: pieceCoord,
           to: target,
-          type: 'melee',
-          ...(moved && { movementAttackBonus: true }),
-          ...(attackBonus && { attackBonus: true })
+          type: 'melee'
         });
       }
     });
@@ -124,18 +117,63 @@ export class Knight extends Piece {
     return attacks;
   }
 
-  executeAttack(
+  calculateAttackOutcome(
     game: Game,
     attack: Attack
-  ): Result<PieceLayoutState, AttackTargetPieceUndefined> {
+  ): Result<AttackOutcome, AttackNotPossibleError> {
     const targetPiece = game.board.getPieceByCoord(attack.to);
+
     //TODO: Better typecheck. Deal with error handling
-    if (targetPiece) {
+    if (!targetPiece) {
       return new Err({
-        type: 'TargetPieceIsUndefined',
-        content: undefined
+        type: 'AttackNotPossible',
+        content: {
+          reason: 'AttackerPieceNotExistent'
+        }
       });
     }
-    return Ok({} as PieceLayoutState);
+
+    const moved = getPieceMoveThisTurn(this, game);
+    const attackBonus =
+      getAllAdjecentPiecesToPosition(
+        attack.from,
+        game.board.state.pieceLayoutState
+      ).filter((p) => p.label === 'Queen' && p.color === this.state.color)
+        .length > 0;
+
+    const moveDamage = moved ? 1 : 0;
+    const bonusDamage = attackBonus ? 1 : 0;
+
+    let kingDefense = 0;
+    if (targetPiece.state.label === 'King') {
+      kingDefense =
+        getAllAdjecentPiecesToPosition(
+          attack.to,
+          game.board.state.pieceLayoutState
+        ).filter(
+          (p) => p.label === 'Rook' && p.color === targetPiece.state.color
+        ).length > 0
+          ? 1
+          : 0;
+    }
+
+    const defenseBonus =
+      targetPiece.state.label === 'Bishop' ||
+      targetPiece.state.label === 'NKnight'
+        ? 1
+        : 0;
+
+    const damage =
+      this.state.attackDamage +
+      moveDamage +
+      bonusDamage -
+      defenseBonus -
+      kingDefense;
+
+    return Ok({
+      attack,
+      willTake: targetPiece.state.hitPoints - damage > 0 ? false : true,
+      damage
+    });
   }
 }

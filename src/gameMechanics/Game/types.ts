@@ -1,64 +1,15 @@
-import { BoardState } from '../Board/types';
 import {
-  IdentifiablePieceState,
-  PieceRegistry,
-  PieceState
-} from '../Piece/types';
+  Color,
+  GameHistory,
+  GameTurn,
+  PartialGameTurnMovePhase,
+  ShortAttack,
+  ShortMove
+} from '../commonTypes';
+import { BoardState } from '../Board/types';
+import { PieceRegistry } from '../Piece/types';
 import { TerrainProps } from '../Terrain/Terrain';
 import { Matrix } from '../util';
-import { Color, Coord } from '../util/types';
-
-export type Move = ShortMove & {
-  piece: IdentifiablePieceState<string>;
-};
-
-export type ShortMove = {
-  from: Coord;
-  to: Coord;
-  promotion?: PieceState<string>['label'];
-};
-
-export type Attack = {
-  from: Coord;
-  to: Coord;
-  type: 'range' | 'melee';
-  //TODO - better organize the type based on other bonus attack/defense mechanism
-  heal?: boolean;
-  crit?: boolean;
-  attackBonus?: boolean;
-  defenseBonus?: boolean;
-  defensePenalty?: boolean;
-  movementAttackBonus?: boolean;
-  aoe?: Coord[];
-};
-
-// // A Partial Game In Move Phase doesn't have the Attack Phase
-// export type PartialGameTurn = [{ white: Move[]; black: Move[] }];
-
-// A Partial Game In Move Phase doesn't have the Attack Phase
-export type PartialGameTurnMovePhase = [{ [k in Color]: Move[] | undefined }];
-
-// A Partial Game in Attack Phase always has the Move Phase
-export type PartialGameTurnAttackPhase = [
-  { [k in Color]: Move[] },
-  { [k in Color]: Attack[] | undefined }
-];
-export type PartialGameTurn =
-  | PartialGameTurnMovePhase
-  | PartialGameTurnAttackPhase;
-
-
-export type FullGameTurn = [
-  { [k in Color]: Move[] },
-  { [k in Color]: Attack[] }
-];
-export type GameTurn = PartialGameTurn | FullGameTurn;
-
-// TODO: The reconciliation for a whole history could become to costly
-//  so in that case we will need to optimize it (caching, memoizine, save the pieceLayout at each step, etc..)
-//  but for now we leave it as is, b/c this is the most raw data!
-// export type GameHistory = FullGameTurn[] | [...FullGameTurn[], PartialGameTurn];
-export type GameHistory = GameTurn[];
 
 export type GameStatePending = {
   boardState: BoardState;
@@ -82,6 +33,7 @@ export type GameStateCompleted = {
 export type InProgressGameStatePhaseSlice =
   | ({
       phase: 'move';
+      history: GameHistory;
     } & (
       | {
           submissionStatus: 'none';
@@ -130,6 +82,7 @@ export type InProgressGameStatePhaseSlice =
     ))
   | ({
       phase: 'attack';
+      history:  [...GameHistory, PartialGameTurnMovePhase];
     } & (
       | {
           submissionStatus: 'none';
@@ -146,11 +99,11 @@ export type InProgressGameStatePhaseSlice =
           submissionStatus: 'preparing';
           white: {
             canDraw: true;
-            attacks: Attack[];
+            attacks: ShortAttack[];
           };
           black: {
             canDraw: true;
-            attacks: Attack[];
+            attacks: ShortAttack[];
           };
         }
       | {
@@ -161,14 +114,14 @@ export type InProgressGameStatePhaseSlice =
           };
           black: {
             canDraw: false; // When Can Draw is false it means player Submitted
-            attacks: Attack[];
+            attacks: ShortAttack[];
           };
         }
       | {
           submissionStatus: 'partial';
           white: {
             canDraw: false; // When Can Draw is false it means player Submitted
-            attacks: Attack[];
+            attacks: ShortAttack[];
           };
           black: {
             canDraw: true;
@@ -181,7 +134,6 @@ export type GameStateInProgress = {
   boardState: BoardState;
   // TODO: This needs to change to stateStatus
   state: 'inProgress';
-  history: GameHistory;
   winner: undefined;
 } & InProgressGameStatePhaseSlice;
 
@@ -204,50 +156,6 @@ export type GameStateInMovePhaseWithPartialSubmission = Extract<
   { submissionStatus: 'partial' }
 >;
 
-export const isGameInMovePhaseWithNoSubmission = (
-  g: GameState
-): g is GameStateInMovePhaseWithPreparingSubmission => {
-  return (
-    g.state === 'inProgress' &&
-    g.phase === 'move' &&
-    g.submissionStatus === 'none'
-  );
-};
-
-export const isGameInMovePhaseWithPreparingSubmission = (
-  g: GameState
-): g is GameStateInMovePhaseWithPreparingSubmission => {
-  return (
-    g.state === 'inProgress' &&
-    g.phase === 'move' &&
-    g.submissionStatus === 'preparing'
-  );
-};
-
-export const isGameInMovePhaseWithPartialSubmission = (
-  g: GameState
-): g is GameStateInMovePhaseWithPartialSubmission => {
-  return (
-    g.state === 'inProgress' &&
-    g.phase === 'move' &&
-    g.submissionStatus === 'partial'
-  );
-};
-
-export const isGameInMovePhaseWithPartialOrPreparingSubmission = (
-  g: GameState
-): g is
-  | GameStateInMovePhaseWithPreparingSubmission
-  | GameStateInMovePhaseWithPartialSubmission => {
-  return (
-    isGameInMovePhaseWithPreparingSubmission(g) ||
-    isGameInMovePhaseWithPartialSubmission(g)
-  );
-};
-
-export const isGameInMovePhase = (g: GameState): g is GameStateInMovePhase =>
-  g.state === 'inProgress' && g.phase === 'move';
-
 export type GameStateInAttackPhase = Extract<GameState, { phase: 'attack' }>;
 export type GameStateInAtttackPhaseWithNoSubmission = Extract<
   GameStateInAttackPhase,
@@ -257,6 +165,7 @@ export type GameStateInAttackPhaseWithPreparingSubmission = Extract<
   GameStateInAttackPhase,
   { submissionStatus: 'preparing' }
 >;
+
 export type GameStateInAttackPhaseWithPartialSubmission = Extract<
   GameStateInAttackPhase,
   { submissionStatus: 'partial' }
@@ -265,4 +174,7 @@ export type GameStateInAttackPhaseWithPartialSubmission = Extract<
 export type GameConfigurator<PR extends PieceRegistry> = {
   terrain: TerrainProps;
   pieceLayout: Matrix<keyof PR | 0>;
+
+  // TODO: Should this be here? Should it be required?
+  pieceAssets?: Record<keyof PR, string>;
 };

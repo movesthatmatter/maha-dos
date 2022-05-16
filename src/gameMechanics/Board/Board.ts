@@ -1,9 +1,13 @@
 import { Err, Ok, Result } from 'ts-results';
-import { GameConfigurator, Move, ShortMove } from '../Game/types';
-import { Piece } from '../Piece/Piece';
-import { PieceRegistry } from '../Piece/types';
-import { Terrain } from '../Terrain/Terrain';
 import {
+  AttackNotPossibleError,
+  getAttackNotPossibleError
+} from '../Game/errors';
+import { IGame } from '../Game/IGame';
+import { Piece } from '../Piece/Piece';
+import { Terrain } from '../Terrain';
+import {
+  coordToMatrixIndex,
   Matrix,
   matrixCreate,
   matrixGet,
@@ -12,20 +16,18 @@ import {
   matrixInsert,
   matrixInsertMany,
   matrixMap,
-  matrixReduce
+  matrixReduce,
+  objectKeys
 } from '../util';
 import { Coord } from '../util/types';
 import { BoardState } from './types';
+import { IBoard } from './IBoard';
+import { PieceRegistry } from '../Piece/types';
+import { GameConfigurator } from '../Game/types';
+import { AttackOutcome, Move, ShortAttack, ShortMove } from '../commonTypes';
+import { toDictIndexedBy } from '../utils';
 
-export interface IBoard {
-  state: BoardState;
-
-  getPieceById(id: string): Piece | undefined;
-
-  getPieceByCoord(coord: Coord): Piece | undefined;
-}
-
-type PieceAndCoordMappedById = Record<
+type PieceMetaMappedById = Record<
   Piece['state']['id'],
   {
     piece: Piece;
@@ -35,10 +37,10 @@ type PieceAndCoordMappedById = Record<
 
 type PiecesState = {
   layoutMatrix: Matrix<Piece['state']['id'] | 0>;
-  pieceById: PieceAndCoordMappedById;
+  pieceById: PieceMetaMappedById;
 };
 
-export class Board<PR extends PieceRegistry> implements IBoard {
+export class Board<PR extends PieceRegistry> implements IBoard<PR> {
   private terrain: Terrain;
 
   private piecesState: PiecesState;
@@ -53,14 +55,14 @@ export class Board<PR extends PieceRegistry> implements IBoard {
 
     this.piecesState = matrixReduce(
       props.pieceLayout,
-      (prev, nextLabel, [row, col]) => {
-        if (nextLabel === 0) {
+      (prev, nextRef, [row, col]) => {
+        if (nextRef === 0) {
           return prev;
         }
 
         // The id gets created by the original Coord, but this is open to change!
-        const id = `${nextLabel}-${row}-${col}`;
-        const piece = pieceRegistry[nextLabel](id);
+        const id = `${nextRef}-${row}-${col}`;
+        const piece = pieceRegistry[nextRef](id);
 
         const nextLayoutMatrix = matrixInsert(
           prev.layoutMatrix,
@@ -178,13 +180,18 @@ export class Board<PR extends PieceRegistry> implements IBoard {
     this._cachedState = next;
   }
 
+  // Deprecate it in favor of applyMoves, which signifies better that it happens once per turn
+  // @deprecate
   move(m: ShortMove): Result<Move, 'MoveNotPossible'> {
     return this.moveMultiple([m])
       .mapErr(() => 'MoveNotPossible' as const)
       .map(([move]) => move);
   }
 
+  // Rename this to applyMoves as it shouldn't happen multipel times
   moveMultiple(moves: ShortMove[]): Result<Move[], 'MovesNotPossible'> {
+    // TODO: Ensure the moves are valid!
+
     const pieces = moves.map((m) =>
       this.getPieceById(
         matrixGet(this.piecesState.layoutMatrix, [m.from.row, m.from.col]) || ''
@@ -202,7 +209,26 @@ export class Board<PR extends PieceRegistry> implements IBoard {
       moves.reduce(
         (prev, next, i) => {
           const piece = pieces[i];
-
+          piece.state.pieceHasMoved = true;
+          const castle = next.castle
+            ? [
+                {
+                  index: [
+                    next.castle.from.row,
+                    next.castle.from.col
+                  ] as MatrixIndex,
+                  nextVal: 0 as 0
+                },
+                {
+                  index: [
+                    next.castle.to.row,
+                    next.castle.to.col
+                  ] as MatrixIndex,
+                  nextVal: this.getPieceByCoord(next.castle.from)!.state
+                    .id as string
+                }
+              ]
+            : [];
           return [
             ...prev,
             {
@@ -212,7 +238,8 @@ export class Board<PR extends PieceRegistry> implements IBoard {
             {
               index: [next.to.row, next.to.col],
               nextVal: piece.state.id
-            }
+            },
+            ...castle
           ];
         },
         [] as {
@@ -231,5 +258,115 @@ export class Board<PR extends PieceRegistry> implements IBoard {
         piece: pieces[i].state
       }))
     );
+  }
+
+  // TODO: Test
+  applyAttacks(
+    game: IGame,
+    attacks: ShortAttack[]
+  ): Result<AttackOutcome[], AttackNotPossibleError> {
+    const attackerPieces = attacks.map((a) =>
+      this.getPieceById(
+        matrixGet(this.piecesState.layoutMatrix, [a.from.row, a.from.col]) || ''
+      )
+    );
+
+    const absentAttackerPiece = attackerPieces.find((p) => !p);
+
+    if (absentAttackerPiece) {
+      return new Err(getAttackNotPossibleError('AttackerPieceNotExistent'));
+    }
+
+    const victimPieces = attacks.map((a) =>
+      this.getPieceById(
+        matrixGet(this.piecesState.layoutMatrix, [a.to.row, a.to.col]) || ''
+      )
+    );
+
+    const absentVictimPiece = victimPieces.find((p) => !p);
+
+    if (absentVictimPiece) {
+      return new Err(getAttackNotPossibleError('VictimPieceNotExistent'));
+    }
+
+    const attacksWithAtackerAndVictimPieces = attacks.map((attack, i) => ({
+      attack,
+      attacker: attackerPieces[i],
+      victim: victimPieces[i]
+    }));
+
+    return Result.all(
+      ...attacksWithAtackerAndVictimPieces.map((zip) =>
+        Result.all(
+          zip.attacker.calculateAttackOutcome(game, zip.attack),
+          new Ok(zip)
+        )
+      )
+    )
+      .map((outcomesAndZip) =>
+        outcomesAndZip.map(([outcome, zip]) => ({
+          ...zip,
+          ...outcome
+        }))
+      )
+      .map((outcomes) => {
+        const victimStatesById = toDictIndexedBy(
+          outcomes.map(({ victim }) => victim.state),
+          (v) => v.id
+        );
+
+        const nextVictimStatesById = outcomes.reduce((accum, next) => {
+          const prev = accum[next.victim.state.id] || next.victim.state;
+
+          return {
+            ...accum,
+            [next.victim.state.id]: {
+              ...prev,
+              hitPoints: prev.hitPoints - next.damage
+            }
+          };
+        }, victimStatesById);
+
+        return {
+          nextVictimStatesById,
+          outcomes
+        };
+      })
+      .andThen(({ nextVictimStatesById, outcomes }) =>
+        Result.all(
+          new Ok(outcomes),
+          new Ok(
+            // TODO: This could be more functional or at least declerative!
+            Object.values(nextVictimStatesById).forEach(
+              ({ id, ...nextVictimState }) => {
+                const victimPiece = this.getPieceById(id);
+
+                victimPiece.state =
+                  victimPiece.calculateNextState(nextVictimState);
+              }
+            )
+          ),
+          this.moveMultiple(
+            outcomes
+              .filter(
+                (outcome) =>
+                  nextVictimStatesById[outcome.victim.state.id].hitPoints <= 0
+              )
+              .map((outcome) => outcome.attack)
+          ).mapErr(() => getAttackNotPossibleError('DestinationNotValid'))
+        )
+      )
+      .map(([outcomes]) => {
+        // The cache must refresh!
+        this._cachedState = undefined;
+
+        return outcomes.map(({ attack, damage, special }) => ({
+          attack,
+          damage,
+          ...(special && {
+            special
+          })
+        }));
+      });
   }
 }

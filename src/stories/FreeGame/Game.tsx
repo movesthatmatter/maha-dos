@@ -1,23 +1,20 @@
 import React, { useState } from 'react';
 import { PieceState } from '../../gameMechanics/Piece/types';
 import { PieceInfo } from '../../mahaDosGame/components/PieceInfo';
-import {
-  isGameInMovePhaseWithPartialOrPreparingSubmission,
-  Move
-} from '../../gameMechanics/Game/types';
 import { Maha, MahaProps } from '../../mahaDosGame/components/Maha';
-import { Color } from '../../gameMechanics/util';
-import { moveToMahaChessMove } from '../../mahaDosGame/util';
+import { Color } from '../../gameMechanics/commonTypes';
 
 type Props = {
   color: Color;
   onSubmitMoves: MahaProps['onSubmitMoves'];
+  onSubmitAttacks: MahaProps['onSubmitAttacks'];
   gameState: MahaProps['gameState'];
 };
 
 export const MahaGame: React.FC<Props> = (props) => {
   const [pieceInfo, setPieceInfo] = useState<PieceState>();
-  const [myMoves, setMyMoves] = useState<Move[]>();
+  // const [preparingMoves, setMyMoves] = useState<Move[]>();
+  // const [myAttacks, setMyAttacks] = useState<Attack[]>();
 
   return (
     <div
@@ -30,25 +27,11 @@ export const MahaGame: React.FC<Props> = (props) => {
           gameState={props.gameState}
           canInteract
           onSubmitMoves={props.onSubmitMoves}
-          onSubmitAttacks={() => {
-            console.log('on sumit attack ');
-          }}
+          onSubmitAttacks={props.onSubmitAttacks}
           playingColor={props.color}
-          onPieceTouched={(piece) => setPieceInfo(piece)}
-          onMoveDrawn={(next) => {
-            if (
-              isGameInMovePhaseWithPartialOrPreparingSubmission(next.gameState)
-            ) {
-              setMyMoves((prev) => [...(prev || []), next.move]);
-            }
-          }}
+          onPieceTouched={(p) => setPieceInfo(p?.piece)}
+          onEmptySquareTouched={() => setPieceInfo(undefined)}
         />
-        <br />
-        {myMoves?.map((m) => (
-          <span>{`${m.piece.label}:${moveToMahaChessMove(m)?.from}-${
-            moveToMahaChessMove(m)?.to
-          }, `}</span>
-        ))}
       </div>
       <div
         style={{

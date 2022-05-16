@@ -1,18 +1,23 @@
 import { Err, Ok, Result } from 'ts-results';
 import { Game } from '../../../gameMechanics/Game/Game';
-import { Color } from '../../../gameMechanics/util/types';
-import { Attack, Move } from '../../../gameMechanics/Game/types';
 import { Piece } from '../../../gameMechanics/Piece/Piece';
 import {
   IdentifiablePieceState,
   PieceDynamicProps
 } from '../../../gameMechanics/Piece/types';
-import { range, Coord, matrixGet } from '../../../gameMechanics/util';
+import { range, Coord } from '../../../gameMechanics/util';
 import { toDictIndexedBy } from '../../../gameMechanics/utils';
-import { Rook } from '../Rook';
-import { evalEachDirectionForMove } from '../utils';
-import { PieceLayoutState } from '../../../gameMechanics/Board/types';
-import { AttackTargetPieceUndefined } from '../../../gameMechanics/Game/errors';
+import { AttackNotPossibleError } from '../../../gameMechanics/Game/errors/types';
+import {
+  evalEachDirectionForMove,
+  getAllAdjecentPiecesToPosition
+} from '../utils';
+import {
+  Attack,
+  AttackOutcome,
+  Color,
+  Move
+} from '../../../gameMechanics/commonTypes';
 
 const pieceLabel = 'Bishop';
 
@@ -106,56 +111,103 @@ export class Bishop extends Piece {
           return;
         }
 
-        const targetPiece = game.board.getPieceByCoord(target); //.state.pieceLayoutState[target.row][target.col];
+        const targetPiece = game.board.getPieceByCoord(target);
+
+        if (!targetPiece) {
+          return;
+        }
 
         if (r === 1) {
-          if (targetPiece?.state.label === 'Rook') {
+          if (
+            (targetPiece.state.label === 'Rook' &&
+              targetPiece.state.color !== this.state.color) ||
+            (targetPiece.state.color === this.state.color &&
+              targetPiece.state.hitPoints < targetPiece.state.maxHitPoints)
+          ) {
             attacks.push({
               from: pieceCoord,
               to: target,
-              type: 'range',
-              ...(targetPiece.state.color === this.state.color && {
-                heal: true
-              })
+              type: 'range'
             });
-            hitObstacle = true;
-            return;
           }
         } else {
-          if (targetPiece) {
+          if (targetPiece.state.color !== this.state.color) {
             attacks.push({
               from: pieceCoord,
               to: target,
-              type: 'range',
-              ...(r < 4 &&
-                targetPiece.state.color === this.state.color && {
-                  heal: true
-                })
+              type: 'range'
             });
-            hitObstacle = true;
-            return;
+          } else {
+            if (
+              r < 4 &&
+              targetPiece.state.hitPoints < targetPiece.state.maxHitPoints
+            ) {
+              attacks.push({
+                from: pieceCoord,
+                to: target,
+                type: 'range'
+              });
+            }
           }
         }
+        hitObstacle = true;
+        return;
       });
     });
 
     return attacks;
   }
 
-  executeAttack(
+  calculateAttackOutcome(
     game: Game,
     attack: Attack
-  ): Result<PieceLayoutState, AttackTargetPieceUndefined> {
+  ): Result<AttackOutcome, AttackNotPossibleError> {
     const targetPiece = game.board.getPieceByCoord(attack.to);
 
-    //TODO: Better typecheck. Deal with error handling
-    if (targetPiece) {
+    if (!targetPiece) {
       return new Err({
-        type: 'TargetPieceIsUndefined',
-        content: undefined
+        type: 'AttackNotPossible',
+        content: {
+          reason: 'AttackerPieceNotExistent'
+        }
       });
     }
 
-    return Ok({} as PieceLayoutState);
+    const attackBonus = targetPiece.state.label === 'NKnight' ? 1 : 0;
+    const heal = targetPiece.state.color === this.state.color;
+
+    let kingDefense = 0;
+    if (targetPiece.state.label === 'King') {
+      kingDefense =
+        getAllAdjecentPiecesToPosition(
+          attack.to,
+          game.board.state.pieceLayoutState
+        ).filter(
+          (p) => p.label === 'Rook' && p.color === targetPiece.state.color
+        ).length > 0
+          ? 1
+          : 0;
+    }
+
+    const damage = heal
+      ? this.determineHealAmount(
+          targetPiece.state.hitPoints,
+          targetPiece.state.maxHitPoints
+        )
+      : this.state.attackDamage - kingDefense + attackBonus;
+
+    return Ok({
+      attack,
+      willTake:
+        attack.type === 'melee' && targetPiece.state.hitPoints - damage > 0
+          ? false
+          : true,
+      damage
+    });
+  }
+
+  private determineHealAmount(hP: number, maxHP: number) {
+    const healAmount = Math.ceil(hP / 2) > 5 ? 5 : Math.ceil(hP / 2);
+    return hP + healAmount <= maxHP ? healAmount : maxHP - hP;
   }
 }

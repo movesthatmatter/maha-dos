@@ -1,12 +1,10 @@
 import { MahaGame } from '../../../mahaDosGame/MahaGame';
 import {
-  Attack,
   GameConfigurator,
-  GameHistory,
   GameStateInMovePhase,
   GameStateInProgress,
-  Move
 } from '../../../gameMechanics/Game/types';
+import { Move, Attack, GameHistory } from '../../../gameMechanics/commonTypes';
 import { mahaPieceRegistry } from '../registry';
 import { Pawn } from '../Pawn';
 
@@ -161,26 +159,22 @@ describe('eval attacks for knight', () => {
       {
         from: { row: 3, col: 2 },
         to: { row: 1, col: 3 },
-        type: 'melee',
-        movementAttackBonus: true
+        type: 'melee'
       },
       {
         from: { row: 3, col: 2 },
         to: { row: 2, col: 4 },
-        type: 'melee',
-        movementAttackBonus: true
+        type: 'melee'
       },
       {
         from: { row: 3, col: 2 },
         to: { row: 4, col: 4 },
-        type: 'melee',
-        movementAttackBonus: true
+        type: 'melee'
       },
       {
         from: { row: 3, col: 2 },
         to: { row: 2, col: 0 },
-        type: 'melee',
-        movementAttackBonus: true
+        type: 'melee'
       }
     ];
     expect(attacks).toEqual(expected);
@@ -242,30 +236,22 @@ describe('eval attacks for knight', () => {
       {
         from: { row: 3, col: 2 },
         to: { row: 1, col: 3 },
-        type: 'melee',
-        movementAttackBonus: true,
-        attackBonus: true
+        type: 'melee'
       },
       {
         from: { row: 3, col: 2 },
         to: { row: 2, col: 4 },
-        type: 'melee',
-        movementAttackBonus: true,
-        attackBonus: true
+        type: 'melee'
       },
       {
         from: { row: 3, col: 2 },
         to: { row: 4, col: 4 },
-        type: 'melee',
-        movementAttackBonus: true,
-        attackBonus: true
+        type: 'melee'
       },
       {
         from: { row: 3, col: 2 },
         to: { row: 2, col: 0 },
-        type: 'melee',
-        movementAttackBonus: true,
-        attackBonus: true
+        type: 'melee'
       }
     ];
     expect(attacks).toEqual(expected);

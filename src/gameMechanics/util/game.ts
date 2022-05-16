@@ -1,5 +1,4 @@
-import { BlackColor, WhiteColor } from '.';
-import { Color } from './types';
+import { BlackColor, Color, WhiteColor } from '../commonTypes';
 
 // I don't know why this needs to be typed like this
 //  with a function declaration but if it's declared

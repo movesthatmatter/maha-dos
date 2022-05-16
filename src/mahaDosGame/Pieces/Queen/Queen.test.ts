@@ -1,16 +1,17 @@
-import { MahaGame } from 'src/mahaDosGame/MahaGame';
+import { MahaGame } from '../../../mahaDosGame/MahaGame';
 import { Queen } from './Queen';
 import {
-  Attack,
   GameConfigurator,
-  GameHistory,
   GameStateInProgress,
-  GameStateInMovePhase,
-  Move,
-  PartialGameTurn
+  GameStateInMovePhase
 } from '../../../gameMechanics/Game/types';
+import {
+  Move,
+  Attack,
+  GameHistory,
+  PartialGameTurn
+} from '../../../gameMechanics/commonTypes';
 import { mahaPieceRegistry } from '../registry';
-import { generatePieceLabel } from 'src/gameMechanics/Board/util';
 import { Pawn } from '../Pawn';
 
 describe('eval moves for Queen', () => {
@@ -104,6 +105,100 @@ describe('eval moves for Queen', () => {
       }
     ];
 
+    expect(moves).toEqual(expectedMoves);
+  });
+
+  test('eval moves with Queen blocked but prev moves clearing space', () => {
+    const configuration: GameConfigurator<typeof mahaPieceRegistry> = {
+      terrain: { width: 5 },
+      pieceLayout: [
+        [0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0],
+        ['wP', 'wP', 'wP', 'wP', 'wP'],
+        [0, 0, 'wQ', 0, 'wK']
+      ]
+    };
+    const game = new MahaGame(configuration);
+
+    const piece = game.board.getPieceByCoord({ row: 4, col: 2 });
+
+    expect(piece).toBeDefined();
+
+    if (!piece) {
+      return;
+    }
+
+    const { state } = game;
+    game.load({
+      ...state,
+      state: 'inProgress',
+      history: [],
+      phase: 'move',
+      white: {
+        canDraw: true,
+        moves: [
+          {
+            from: { row: 3, col: 1 },
+            to: { row: 2, col: 1 }
+          },
+          {
+            from: { row: 3, col: 3 },
+            to: { row: 2, col: 3 }
+          },
+          { from: { row: 3, col: 2 }, to: { row: 2, col: 2 } }
+        ]
+      },
+      black: {
+        canDraw: true,
+        moves: []
+      }
+    } as GameStateInMovePhase);
+
+    const moves = piece.evalMove(game);
+
+    const expectedMoves: Move[] = [
+      {
+        from: { row: 4, col: 2 },
+        to: { row: 3, col: 2 },
+        piece: piece.state
+      },
+      {
+        from: { row: 4, col: 2 },
+        to: { row: 3, col: 3 },
+        piece: piece.state
+      },
+      {
+        from: { row: 4, col: 2 },
+        to: { row: 2, col: 4 },
+        piece: piece.state
+      },
+      {
+        from: { row: 4, col: 2 },
+        to: { row: 4, col: 3 },
+        piece: piece.state
+      },
+      {
+        from: { row: 4, col: 2 },
+        to: { row: 4, col: 1 },
+        piece: piece.state
+      },
+      {
+        from: { row: 4, col: 2 },
+        to: { row: 4, col: 0 },
+        piece: piece.state
+      },
+      {
+        from: { row: 4, col: 2 },
+        to: { row: 3, col: 1 },
+        piece: piece.state
+      },
+      {
+        from: { row: 4, col: 2 },
+        to: { row: 2, col: 0 },
+        piece: piece.state
+      }
+    ];
     expect(moves).toEqual(expectedMoves);
   });
 });
@@ -209,25 +304,9 @@ describe('eval attacks for Queen', () => {
             piece: piece.state
           }
         ]
-      },
-      {
-        white: [],
-        black: []
       }
     ];
-    const history: GameHistory = [
-      [
-        {
-          white: [] as Move[],
-          black: [] as Move[]
-        },
-        {
-          white: [] as Attack[],
-          black: [] as Attack[]
-        }
-      ],
-      [...turn]
-    ];
+    const history: GameHistory = [[...turn]];
 
     const state = game.state;
     game.load({
@@ -269,38 +348,32 @@ describe('eval attacks for Queen', () => {
       {
         from: { row: 3, col: 2 },
         to: { row: 2, col: 3 },
-        type: 'melee',
-        crit: true
+        type: 'melee'
       },
       {
         from: { row: 3, col: 2 },
         to: { row: 3, col: 4 },
-        type: 'range',
-        crit: true
+        type: 'range'
       },
       {
         from: { row: 3, col: 2 },
         to: { row: 5, col: 2 },
-        type: 'range',
-        crit: true
+        type: 'range'
       },
       {
         from: { row: 3, col: 2 },
         to: { row: 5, col: 0 },
-        type: 'range',
-        crit: true
+        type: 'range'
       },
       {
         from: { row: 3, col: 2 },
         to: { row: 3, col: 0 },
-        type: 'range',
-        crit: true
+        type: 'range'
       },
       {
         from: { row: 3, col: 2 },
         to: { row: 1, col: 0 },
-        type: 'range',
-        crit: true
+        type: 'range'
       }
     ];
     expect(attacks).toEqual(expected);
@@ -343,25 +416,9 @@ describe('eval attacks for Queen', () => {
             piece: piece.state
           }
         ]
-      },
-      {
-        white: [],
-        black: []
       }
     ];
-    const history: GameHistory = [
-      [
-        {
-          white: [] as Move[],
-          black: [] as Move[]
-        },
-        {
-          white: [] as Attack[],
-          black: [] as Attack[]
-        }
-      ],
-      [...turn]
-    ];
+    const history: GameHistory = [[...turn]];
 
     const state = game.state;
     game.load({
@@ -375,8 +432,7 @@ describe('eval attacks for Queen', () => {
       {
         from: { row: 3, col: 2 },
         to: { row: 2, col: 1 },
-        type: 'melee',
-        crit: true
+        type: 'melee'
       }
     ];
     expect(attacks).toEqual(expected);
@@ -418,25 +474,9 @@ describe('eval attacks for Queen', () => {
             piece: piece.state
           }
         ]
-      },
-      {
-        white: [],
-        black: []
       }
     ];
-    const history: GameHistory = [
-      [
-        {
-          white: [] as Move[],
-          black: [] as Move[]
-        },
-        {
-          white: [] as Attack[],
-          black: [] as Attack[]
-        }
-      ],
-      [...turn]
-    ];
+    const history: GameHistory = [[...turn]];
 
     const state = game.state;
     game.load({
@@ -485,25 +525,9 @@ describe('eval attacks for Queen', () => {
             piece: new Pawn('white', 'wP').state
           }
         ]
-      },
-      {
-        white: [],
-        black: []
       }
     ];
-    const history: GameHistory = [
-      [
-        {
-          white: [] as Move[],
-          black: [] as Move[]
-        },
-        {
-          white: [] as Attack[],
-          black: [] as Attack[]
-        }
-      ],
-      [...turn]
-    ];
+    const history: GameHistory = [[...turn]];
 
     const game = new MahaGame(configuration);
 

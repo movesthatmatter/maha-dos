@@ -1,6 +1,4 @@
 import { Game } from '../../../gameMechanics/Game/Game';
-import { Color } from '../../../gameMechanics/util/types';
-import { Attack, Move } from '../../../gameMechanics/Game/types';
 import { Piece } from '../../../gameMechanics/Piece/Piece';
 import {
   IdentifiablePieceState,
@@ -12,10 +10,14 @@ import {
   getAllAdjecentPiecesToPosition
 } from '../utils';
 import { Err, Ok, Result } from 'ts-results';
-import { PieceLayoutState } from '../../../gameMechanics/Board/types';
 import { toDictIndexedBy } from '../../../gameMechanics/utils';
-import { King } from '../King';
-import { AttackTargetPieceUndefined } from '../../../gameMechanics/Game/errors';
+import { AttackNotPossibleError } from '../../../gameMechanics/Game/errors/types';
+import {
+  AttackOutcome,
+  Move,
+  Attack,
+  Color
+} from '../../../gameMechanics/commonTypes';
 
 const pieceLabel = 'Queen';
 
@@ -81,14 +83,7 @@ export class Queen extends Piece {
 
     const attacks: Attack[] = [];
     const { history } = game.state;
-    const adjecentPieces = getAllAdjecentPiecesToPosition(
-      pieceCoord,
-      game.board.state.pieceLayoutState
-    );
-    const crit =
-      adjecentPieces.filter((p) => {
-        return p.label === 'King' && p.color === this.state.color;
-      }).length > 0;
+
     if (
       history &&
       history.length > 0 &&
@@ -135,28 +130,22 @@ export class Queen extends Piece {
               attacks.push({
                 from: pieceCoord,
                 to: target,
-                type: 'melee',
-                ...(crit && { crit: true })
+                type: 'melee'
               });
             }
           }
         }
       } else {
-        attacks.push(
-          ...this.processQueenAttacksWithoutPriorMovement(game, crit)
-        );
+        attacks.push(...this.processQueenAttacksWithoutPriorMovement(game));
       }
     } else {
-      attacks.push(...this.processQueenAttacksWithoutPriorMovement(game, crit));
+      attacks.push(...this.processQueenAttacksWithoutPriorMovement(game));
     }
 
     return attacks;
   }
 
-  processQueenAttacksWithoutPriorMovement(
-    game: Game,
-    withCrit: boolean
-  ): Attack[] {
+  processQueenAttacksWithoutPriorMovement(game: Game): Attack[] {
     const pieceCoord = game.board.getPieceCoordById(this.state.id);
     const attacks: Attack[] = [];
 
@@ -190,8 +179,7 @@ export class Queen extends Piece {
             attacks.push({
               from: pieceCoord,
               to: target,
-              type: r === 1 ? 'melee' : 'range',
-              ...(withCrit && { crit: true })
+              type: r === 1 ? 'melee' : 'range'
             });
           }
           hitObstacle = true;
@@ -203,19 +191,59 @@ export class Queen extends Piece {
     return attacks;
   }
 
-  executeAttack(
+  calculateAttackOutcome(
     game: Game,
     attack: Attack
-  ): Result<PieceLayoutState, AttackTargetPieceUndefined> {
+  ): Result<AttackOutcome, AttackNotPossibleError> {
     const targetPiece = game.board.getPieceByCoord(attack.to);
 
     //TODO: Better typecheck. Deal with error handling
-    if (targetPiece) {
+    if (!targetPiece) {
       return new Err({
-        type: 'TargetPieceIsUndefined',
-        content: undefined
+        type: 'AttackNotPossible',
+        content: {
+          reason: 'AttackerPieceNotExistent'
+        }
       });
     }
-    return Ok({} as PieceLayoutState);
+
+    const crit =
+      getAllAdjecentPiecesToPosition(
+        attack.from,
+        game.board.state.pieceLayoutState
+      ).filter((p) => p.label === 'King' && p.color === this.state.color)
+        .length > 0;
+
+    const critDmg = crit ? 1 : 0;
+
+    let kingDefense = 0;
+    if (targetPiece.state.label === 'King') {
+      kingDefense =
+        getAllAdjecentPiecesToPosition(
+          attack.to,
+          game.board.state.pieceLayoutState
+        ).filter(
+          (p) => p.label === 'Rook' && p.color === targetPiece.state.color
+        ).length > 0
+          ? 1
+          : 0;
+    }
+
+    const defenseBonus =
+      targetPiece.state.label === 'Bishop' ||
+      targetPiece.state.label === 'NKnight'
+        ? 1
+        : 0;
+
+    const damage =
+      this.state.attackDamage + critDmg - defenseBonus - kingDefense;
+    return Ok({
+      attack,
+      willTake:
+        attack.type === 'melee' && targetPiece.state.hitPoints - damage > 0
+          ? false
+          : true,
+      damage
+    });
   }
 }

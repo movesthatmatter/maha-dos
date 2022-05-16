@@ -1,5 +1,7 @@
-import { Move, ShortMove } from '../gameMechanics/Game/types';
+import { GameState, GameStateInProgress } from 'src/gameMechanics/Game/types';
+import { Move, ShortMove } from '../gameMechanics/commonTypes';
 import { Coord } from '../gameMechanics/util';
+import { detailedDiff } from 'deep-object-diff';
 
 const mahaChessSquares = {
   a1: null,
@@ -148,3 +150,16 @@ export function moveToMahaChessMove<
     ] as AcceptableTupleCoordForMahaChessSquare)
   } as unknown as R;
 }
+
+export const printPieceLayoutStateDiff = (
+  prev: GameStateInProgress,
+  next: GameStateInProgress
+) => {
+  console.log(
+    'Board State diff : ',
+    detailedDiff(
+      prev.boardState.pieceLayoutState,
+      next.boardState.pieceLayoutState
+    )
+  );
+};

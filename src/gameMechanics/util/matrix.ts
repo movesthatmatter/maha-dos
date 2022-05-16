@@ -1,4 +1,4 @@
-import { Coord } from '.';
+import { Coord } from './types';
 import { identity, range } from './misc';
 
 export type Matrix<T> = T[][];
@@ -43,6 +43,24 @@ export const flipMatrixVertically = <T>(matrix: Matrix<T>) =>
   matrix.map((row) =>
     row.reduce((accum, nextColVal) => [nextColVal, ...accum], [] as T[])
   );
+
+export const flipMatrixIndexHorizontally = <T>(
+  matrix: Matrix<T>,
+  [row, col]: MatrixIndex
+): MatrixIndex => {
+  return [matrix.length - 1 - row, col];
+};
+
+export const flipMatrixIndexVertically = <T>(
+  matrix: Matrix<T>,
+  [row, col]: MatrixIndex
+): MatrixIndex => {
+  if (matrix.length === 0) {
+    return [0, 0];
+  }
+
+  return [row, matrix[0].length - 1 - col];
+};
 
 export const getMatrixRowsLength = (matrix: Matrix<unknown>) => matrix.length;
 export const getMatrixColsLength = (matrix: Matrix<unknown>) =>
@@ -105,7 +123,16 @@ export const printMatrix = <T>(matrix: Matrix<T>) => {
   let res = '';
 
   matrix.forEach((row) => {
-    res += `${row.join(' | ')}\n`;
+    const r = row
+      .map((s) => String(s))
+      .map(
+        (s) =>
+          range(4 - s.length)
+            .map(() => ' ')
+            .join('') + s
+      );
+
+    res += `${r.join(' | ')}\n`;
   });
 
   console.dir(res);

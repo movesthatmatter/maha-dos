@@ -1,16 +1,20 @@
-import React, { CSSProperties, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   GameState,
   GameStateInAttackPhaseWithPreparingSubmission,
-  GameStateInMovePhaseWithPreparingSubmission,
-  isGameInMovePhaseWithPreparingSubmission,
-  Move
+  GameStateInMovePhaseWithPreparingSubmission
 } from '../../../gameMechanics/Game/types';
-import { Color, Coord, noop } from '../../../gameMechanics/util';
+import { Coord, noop } from '../../../gameMechanics/util';
 import { MahaGame } from '../../..//mahaDosGame/MahaGame';
 import { MahaChessTerrain, MahaChessTerrainProps } from '../MahaTerrain';
 import { Button } from '../Button';
-import { toPrintableBoard } from '../../../gameMechanics/Board/util';
+import { Color, ShortMove } from '../../../gameMechanics/commonTypes';
+import {
+  isGameInAttackPhase,
+  isGameInAttackPhaseWithPreparingSubmission,
+  isGameInMovePhase,
+  isGameInMovePhaseWithPreparingSubmission
+} from '../../../gameMechanics/Game/helpers';
 
 export type MahaProps = {
   onSubmitMoves: (
@@ -23,7 +27,8 @@ export type MahaProps = {
   playingColor: Color;
   gameState: GameState; // always receives a game state even if default/pending
   onPieceTouched?: MahaChessTerrainProps['onPieceTouched'];
-  onMoveDrawn?: (p: { move: Move; gameState: GameState }) => void;
+  onEmptySquareTouched?: MahaChessTerrainProps['onEmptySquareTouched'];
+  orientation?: MahaChessTerrainProps['orientation'];
 };
 
 const getGameFromState = (gameState?: GameState) => {
@@ -31,27 +36,30 @@ const getGameFromState = (gameState?: GameState) => {
 
   if (gameState) {
     game.load(gameState);
+  } else {
+    game.start();
   }
 
   return game;
 };
 
-const destinationSquareStyle: CSSProperties = {
-  background: 'rgba(0, 0, 150, .5)',
-  borderRadius: '8px'
-};
-
 export const Maha: React.FC<MahaProps> = ({
   gameState,
   playingColor,
+  orientation,
   onSubmitMoves,
   onSubmitAttacks,
   canInteract = false,
   onPieceTouched = noop,
-  onMoveDrawn = noop
+  onEmptySquareTouched = noop
 }) => {
   const localGameRef = useRef(getGameFromState(gameState));
-  const [destinationSquares, setDestinationSquares] = useState<Coord[]>();
+  const [possibleMoveSquares, setPossibleMoveSquares] = useState<ShortMove[]>(
+    []
+  );
+  const [possibleAttackSquares, setPossibleAttackSquares] = useState<Coord[]>(
+    []
+  );
 
   const [preparingGameState, setPreparingGameState] = useState<GameState>();
 
@@ -78,18 +86,24 @@ export const Maha: React.FC<MahaProps> = ({
       <MahaChessTerrain
         sizePx={500}
         gameState={workingGameState}
-        styledCoords={destinationSquares?.map((dest) => ({
-          ...dest,
-          style: destinationSquareStyle
-        }))}
-        onPieceTouched={(pieceState, coord) => {
-          console.log('on piece touched', pieceState, coord, workingGameState);
+        possibleAttackSquares={possibleAttackSquares}
+        possibleMoveSquares={possibleMoveSquares}
+        playingColor={playingColor}
+        canInteract={canInteract}
+        orientation={orientation}
+        onPieceTouched={(p) => {
+          if (!p) {
+            setPossibleMoveSquares([]);
+            setPossibleAttackSquares([]);
+
+            return;
+          }
 
           if (!canInteract) {
             return;
           }
 
-          if (playingColor !== pieceState.color) {
+          if (playingColor !== p.piece.color) {
             return;
           }
 
@@ -97,65 +111,94 @@ export const Maha: React.FC<MahaProps> = ({
             return;
           }
 
-          const piece = localGameRef.current.board.getPieceById(pieceState.id);
-          const pieceCoord = localGameRef.current.board.getPieceCoordById(pieceState.id);
-
-          console.log('on touched piece', piece)
-          console.log('on touched piece coord', pieceCoord)
-          console.dir(toPrintableBoard(localGameRef.current.board.state));
-          
+          const piece = localGameRef.current.board.getPieceById(p.piece.id);
 
           if (workingGameState.phase === 'move') {
-            const dests = piece?.evalMove(localGameRef.current);
+            const dests = piece?.evalMove(getGameFromState(workingGameState));
 
             if (dests) {
-              setDestinationSquares(dests.map((d) => d.to));
+              setPossibleMoveSquares(dests.map((d) => d));
             }
           } else {
             const dests = piece?.evalAttack(localGameRef.current);
 
-            console.log('atack dests', dests);
-
             if (dests) {
-              setDestinationSquares(dests.map((d) => d.to));
+              setPossibleAttackSquares(dests.map((d) => d.to));
             }
           }
 
-          onPieceTouched(pieceState, coord);
+          onPieceTouched(p);
         }}
-        onPieceDestinationSet={(move) => {
-          if (!canInteract) {
-            return;
-          }
+        onEmptySquareTouched={(coord) => {
+          onEmptySquareTouched(coord);
 
-          if (playingColor !== move.piece.color) {
-            return;
-          }
+          setPossibleMoveSquares([]);
+          setPossibleAttackSquares([]);
+        }}
+        onMove={(move) => {
+          setPossibleMoveSquares([]);
+          return localGameRef.current.drawMove(move).map((next) => {
+            setPreparingGameState(next.gameState);
 
-          localGameRef.current
-            .drawMove(move.from, move.to)
-            .mapErr((e) => {
-              // console.log('error move', e);
-            })
+            return next.move;
+          });
+        }}
+        onAttack={(attack) => {
+          setPossibleAttackSquares([]);
+
+          return localGameRef.current
+            .drawAttack(attack.from, attack.to)
             .map((next) => {
-              onMoveDrawn(next);
               setPreparingGameState(next.gameState);
+
+              return next.attack;
             });
         }}
       />
-      {preparingGameState &&
-        isGameInMovePhaseWithPreparingSubmission(preparingGameState) && (
-          <>
-            <br />
-            <Button
-              primary
-              label={`Submit`}
-              onClick={() => {
+      <>
+        <br />
+        {isGameInMovePhase(gameState) && (
+          <Button
+            primary={gameState[playingColor].canDraw}
+            disabled={!gameState[playingColor].canDraw}
+            label={`Submit Moves`}
+            onClick={() => {
+              if (
+                preparingGameState &&
+                isGameInMovePhaseWithPreparingSubmission(preparingGameState) &&
+                preparingGameState[playingColor].canDraw
+              ) {
                 onSubmitMoves(preparingGameState);
-              }}
-            />
-          </>
+              }
+            }}
+          />
         )}
+        {isGameInAttackPhase(gameState) && (
+          <Button
+            primary={gameState[playingColor].canDraw}
+            disabled={!gameState[playingColor].canDraw}
+            label={`Submit Attacks`}
+            onClick={() => {
+              if (
+                preparingGameState &&
+                isGameInAttackPhaseWithPreparingSubmission(
+                  preparingGameState
+                ) &&
+                preparingGameState[playingColor].canDraw
+              ) {
+                onSubmitAttacks(preparingGameState);
+              }
+            }}
+          />
+        )}
+      </>
+      {/* <div
+        style={{
+          width: '500px'
+        }}
+      >
+        <pre>{JSON.stringify(workingGameState, null, 2)}</pre>
+      </div> */}
     </>
   );
 };
