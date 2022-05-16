@@ -8,7 +8,7 @@ import { Coord, noop } from '../../../gameMechanics/util';
 import { MahaGame } from '../../..//mahaDosGame/MahaGame';
 import { MahaChessTerrain, MahaChessTerrainProps } from '../MahaTerrain';
 import { Button } from '../Button';
-import { Color } from '../../../gameMechanics/commonTypes';
+import { Color, ShortMove } from '../../../gameMechanics/commonTypes';
 import {
   isGameInAttackPhase,
   isGameInAttackPhaseWithPreparingSubmission,
@@ -54,7 +54,9 @@ export const Maha: React.FC<MahaProps> = ({
   onEmptySquareTouched = noop
 }) => {
   const localGameRef = useRef(getGameFromState(gameState));
-  const [possibleMoveSquares, setPossibleMoveSquares] = useState<Coord[]>([]);
+  const [possibleMoveSquares, setPossibleMoveSquares] = useState<ShortMove[]>(
+    []
+  );
   const [possibleAttackSquares, setPossibleAttackSquares] = useState<Coord[]>(
     []
   );
@@ -115,7 +117,7 @@ export const Maha: React.FC<MahaProps> = ({
             const dests = piece?.evalMove(getGameFromState(workingGameState));
 
             if (dests) {
-              setPossibleMoveSquares(dests.map((d) => d.to));
+              setPossibleMoveSquares(dests.map((d) => d));
             }
           } else {
             const dests = piece?.evalAttack(localGameRef.current);
@@ -135,14 +137,11 @@ export const Maha: React.FC<MahaProps> = ({
         }}
         onMove={(move) => {
           setPossibleMoveSquares([]);
+          return localGameRef.current.drawMove(move).map((next) => {
+            setPreparingGameState(next.gameState);
 
-          return localGameRef.current
-            .drawMove(move.from, move.to)
-            .map((next) => {
-              setPreparingGameState(next.gameState);
-
-              return next.move;
-            });
+            return next.move;
+          });
         }}
         onAttack={(attack) => {
           setPossibleAttackSquares([]);
@@ -180,7 +179,6 @@ export const Maha: React.FC<MahaProps> = ({
             disabled={!gameState[playingColor].canDraw}
             label={`Submit Attacks`}
             onClick={() => {
-              console.log('press attack');
               if (
                 preparingGameState &&
                 isGameInAttackPhaseWithPreparingSubmission(

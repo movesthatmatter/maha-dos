@@ -209,7 +209,26 @@ export class Board<PR extends PieceRegistry> implements IBoard<PR> {
       moves.reduce(
         (prev, next, i) => {
           const piece = pieces[i];
-
+          piece.state.pieceHasMoved = true;
+          const castle = next.castle
+            ? [
+                {
+                  index: [
+                    next.castle.from.row,
+                    next.castle.from.col
+                  ] as MatrixIndex,
+                  nextVal: 0 as 0
+                },
+                {
+                  index: [
+                    next.castle.to.row,
+                    next.castle.to.col
+                  ] as MatrixIndex,
+                  nextVal: this.getPieceByCoord(next.castle.from)!.state
+                    .id as string
+                }
+              ]
+            : [];
           return [
             ...prev,
             {
@@ -219,7 +238,8 @@ export class Board<PR extends PieceRegistry> implements IBoard<PR> {
             {
               index: [next.to.row, next.to.col],
               nextVal: piece.state.id
-            }
+            },
+            ...castle
           ];
         },
         [] as {

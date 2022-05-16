@@ -5,12 +5,17 @@ import {
   GameConfigurator,
   GameStateInProgress
 } from 'src/gameMechanics/Game/types';
+import { Matrix } from 'src/gameMechanics/util';
 import { MahaGame } from '../MahaGame';
 import { Knight } from './Knight';
 import { Pawn } from './Pawn';
 import { Queen } from './Queen';
 import { mahaPieceRegistry } from './registry';
-import { getAllAdjecentPiecesToPosition, getPieceMoveThisTurn } from './utils';
+import {
+  getAllAdjecentPiecesToPosition,
+  getPieceMoveThisTurn,
+  checkForRookOnDeterminedDirection
+} from './utils';
 
 describe('test getAllAdjecentPiecesToPosition function', () => {
   test('with no pieces', () => {
@@ -367,5 +372,54 @@ describe('test getPieceMovethisTurn function', () => {
 
     const move = getPieceMoveThisTurn(trackedPiece, game);
     expect(move).toBeUndefined();
+  });
+});
+
+describe('test checkForPieceOnDeterminedDirection for both left and right', () => {
+  test('check for Rook on the left of King', () => {
+    const pieceLayout: Matrix<keyof typeof mahaPieceRegistry | 0> = [
+      ['wR', 'wN', 0, 'wK', 0, 0, 'wR', 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0]
+    ];
+    const game = new MahaGame({ pieceLayout, terrain: { width: 8 } });
+
+    const result = checkForRookOnDeterminedDirection(
+      game.board.state.pieceLayoutState,
+      { row: 0, col: 3 },
+      { row: 0, col: 1 },
+      'white'
+    );
+
+    expect(result).toBeDefined();
+
+    expect(result).toEqual({ row: 0, col: 6 });
+  });
+  test('check for Rook on the right of King - fail', () => {
+    const pieceLayout: Matrix<keyof typeof mahaPieceRegistry | 0> = [
+      ['wR', 'wN', 0, 'wK', 0, 0, 'wR', 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0]
+    ];
+    const game = new MahaGame({ pieceLayout, terrain: { width: 8 } });
+
+    const result = checkForRookOnDeterminedDirection(
+      game.board.state.pieceLayoutState,
+      { row: 0, col: 3 },
+      { row: 0, col: -1 },
+      'white'
+    );
+
+    expect(result).toBeUndefined();
   });
 });

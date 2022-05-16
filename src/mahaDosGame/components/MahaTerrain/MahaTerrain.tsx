@@ -35,7 +35,7 @@ export type MahaChessTerrainProps = Omit<
   canInteract?: boolean;
   destinationSquares?: Coord[];
 
-  possibleMoveSquares: Coord[];
+  possibleMoveSquares: ShortMove[];
   onMove: (m: ShortMove) => Result<Move, unknown>;
 
   possibleAttackSquares: Coord[];
@@ -117,11 +117,10 @@ export const MahaChessTerrain: React.FC<MahaChessTerrainProps> = ({
 
   const [attackOverlays, setAttackOverlays] = useState<Coord[]>();
 
-  const [touchedPiece, setTouchedPiece] =
-    useState<{
-      coord: Coord;
-      piece: IdentifiablePieceState;
-    }>();
+  const [touchedPiece, setTouchedPiece] = useState<{
+    coord: Coord;
+    piece: IdentifiablePieceState;
+  }>();
 
   useEffect(() => {
     onPieceTouched(touchedPiece);
@@ -138,7 +137,7 @@ export const MahaChessTerrain: React.FC<MahaChessTerrainProps> = ({
           style: possibleAttackSquareStyle
         })),
         ...possibleMoveSquares.map((dest) => ({
-          ...dest,
+          ...{ row: dest.to.row, col: dest.to.col },
           style: possibleMoveSquareStyle
         })),
         ...(touchedPiece
@@ -228,10 +227,14 @@ export const MahaChessTerrain: React.FC<MahaChessTerrainProps> = ({
       }}
       onEmptySquareTouched={(coord) => {
         if (isGameInMovePhase(gameState) && touchedPiece) {
-          onMove({
-            from: touchedPiece.coord,
-            to: coord
-          });
+          const move = possibleMoveSquares.find(
+            (m) =>
+              coordsAreEqual(m.from, touchedPiece.coord) &&
+              coordsAreEqual(m.to, coord)
+          );
+          if (move) {
+            onMove(move);
+          }
         }
 
         setTouchedPiece(undefined);

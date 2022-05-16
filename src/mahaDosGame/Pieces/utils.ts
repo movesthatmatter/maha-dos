@@ -7,12 +7,15 @@ import {
   range,
   matrixInsertMany,
   MatrixIndex,
-  matrixGet
+  matrixGet,
+  Matrix
 } from '../../gameMechanics/util';
+import { coordsAreEqual } from '../../gameMechanics/util/misc';
 import { toDictIndexedBy } from '../../gameMechanics/utils';
 import { PieceLayoutState } from '../../gameMechanics/Board/types';
-import { Move } from '../../gameMechanics/commonTypes';
+import { Color, Move } from '../../gameMechanics/commonTypes';
 import { isGameInMovePhase } from '../../gameMechanics/Game/helpers';
+import { Err, Ok, Result } from 'ts-results';
 
 const determineRange = (moves: Coord[], moveRange: number) => {
   return moves.reduce((totalRange, dir) => {
@@ -62,6 +65,9 @@ export function evalEachDirectionForMove(
           [move.from.row, move.from.col]
         );
         if (!pieceFromMatrix) {
+          return total;
+        }
+        if (coordsAreEqual(move.to, from) || coordsAreEqual(move.from, from)) {
           return total;
         }
         return [
@@ -188,4 +194,41 @@ export function getPieceMoveThisTurn(
   }
 
   return undefined;
+}
+
+export function checkForRookOnDeterminedDirection(
+  matrix: Matrix<0 | IdentifiablePieceState<string>>,
+  from: Coord,
+  dir: Coord,
+  color: Color
+): Coord | undefined {
+  let skip = false;
+  const check = range(matrix[0].length, 1).reduce((result, nextSquareIndex) => {
+    if (skip) {
+      return result;
+    }
+    const targetSq: Coord = {
+      row: from.row + dir.row * nextSquareIndex,
+      col: from.col + dir.col * nextSquareIndex
+    };
+    if (targetSq.col < matrix[0].length && targetSq.col > -1) {
+      const checkForPiece = matrixGet(matrix, [targetSq.row, targetSq.col]);
+
+      if (checkForPiece) {
+        if (
+          checkForPiece.label === 'Rook' &&
+          checkForPiece.color === color &&
+          !checkForPiece.pieceHasMoved
+        ) {
+          skip = true;
+          return [...result, targetSq];
+        }
+        skip = true;
+        return result;
+      }
+      return result;
+    }
+    return result;
+  }, [] as Coord[]);
+  return check.length === 0 ? undefined : check[0];
 }
