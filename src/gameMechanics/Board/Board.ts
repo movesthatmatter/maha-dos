@@ -208,7 +208,6 @@ export class Board<PR extends PieceRegistry> implements IBoard<PR> {
       this.piecesState.layoutMatrix,
       moves.reduce(
         (prev, next, i) => {
-          console.log('next move ==>', next);
           const piece = pieces[i];
           piece.state.pieceHasMoved = true;
           const castle = next.castle
@@ -230,7 +229,6 @@ export class Board<PR extends PieceRegistry> implements IBoard<PR> {
                 }
               ]
             : [];
-          console.log('castle in board', castle);
           return [
             ...prev,
             {
